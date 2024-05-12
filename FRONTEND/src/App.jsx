@@ -1,14 +1,25 @@
 import "./App.css";
 import "bootstrap/dist/js/bootstrap.min.js";
 import "bootstrap/dist/css/bootstrap.min.css";
-import LandingUI from "./components/Homepage/LandingUI";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import "aos/dist/aos.js";
+import Home from "./pages/HomePage/Home";
+import SideBar from "./components/OMPage/SideBar";
+import LandingUI from "./components/Homepage/LandingUI";
+
 function App() {
+  useEffect(() => {
+    AOS.init({ duration: 2000 });
+  }, []);
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LandingUI />} />
-        <Route path="/admin" element={<LandingUI />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/admin" element={<SideBar />} />
       </Routes>
     </BrowserRouter>
   );
