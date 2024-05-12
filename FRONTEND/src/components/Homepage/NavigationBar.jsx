@@ -5,7 +5,11 @@ import "./NavigationBarStyles.css";
 export default function NavigationBar() {
   return (
     <>
-      <nav className="navbar fixed-top navbar-expand-lg navbar-dark m-0 p-0 ps-3 pe-3  bg-black bg-opacity-50">
+      <nav
+        className="navbar fixed-top navbar-expand-lg navbar-dark m-0 p-0 ps-3 pe-3  "
+        data-aos="fade-down"
+        data-aos-anchor-placement="center-center"
+      >
         <div className="container-fluid p-0 m-0">
           <a className="navbar-brand" href="#">
             <img src={logo} alt="" width="45" height="45" />
