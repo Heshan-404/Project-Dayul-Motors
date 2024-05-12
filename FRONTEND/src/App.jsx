@@ -8,7 +8,6 @@ import "aos/dist/aos.css";
 import "aos/dist/aos.js";
 import Home from "./pages/HomePage/Home";
 import SideBar from "./components/OMPage/SideBar";
-import LandingUI from "./components/Homepage/LandingUI";
 
 function App() {
   useEffect(() => {
