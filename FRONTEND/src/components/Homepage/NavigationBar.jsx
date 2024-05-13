@@ -1,6 +1,7 @@
 import logo from "../../assets/Project Images/Dayul Motors/Dayul Motors logo/Artboard 1.png";
 import callIcon from "../../assets/Project Images/Dayul Motors/HomePage/phoneIcon.png";
 import "./NavigationBarStyles.css";
+import { Link } from "react-router-dom";
 
 export default function NavigationBar() {
   return (
@@ -62,19 +63,17 @@ export default function NavigationBar() {
                 <a
                   className="nav-link active fw-bold"
                   aria-current="page"
-                  href="#"
+                  href="/about-us"
                 >
                   <span className="fs-5 font-robot">About Us</span>
                 </a>
               </li>
               <li className="nav-item ms-lg-5">
-                <a
-                  className="nav-link active fw-bold"
-                  aria-current="page"
-                  href="#"
-                >
-                  <span className="fs-5 font-robot">Contact Us</span>
-                </a>
+                <Link to="/admin" className="nav-link active fw-bold">
+                  <button className="btn btn-primary">
+                    <span className="fs-5 font-robot">Contact Us</span>
+                  </button>
+                </Link>
               </li>
               <li className="nav-item dropdown ms-lg-5 ps-lg-5">
                 <a
