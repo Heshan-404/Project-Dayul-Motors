@@ -1,6 +1,7 @@
 import logo from "../../assets/Project Images/Dayul Motors/Dayul Motors logo/Artboard 1.png";
 import callIcon from "../../assets/Project Images/Dayul Motors/HomePage/phoneIcon.png";
 import "./NavigationBarStyles.css";
+import { Link } from "react-router-dom";
 
 export default function NavigationBar() {
   return (
@@ -11,9 +12,9 @@ export default function NavigationBar() {
         data-aos-anchor-placement="center-center"
       >
         <div className="container-fluid p-0 m-0">
-          <a className="navbar-brand" href="#">
+          <Link to="/" className="navbar-brand">
             <img src={logo} alt="" width="45" height="45" />
-          </a>
+          </Link>
           <a className="navbar-brand h5 ps-5 pt-3" href="tel:+94777777777">
             <img
               src={callIcon}
@@ -41,69 +42,53 @@ export default function NavigationBar() {
           >
             <ul className="navbar-nav  mb-lg-0 ms-sm-0 ">
               <li className="nav-item ms-lg-5">
-                <a
-                  className="nav-link active fw-bold"
-                  aria-current="page"
-                  href="#"
-                >
+                <Link to="/" className="nav-link active fw-bold">
                   <span className="fs-5 font-robot">Home</span>
-                </a>
+                </Link>
               </li>
               <li className="nav-item ms-lg-5 ps-lg-5">
-                <a
-                  className="nav-link active fw-bold"
-                  aria-current="page"
-                  href="#"
-                >
+                <Link to="/shop" className="nav-link active fw-bold">
                   <span className="fs-5 font-robot">Shop</span>
-                </a>
+                </Link>
               </li>
               <li className="nav-item ms-lg-5 ps-lg-5">
-                <a
-                  className="nav-link active fw-bold"
-                  aria-current="page"
-                  href="#"
-                >
+                <Link to="/about-us" className="nav-link active fw-bold">
                   <span className="fs-5 font-robot">About Us</span>
-                </a>
+                </Link>
               </li>
               <li className="nav-item ms-lg-5">
-                <a
-                  className="nav-link active fw-bold"
-                  aria-current="page"
-                  href="#"
-                >
+                <Link to="/contact-us" className="nav-link active fw-bold">
                   <span className="fs-5 font-robot">Contact Us</span>
-                </a>
+                </Link>
               </li>
               <li className="nav-item dropdown ms-lg-5 ps-lg-5">
-                <a
+                <Link
+                  to="#"
                   className="nav-link active dropdown-toggle fw-bold"
-                  href="#"
                   id="navbarDropdown"
                   role="button"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
                   <span className="fs-5 font-robot">Spare Parts</span>
-                </a>
+                </Link>
                 <ul
                   className="dropdown-menu"
                   aria-labelledby="navbarDropdown"
                   style={{ width: "fit-content" }}
                 >
                   <li>
-                    <a className="dropdown-item" href="#">
+                    <Link to="/chains" className="dropdown-item">
                       Chains
-                    </a>
+                    </Link>
                   </li>
                   <li>
                     <hr className="dropdown-divider bg-white" />
                   </li>
                   <li>
-                    <a className="dropdown-item" href="#">
+                    <Link to="/oil" className="dropdown-item">
                       Oil
-                    </a>
+                    </Link>
                   </li>
                 </ul>
               </li>
