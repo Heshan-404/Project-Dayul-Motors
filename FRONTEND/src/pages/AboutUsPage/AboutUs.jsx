@@ -1,7 +1,7 @@
+import LandingUI from "../../components/AboutUsPage/LandingUI";
 import Footer from "../../components/Homepage/Footer";
-import LandingUI from "../../components/Homepage/LandingUI";
 
-export default function Home() {
+export default function Aboutus() {
   return (
     <div className="bg-black" style={{ width: "100%" }}>
       <LandingUI />

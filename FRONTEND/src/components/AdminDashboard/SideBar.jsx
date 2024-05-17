@@ -16,7 +16,6 @@ import logo from "../../assets/Project Images/Dayul Motors/Dayul Motors logo/Art
 import OrderIcon from "../../assets/Project Images/Dayul Motors/AdminSideBar/OrderMNG.png";
 import ProductIcon from "../../assets/Project Images/Dayul Motors/AdminSideBar/Products.png";
 import HomeIcon from "../../assets/Project Images/Dayul Motors/AdminSideBar/Home.png";
-import Home from "../../pages/HomePage/Home";
 import AdminHomePage from "../../pages/AdminDashboard/AdminHome/AdminHomePage";
 import ProductMNGPage from "../../pages/AdminDashboard/ProductMNG/ProductMNGPage";
 import OrderMNGPage from "../../pages/AdminDashboard/OrderMNGPage/OrderMNGPage";
@@ -71,7 +70,7 @@ const SideBar = ({ window }) => {
             icon: <img src={OrderIcon} width={"30px"} alt="Mail Icon" />,
             component: <OrderMNGPage />,
           },
-        ].map((item, index) => (
+        ].map((item) => (
           <ListItem
             button
             key={item.text}
