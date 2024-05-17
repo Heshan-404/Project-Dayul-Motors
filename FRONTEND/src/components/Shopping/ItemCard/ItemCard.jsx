@@ -1,24 +1,42 @@
-import icon from "../../../assets/Project Images/Dayul Motors/Brands/Edited/Bajaj.jpg";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
+import icon from "../../../assets/Project Images/Dayul Motors/Categories/Bearing.jpg";
 
-export default function ItemCard(props) {
+function ItemCard(props) {
   return (
-    <div className="card mb-3" style={{ maxWidth: "18rem" }}>
-      <img
-        src={icon}
-        className="card-img-top"
-        alt="..."
-        style={{ cursor: "pointer" }}
-      />
+    <div className="card mb-3 shadow-lg" style={{ border: "1px solid black", width: "100%" }}>
+      <Link
+        to={`/Shop/product/${encodeURIComponent(props.id)}`} 
+        state={{ 
+  
+        }}
+      >
+        <img
+          src={props.image} 
+          className="card-img-top img-fluid"
+          alt="..."
+          style={{ cursor: "pointer" }}
+        />
+      </Link>
       <div className="card-body" style={{ backgroundColor: "black" }}>
         <h5 className="card-title" style={{ color: "white" }}>
-          {props.name}
+          <Link
+            to={`/Shop/product/${encodeURIComponent(props.name)}`}
+            state={{ 
+              desc: props.desc, 
+              price: props.price, 
+              image: props.image,
+            }}
+            style={{ color: "white" }}
+          >
+            {props.name}
+          </Link>
         </h5>
-        <p className="card-text" style={{ color: "white" }}>
-          Set of 2 Pieces Black Color Handle Grip Pro Taper Motorcycle
+        <p className="card-text" style={{ color: "white", fontSize: "15px" }}>
+          {props.desc}
         </p>
         <div style={{ color: "red" }}>
-          <h5 className="card-title ">Rs.3000/=</h5>
+          <h5 className="card-title ">{props.price}</h5>
         </div>
       </div>
     </div>
@@ -27,4 +45,9 @@ export default function ItemCard(props) {
 
 ItemCard.propTypes = {
   name: PropTypes.string.isRequired,
+  desc: PropTypes.string.isRequired,
+  image: PropTypes.string.isRequired,
+  id: PropTypes.string.isRequired,
 };
+
+export default ItemCard;
