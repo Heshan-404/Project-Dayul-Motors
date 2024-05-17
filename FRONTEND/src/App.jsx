@@ -30,7 +30,6 @@ function App() {
         <Route path="/home" element={<Home />} />
           <Route path="/admin" element={<AdminUI />} />
         <Route path="/about-us" element={<AboutUs />} />
-        <Route path="/test" element={<ResponsiveDrawer />} />
         <Route path="/Shop" element={<Shop />}>
           {/* Nested route for displaying MainItem */}
         </Route> 
