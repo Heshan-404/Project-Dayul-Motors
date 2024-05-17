@@ -18,6 +18,7 @@ export default function Home() {
         }}
       ></div>
       <CategoriesSection />
+      <div className="m-5"></div>
       <Footer />
     </div>
   );

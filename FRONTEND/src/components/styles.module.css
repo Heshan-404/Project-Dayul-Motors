@@ -1,0 +1,21 @@
+/* styles.module.css */
+.chartContainer {
+  font-family: "Roboto", sans-serif;
+  background-color: rgba(255, 255, 255, 1); /* Opaque background */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.tooltip {
+  background-color: rgba(255, 255, 255, 0.9); /* Partially transparent background */
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px); /* Apply blur effect */
+  transition: backdrop-filter 0.3s ease-in-out; /* Smooth transition */
+}
+
+.tooltip:hover {
+  backdrop-filter: blur(12px); /* Increase blur effect on hover */
+}
