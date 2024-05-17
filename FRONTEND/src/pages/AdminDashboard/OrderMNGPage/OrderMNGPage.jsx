@@ -1,3 +1,9 @@
+import EnhancedTable from "../../../components/OMPage/Pm";
+
 export default function OrderMNGPage() {
-  return <div>OrderMNGPage</div>;
+  return (
+    <div>
+      <EnhancedTable />
+    </div>
+  );
 }

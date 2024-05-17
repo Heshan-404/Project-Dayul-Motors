@@ -10,6 +10,8 @@ import Home from "./pages/HomePage/Home";
 import AboutUs from "./pages/AboutUsPage/AboutUs";
 import AdminUI from "./pages/AdminDashboard/AdminUI";
 import ResponsiveDrawer from "./components/BCD";
+import Shop from "./pages/Shopping/Shop";
+import ShowItem from "./pages/Shopping/ShowItem";
 
 function App() {
   useEffect(() => {
@@ -29,6 +31,8 @@ function App() {
         <Route path="/admin" element={<AdminUI />} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/test" element={<ResponsiveDrawer />} />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/item" element={<ShowItem />} />
       </Routes>
     </BrowserRouter>
   );
