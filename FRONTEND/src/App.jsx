@@ -11,7 +11,6 @@ import Shop from "./pages/Shopping/Shop";
 import MainPage from "./components/ShowItem/Background/MainPage";
 import AboutUs from "./pages/AboutUsPage/AboutUs";
 import AdminUI from "./pages/AdminDashboard/AdminUI";
-import Shop from "./pages/Shopping/Shop";
 import ShowItem from "./pages/Shopping/ShowItem";
 
 function App() {
