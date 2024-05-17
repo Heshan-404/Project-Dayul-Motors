@@ -61,36 +61,40 @@ export default function LandingUI() {
   };
 
   return (
-    <div style={{ backgroundColor: "black" }}>
+    <div>
       <NavigationBar />
-      <div style={styles.backgroundImageDiv}>
-        <div style={styles.contentContainer}>
-          <div className="row">
-            <div className="col-md-6 col-sm-12" data-aos="fade-right">
-              <h1 style={styles.heading}>
-                QUALITY, SAFETY
-                <br />
-                AND PERFORMANCE
-              </h1>
-            </div>
-            <div className="col-md-6 col-sm-12" data-aos="fade-left">
-              <p style={styles.subheading}>
-                Welcome to <span style={{ color: "yellow" }}>Dayul Motors</span>
-              </p>
-              <p style={styles.paragraph}>
-                We're here to help with all your motorcycle repair and parts
+      <br />
+      <div style={{ backgroundColor: "black" }}>
+        <div style={styles.backgroundImageDiv}>
+          <div style={styles.contentContainer}>
+            <div className="row">
+              <div className="col-md-6 col-sm-12" data-aos="fade-right">
+                <h1 style={styles.heading}>
+                  QUALITY, SAFETY
+                  <br />
+                  AND PERFORMANCE
+                </h1>
+              </div>
+              <div className="col-md-6 col-sm-12" data-aos="fade-left">
+                <p style={styles.subheading}>
+                  Welcome to{" "}
+                  <span style={{ color: "yellow" }}>Dayul Motors</span>
+                </p>
+                <p style={styles.paragraph}>
+                  {` We're here to help with all your motorcycle repair and parts
                 needs. Explore our products, from spare parts to accessories.
                 Our easy-to-use website makes shopping a breeze. Let's make your
-                next ride amazing!
-              </p>
-              <button
-                className="custom-btn"
-                style={styles.customButton}
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                Shop Now
-              </button>
+                next ride amazing!`}
+                </p>
+                <button
+                  className="custom-btn"
+                  style={styles.customButton}
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  Shop Now
+                </button>
+              </div>
             </div>
           </div>
         </div>

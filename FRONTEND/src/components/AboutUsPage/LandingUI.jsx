@@ -1,129 +1,264 @@
 import NavigationBar from "../Homepage/NavigationBar";
-import bgImg from "./BackGround2.jpg";
-import { useState } from "react";
 import logo from "../../assets/Project Images/Dayul Motors/Dayul Motors logo/Artboard 1.png";
-import callIcon from "../../assets/Project Images/Dayul Motors/HomePage/phoneIcon.png";
+import storeImage from "../../assets/Project Images/Dayul Motors/About US page/store.jpg";
+import {
+  FaMotorcycle,
+  FaTools,
+  FaAward,
+  FaHandshake,
+  FaWrench,
+} from "react-icons/fa";
 
 export default function LandingUI() {
-  const [isHovered, setIsHovered] = useState(false);
-
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-  };
-  const styles = {
-    customButton: {
-      color: isHovered ? "white" : "black",
-      width: "200px",
-      height: "40px",
-      fontSize: "18px",
-      fontWeight: "bolder",
-      backgroundColor: "#FCD844",
-      border: "none",
-      borderRadius: "20px",
-      cursor: "pointer",
-      transition: "all 0.3s ease",
-
-      boxShadow: isHovered
-        ? "0 0 10px #FCD844, 0 0 20px #FCD844, 0 0 20px #FCD844 inset"
-        : "0 0 5px #FCD844",
-    },
-    backgroundImageDiv: {
-      backgroundImage: `url(${bgImg})`, // Use the imported image directly
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      width: "100%",
-      height: "100vh", // Set height to 100vh for full viewport height
-    },
-  };
-
   return (
-    <div style={{ backgroundColor: "black" }}>
-      <div>
-        <NavigationBar />
-      </div>
-      <div style={styles.backgroundImageDiv}>
-        <div className="ms-3">
+    <div style={{ backgroundColor: "#141414", overflowX: "hidden" }}>
+      <NavigationBar />
+
+      {/* Hero Section (without background image) */}
+      <section
+        className="jumbotron jumbotron-fluid text-center pt-5 pb-5"
+        data-aos="fade"
+        data-aos-duration="1000"
+      >
+        <div className="container">
           <div
-            className="row pt-md-5 pt-sm-0"
-            style={{ translate: "0px 50px" }}
+            className="hero-content"
+            style={{ padding: "2rem", borderRadius: "10px" }}
+          >
+            <img
+              src={logo}
+              width="350"
+              alt="Dayul Motors Logo"
+              className="mb-4"
+              data-aos="zoom-in"
+              data-aos-delay="100"
+            />
+            <h1
+              className="display-4 text-white font-weight-bold"
+              style={{ fontFamily: "'Roboto', sans-serif" }}
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
+              About Dayul Motors
+            </h1>
+            <p
+              className="lead text-white"
+              style={{ fontSize: "1.3rem" }}
+              data-aos="fade-up"
+              data-aos-delay="300"
+            >
+              Your trusted source for motorcycle parts and unparalleled service.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* About Us Section (with gradient) */}
+      <section
+        className="py-5"
+        style={{ background: "linear-gradient(to right, #1a1a1a, #222222)" }}
+      >
+        <div className="container">
+          <div
+            className="row align-items-center flex-column-reverse flex-lg-row"
+            data-aos="fade-up"
+            data-aos-duration="800"
           >
             <div
-              className="col-md-12 col-sm-12"
-              style={{ textAlign: "center" }}
+              className="col-lg-6 mb-4 mb-lg-0 order-lg-2"
               data-aos="fade-right"
+              data-aos-delay="100"
             >
-              <h1
-                style={{
-                  color: "white",
-                  fontWeight: "bolder",
-                  fontSize: "60px",
-                }}
-              >
-                About US
-              </h1>
+              <img
+                src={storeImage}
+                className="img-fluid rounded shadow w-100"
+                alt="Dayul Motors Store"
+              />
             </div>
             <div
-              className="col-md-6 col-sm-12 float-start ps-5 pt-sm-5 pt-md-0"
-              style={{ translate: "0px 50px" }}
+              className="col-lg-6 order-lg-1"
               data-aos="fade-left"
+              data-aos-delay="200"
             >
-              <p
-                style={{
-                  color: "white",
-                  fontWeight: "bolder",
-                  fontSize: "30px",
-                }}
+              <h2
+                className="text-white font-weight-bold mb-3"
+                style={{ fontFamily: "'Roboto', sans-serif" }}
               >
-                Welcome to <span style={{ color: "yellow" }}>Dayul Motors</span>
+                Our Story
+              </h2>
+              <p className="text-white" style={{ fontSize: "1.1rem" }}>
+                Dayul Motors was founded on the principle of providing
+                motorcycle enthusiasts with high-quality parts and exceptional
+                customer service. With years of experience in the industry, we
+                have become a trusted name in Thanamalwila and beyond. Our
+                commitment to quality, reliability, and customer satisfaction
+                has fueled our growth and solidified our reputation as a leader
+                in the motorcycle parts market.
               </p>
-              <p
-                style={{
-                  color: "white",
-                  fontWeight: "normal",
-                  fontSize: "20px",
-                  paddingRight: "150px",
-                }}
-              >
-                {` We're here to help with all your motorcycle repair and parts
-                needs. Explore our products, from spare parts to accessories.
-                Our easy-to-use website makes shopping a breeze. Let's make your
-                next ride amazing!`}
-              </p>
-              <button
-                className="custom-btn"
-                style={styles.customButton}
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                Shop Now
-              </button>
-            </div>
-            <div
-              className="col-md-6 col-sm-12 float-start ps-5 pt-sm-5 pt-md-0"
-              style={{ translate: "0px 50px" }}
-              data-aos="fade-left"
-            >
-              <a className="navbar-brand" href="#">
-                <img src={logo} alt="" width="45" height="45" />
-              </a>
-              <a className="navbar-brand h5 ps-5 pt-3" href="tel:+94777777777">
-                <img
-                  src={callIcon}
-                  alt=""
-                  width="34"
-                  height="34"
-                  className="rounded-5 "
-                />
-                <span className="text-danger ps-3">077-777-7777</span>
-              </a>
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Mission & Vision Section */}
+      <section className="py-5 bg-transparent">
+        <div className="container">
+          <div className="row">
+            <div
+              className="col-md-6 mb-4 mb-md-0"
+              data-aos="flip-left"
+              data-aos-delay="100"
+            >
+              <div
+                className="card bg-dark text-white border-light"
+                style={{
+                  borderRadius: "15px",
+                  transition: "transform 0.2s ease",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.transform = "scale(1.05)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.transform = "scale(1)")
+                }
+              >
+                <div className="card-body text-center p-4">
+                  <FaMotorcycle size="4em" className="text-danger mb-3" />
+                  <h3
+                    className="card-title font-weight-bold"
+                    style={{ fontFamily: "'Roboto', sans-serif" }}
+                  >
+                    Our Mission
+                  </h3>
+                  <p className="card-text">
+                    To empower motorcycle enthusiasts with a seamless and
+                    reliable source for high-quality parts, fostering a
+                    community of passionate riders.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div
+              className="col-md-6"
+              data-aos="flip-right"
+              data-aos-delay="200"
+            >
+              <div
+                className="card bg-dark text-white border-light"
+                style={{
+                  borderRadius: "15px",
+                  transition: "transform 0.2s ease",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.transform = "scale(1.05)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.transform = "scale(1)")
+                }
+              >
+                <div className="card-body text-center p-4">
+                  <FaTools size="4em" className="text-danger mb-3" />
+                  <h3
+                    className="card-title font-weight-bold"
+                    style={{ fontFamily: "'Roboto', sans-serif" }}
+                  >
+                    Our Vision
+                  </h3>
+                  <p className="card-text">
+                    To be the leading provider of motorcycle parts, known for
+                    our unwavering commitment to quality, innovation, and
+                    customer satisfaction.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Us Section */}
+      <section className="py-5" style={{ backgroundColor: "#1a1a1a" }}>
+        <div className="container">
+          <h2
+            className="text-white text-center font-weight-bold mb-5"
+            style={{ fontFamily: "'Roboto', sans-serif" }}
+            data-aos="fade-up"
+            data-aos-duration="800"
+          >
+            Why Choose Dayul Motors?
+          </h2>
+          <div className="row">
+            <div
+              className="col-md-4 mb-4"
+              data-aos="zoom-in"
+              data-aos-delay="100"
+            >
+              <div
+                className="card bg-dark text-white border-light h-100"
+                style={{ borderRadius: "15px" }}
+              >
+                <div className="card-body text-center p-4">
+                  <FaAward size="3em" className="text-danger mb-3" />
+                  <h5
+                    className="card-title"
+                    style={{ fontFamily: "'Roboto', sans-serif" }}
+                  >
+                    Wide Selection
+                  </h5>
+                  <p className="card-text">
+                    Explore our extensive inventory of high-quality motorcycle
+                    parts from trusted brands.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div
+              className="col-md-4 mb-4"
+              data-aos="zoom-in"
+              data-aos-delay="200"
+            >
+              <div
+                className="card bg-dark text-white border-light h-100"
+                style={{ borderRadius: "15px" }}
+              >
+                <div className="card-body text-center p-4">
+                  <FaWrench size="3em" className="text-danger mb-3" />
+                  <h5
+                    className="card-title"
+                    style={{ fontFamily: "'Roboto', sans-serif" }}
+                  >
+                    Quality Assurance
+                  </h5>
+                  <p className="card-text">
+                    We are committed to providing parts that meet the highest
+                    standards of quality and reliability.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-4" data-aos="zoom-in" data-aos-delay="300">
+              <div
+                className="card bg-dark text-white border-light" // h-100 removed!
+                style={{ borderRadius: "15px" }}
+              >
+                <div className="card-body text-center p-4">
+                  <FaHandshake size="3em" className="text-danger mb-3" />
+                  <h5
+                    className="card-title"
+                    style={{ fontFamily: "'Roboto', sans-serif" }}
+                  >
+                    Exceptional Service
+                  </h5>
+                  <p className="card-text">
+                    Our dedicated team is here to provide you with personalized
+                    support and expert advice.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
