@@ -21,7 +21,7 @@ export default function NavigationBar() {
           {/* Responsive call button */}
           <a
             className="navbar-brand h5 ps-5 pt-3 d-none d-md-block" // Only visible on medium screens and up
-            href="tel:+94777777777"
+            href="tel:+94777777778"
           >
             <img
               src={callIcon}
@@ -30,7 +30,7 @@ export default function NavigationBar() {
               height="34"
               className="rounded-5"
             />
-            <span className="text-danger ps-3">077-777-7777</span>
+            <span className="text-danger ps-3">077-777-7778</span>
           </a>
           <button
             className="navbar-toggler"
