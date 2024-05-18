@@ -1,28 +1,37 @@
-require("dotenv").config();
+const express = require("express");
 const mysql = require("mysql2");
 
-// Database Configuration
-const dbConfig = {
-  host: process.env.DATABASE_HOST,
-  user: process.env.DATABASE_USER,
-  password: process.env.DATABASE_PASSWORD,
-  database: process.env.DATABASE_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-};
+const app = express();
 
-// Create a MySQL Connection Pool
-const pool = mysql.createPool(dbConfig);
+const connection = mysql.createConnection({
+  host: "bw3ryqxw0xyxk0s9u6ze-mysql.services.clever-cloud.com",
+  port: "3306",
+  user: "ufbxvknaudaeqojb",
+  password: "O2XsuyJPXAiqxPtmen5R",
+  database: "bw3ryqxw0xyxk0s9u6ze",
+});
 
-// Test Connection (Optional)
-pool.getConnection((err, connection) => {
-  if (err) {
-    console.error("Error connecting to the database:", err);
+connection.connect((error) => {
+  if (error) {
+    console.error("Error connecting to MySQL:", error);
   } else {
-    console.log("Connected to the database!");
+    console.log("Connected to MySQL database!");
   }
 });
 
-// Export the connection pool (so other files can use it)
-module.exports = pool.promise();
+// Define your routes and make queries to your database
+
+app.get("/users", (req, res) => {
+  connection.query("SELECT * FROM users", (error, results, fields) => {
+    if (error) {
+      console.error(error);
+      res.status(500).send("Error fetching data");
+    } else {
+      res.json(results);
+    }
+  });
+});
+
+app.listen(3000, () => {
+  console.log("Server listening on port 3000");
+});
