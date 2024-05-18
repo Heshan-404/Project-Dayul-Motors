@@ -1,76 +1,37 @@
 const express = require("express");
 const mysql = require("mysql2");
+
 const app = express();
-const port = process.env.PORT || 3000;
 
-// Database Configuration (These will be set as environment variables in Vercel)
-const dbConfig = {
-  host: process.env.DATABASE_HOST,
-  user: process.env.DATABASE_USER,
-  password: process.env.DATABASE_PASSWORD,
-  database: process.env.DATABASE_NAME,
-};
+const connection = mysql.createConnection({
+  host: "bw3ryqxw0xyxk0s9u6ze-mysql.services.clever-cloud.com",
+  port: "3306",
+  user: "ufbxvknaudaeqojb",
+  password: "O2XsuyJPXAiqxPtmen5R",
+  database: "bw3ryqxw0xyxk0s9u6ze",
+});
 
-// Create a MySQL Connection Pool
-const pool = mysql.createPool(dbConfig);
-
-// Middleware
-app.use(express.json());
-
-// Route to get all users
-app.get("/api/users", async (req, res) => {
-  try {
-    const [rows] = await pool.promise().query("SELECT * FROM users");
-    res.json(rows);
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    res.status(500).send("Internal Server Error");
+connection.connect((error) => {
+  if (error) {
+    console.error("Error connecting to MySQL:", error);
+  } else {
+    console.log("Connected to MySQL database!");
   }
 });
 
-// Route to create a new user
-app.post("/api/users", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const [result] = await pool
-      .promise()
-      .query("INSERT INTO users (email, password) VALUES (?, ?)", [
-        email,
-        password,
-      ]);
-    res.json({
-      message: "User created successfully!",
-      userId: result.insertId,
-    });
-  } catch (error) {
-    console.error("Error creating user:", error);
-    res.status(500).send("Internal Server Error");
-  }
-});
+// Define your routes and make queries to your database
 
-// Route to update a user by email
-app.put("/api/users/:email", async (req, res) => {
-  try {
-    const email = req.params.email;
-    const { password } = req.body;
-    const [result] = await pool
-      .promise()
-      .query("UPDATE users SET password = ? WHERE email = ?", [
-        password,
-        email,
-      ]);
-    if (result.affectedRows === 0) {
-      res.status(404).json({ message: "User not found" });
+app.get("/users", (req, res) => {
+  connection.query("SELECT * FROM users", (error, results, fields) => {
+    if (error) {
+      console.error(error);
+      res.status(500).send("Error fetching data");
     } else {
-      res.json({ message: "User updated successfully!" });
+      res.json(results);
     }
-  } catch (error) {
-    console.error("Error updating user:", error);
-    res.status(500).send("Internal Server Error");
-  }
+  });
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+app.listen(3000, () => {
+  console.log("Server listening on port 3000");
 });
