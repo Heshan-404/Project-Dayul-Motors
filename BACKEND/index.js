@@ -77,6 +77,7 @@ app.post("/users", (req, res) => {
       };
 
       transporter.sendMail(mailOptions, (error, info) => {
+        console.error("Email sending started");
         if (error) {
           console.error("Error sending email:", error);
         } else {
