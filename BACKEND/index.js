@@ -33,6 +33,28 @@ app.get("/users", (req, res) => {
   });
 });
 
+app.post("/users", (req, res) => {
+  const { name, email } = req.body;
+
+  if (!name || !email) {
+    return res.status(400).send("Name and email are required");
+  }
+
+  const query = "INSERT INTO users (name, email) VALUES (?, ?)";
+  const values = [name, email];
+
+  connection.query(query, values, (error, results) => {
+    if (error) {
+      console.error("Error inserting user:", error);
+      res.status(500).send("Error adding user");
+    } else {
+      res
+        .status(201)
+        .json({ message: "User added successfully", userId: results.insertId });
+    }
+  });
+});
+
 app.listen(3000, () => {
   console.log("Server listening on port 3000");
 });
