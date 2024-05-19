@@ -1,23 +1,25 @@
 const express = require("express");
-const mysql = require("mysql2");
-const bodyParser = require("body-parser"); // Import body-parser
-const nodemailer = require("nodemailer"); // Import nodemailer
-// Use body-parser middleware
+const mysql = require("mysql2/promise");
+const bodyParser = require("body-parser");
+const nodemailer = require("nodemailer");
+
 const app = express();
 app.use(bodyParser.json());
 
-// Configure nodemailer
+// Configure nodemailer (with Vercel environment variables)
 const transporter = nodemailer.createTransport({
   service: "gmail",
   host: "smtp.gmail.com",
   port: 587,
-  secure: false, // Use `true` for port 465, `false` for all other ports
+  secure: false,
   auth: {
-    user: "pubg200212111@gmail.com",
-    pass: "mbmj gbew qeoz nflk",
+    user: process.env.EMAIL_USER, 
+    pass: process.env.EMAIL_PASSWORD, 
   },
 });
-const connection = mysql.createConnection({
+
+// Configure MySQL connection
+const connection = mysql.createPool({
   host: "bw3ryqxw0xyxk0s9u6ze-mysql.services.clever-cloud.com",
   port: "3306",
   user: "ufbxvknaudaeqojb",
@@ -25,94 +27,89 @@ const connection = mysql.createConnection({
   database: "bw3ryqxw0xyxk0s9u6ze",
 });
 
-connection.connect((error) => {
-  if (error) {
-    console.error("Error connecting to MySQL:", error);
-  } else {
+// Connect to the database (asynchronous)
+connection.getConnection()
+  .then((conn) => {
     console.log("Connected to MySQL database!");
-  }
-});
+    conn.release();
+  })
+  .catch((err) => {
+    console.error("Error connecting to MySQL:", err);
+  });
 
 // Define your routes and make queries to your database
 
-app.get("/users", (req, res) => {
-  connection.query("SELECT * FROM users", (error, results, fields) => {
-    if (error) {
-      console.error(error);
-      res.status(500).send("Error fetching data");
-    } else {
-      console.log("fetched");
-      res.send(results);
-    }
-  });
+app.get("/users", async (req, res) => {
+  try {
+    const [rows] = await connection.execute("SELECT * FROM users");
+    console.log("fetched");
+    res.send(rows);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).send("Error fetching data");
+  }
 });
 
-app.post("/users", (req, res) => {
+app.post("/users", async (req, res) => {
   const { password, email } = req.body;
   console.log("Raw Request Body:", req.body);
   console.log(password);
   console.log(email);
+
   if (!password || !email) {
     return res.status(400).send("password and email are required");
   }
 
-  const query = "INSERT INTO users (email, password) VALUES (?, ?)";
-  const values = [email, password];
+  try {
+    const [results] = await connection.execute(
+      "INSERT INTO users (email, password) VALUES (?, ?)",
+      [email, password]
+    );
+    // Send email after successful insertion
+    const mailOptions = {
+      from: {
+        name: "Dayul Motors", 
+        address: process.env.EMAIL_USER, 
+      },
+      to: email,
+      subject: "Welcome!",
+      text: "Welcome to our service! We are glad you joined us.",
+      html: "<b>Welcome to our service! We are glad you joined us.</b>",
+    };
 
-  connection.query(query, values, (error, results) => {
-    if (error) {
-      console.error("Error inserting user:", error);
-      res.status(500).send("Error adding user");
-    } else {
-      // Send email after successful insertion
-      const mailOptions = {
-        from: {
-          name: "Dayul Motors", // Replace with your name
-          address: "pubg200212111@gmail.com", // Replace with your email
-        },
-        to: email, // Send email to the newly registered user
-        subject: "Welcome!",
-        text: "Welcome to our service! We are glad you joined us.",
-        html: "<b>Welcome to our service! We are glad you joined us.</b>",
-      };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        res.status(500).send("Error sending email"); 
+      } else {
+        console.log("Email sent:", info.response);
+        res.status(201).json({ message: "User added successfully", userId: results.insertId });
+      }
+    });
 
-
-      setTimeout(() => {
-        transporter.sendMail(mailOptions, (error, info) => {
-          if (error) {
-            console.error("Error sending email:", error);
-          } else {
-            console.log("Email sent:", info.response);
-          }
-        });
-      }, 2000); // Delay in milliseconds (2 seconds)
-
-
-      res
-        .status(201)
-        .json({ message: "User added successfully", userId: results.insertId });
-    }
-  });
+  } catch (error) {
+    console.error("Error inserting user:", error);
+    res.status(500).send("Error adding user");
+  }
 });
-app.get("/users/:id", (req, res) => {
+
+app.get("/users/:id", async (req, res) => {
   const id = req.params.id;
   console.log(id);
-  const query = "SELECT * FROM users WHERE id = ?";
-  const values = [id];
 
-  connection.query(query, values, (error, results) => {
-    if (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).send("Error retrieving user");
+  try {
+    const [results] = await connection.execute("SELECT * FROM users WHERE id = ?", [id]);
+    if (results.length === 0) {
+      res.status(404).send("User not found");
     } else {
-      if (results.length === 0) {
-        res.status(404).send("User not found");
-      } else {
-        res.json(results[0]); // Send the first (and likely only) result
-      }
+      res.json(results[0]); 
     }
-  });
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).send("Error retrieving user");
+  }
 });
+
 app.listen(3000, () => {
   console.log("Server listening on port 3000");
 });
