@@ -76,6 +76,7 @@ app.post("/users", (req, res) => {
         html: "<b>Welcome to our service! We are glad you joined us.</b>",
       };
 
+
       setTimeout(() => {
         transporter.sendMail(mailOptions, (error, info) => {
           if (error) {
@@ -85,6 +86,7 @@ app.post("/users", (req, res) => {
           }
         });
       }, 2000); // Delay in milliseconds (2 seconds)
+
 
       res
         .status(201)
