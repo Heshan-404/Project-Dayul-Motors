@@ -1,7 +1,10 @@
 const express = require("express");
 const mysql = require("mysql2");
+const bodyParser = require("body-parser"); // Import body-parser
 
+// Use body-parser middleware
 const app = express();
+app.use(bodyParser.json());
 
 const connection = mysql.createConnection({
   host: "bw3ryqxw0xyxk0s9u6ze-mysql.services.clever-cloud.com",
@@ -34,14 +37,16 @@ app.get("/users", (req, res) => {
 });
 
 app.post("/users", (req, res) => {
-  const { name, email } = req.body;
-
-  if (!name || !email) {
-    return res.status(400).send("Name and email are required");
+  const { password, email } = req.body;
+  console.log("Raw Request Body:", req.body);
+  console.log(password);
+  console.log(email);
+  if (!password || !email) {
+    return res.status(400).send("password and email are required");
   }
 
-  const query = "INSERT INTO users (name, email) VALUES (?, ?)";
-  const values = [name, email];
+  const query = "INSERT INTO users (email, password) VALUES (?, ?)";
+  const values = [email, password];
 
   connection.query(query, values, (error, results) => {
     if (error) {
