@@ -27,7 +27,8 @@ app.get("/users", (req, res) => {
       console.error(error);
       res.status(500).send("Error fetching data");
     } else {
-      res.json(results);
+      console.log("fetched");
+      res.send(results);
     }
   });
 });
