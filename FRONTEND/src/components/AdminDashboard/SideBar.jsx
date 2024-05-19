@@ -34,8 +34,9 @@ const SideBar = ({ window }) => {
     setMobileOpen(!mobileOpen);
   };
 
-  const handleListItemClick = (component) => {
+  const handleListItemClick = (component, text) => {
     setSelectedComponent(component);
+    setTittleText(text);
     setMobileOpen(false);
   };
 
@@ -74,7 +75,7 @@ const SideBar = ({ window }) => {
           <ListItem
             button
             key={item.text}
-            onClick={() => handleListItemClick(item.component)}
+            onClick={() => handleListItemClick(item.component, item.text)}
           >
             <ListItemIcon>{item.icon}</ListItemIcon>
             <Typography variant="body1">{item.text}</Typography>
@@ -84,6 +85,7 @@ const SideBar = ({ window }) => {
     </div>
   );
 
+  const [titleText, setTittleText] = useState("Dashboard");
   const container =
     window !== undefined ? () => window().document.body : undefined;
 
@@ -107,8 +109,13 @@ const SideBar = ({ window }) => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Responsive drawer
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            className="text-black"
+          >
+            {titleText}
           </Typography>
         </Toolbar>
       </AppBar>

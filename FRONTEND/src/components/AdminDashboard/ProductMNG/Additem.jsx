@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
-import './Additem.css'; // Import CSS file for styling
+/* eslint-disable react/prop-types */
+import { useState } from "react";
+import "./Additem.css"; // Import CSS file for styling
 
 const DropdownWithAddOption = ({ options, addOptionLabel, onAddOption }) => {
-  const [selectedOption, setSelectedOption] = useState('');
+  const [selectedOption, setSelectedOption] = useState("");
   const handleChange = (event) => {
     const selectedValue = event.target.value;
     if (selectedValue === addOptionLabel) {
-      const newOptionValue = prompt(`Enter the new ${addOptionLabel.toLowerCase()}:`);
+      const newOptionValue = prompt(
+        `Enter the new ${addOptionLabel.toLowerCase()}:`
+      );
       if (newOptionValue) {
         onAddOption(newOptionValue);
       }
@@ -17,8 +20,10 @@ const DropdownWithAddOption = ({ options, addOptionLabel, onAddOption }) => {
 
   return (
     <select value={selectedOption} onChange={handleChange}>
-      {options.map(option => (
-        <option key={option.value} value={option.value}>{option.label}</option>
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
       ))}
       <option value={addOptionLabel}>{addOptionLabel}</option>
     </select>
@@ -27,13 +32,16 @@ const DropdownWithAddOption = ({ options, addOptionLabel, onAddOption }) => {
 
 const Additem = () => {
   const [categories, setCategories] = useState([
-    { value: 'cat1', label: 'Category 1' },
-    { value: 'cat2', label: 'Category 2' },
-    { value: 'cat3', label: 'Category 3' }
+    { value: "cat1", label: "Category 1" },
+    { value: "cat2", label: "Category 2" },
+    { value: "cat3", label: "Category 3" },
   ]);
 
   const handleAddCategory = (newCategoryValue) => {
-    const newCategoryOption = { value: `cat${categories.length + 1}`, label: newCategoryValue };
+    const newCategoryOption = {
+      value: `cat${categories.length + 1}`,
+      label: newCategoryValue,
+    };
     setCategories([...categories, newCategoryOption]);
   };
 
@@ -44,7 +52,12 @@ const Additem = () => {
         <form>
           <div className="form-group">
             <label htmlFor="name">Name:</label>
-            <input style={{width:'200px'}} type="text" id="name" name="name" />
+            <input
+              style={{ width: "200px" }}
+              type="text"
+              id="name"
+              name="name"
+            />
           </div>
           <div className="form-group">
             <label htmlFor="description">Description:</label>
@@ -55,9 +68,9 @@ const Additem = () => {
               <label htmlFor="brand">Brand:</label>
               <DropdownWithAddOption
                 options={[
-                  { value: 'brand1', label: 'Brand 1' },
-                  { value: 'brand2', label: 'Brand 2' },
-                  { value: 'brand3', label: 'Brand 3' }
+                  { value: "brand1", label: "Brand 1" },
+                  { value: "brand2", label: "Brand 2" },
+                  { value: "brand3", label: "Brand 3" },
                 ]}
                 addOptionLabel="Add Brand +"
                 onAddOption={(newBrandValue) => {
@@ -78,7 +91,12 @@ const Additem = () => {
           <div className="form-group horizontal-inputs">
             <div className="input-c">
               <label htmlFor="quantity">Quantity:</label>
-              <input type="number" id="quantity" name="quantity" style={{ width: '200px' }} />
+              <input
+                type="number"
+                id="quantity"
+                name="quantity"
+                style={{ width: "200px" }}
+              />
             </div>
             <div className="input-c">
               <label htmlFor="image">Image:</label>
@@ -87,13 +105,28 @@ const Additem = () => {
           </div>
           <div className="form-group">
             <label htmlFor="price">Price:</label>
-            <input style={{width:'200px'}} type="text" id="price" name="price" />
+            <input
+              style={{ width: "200px" }}
+              type="text"
+              id="price"
+              name="price"
+            />
           </div>
           <div className="form-group">
             <label htmlFor="maxQuantity">Max Quantity:</label>
-            <input style={{width:'200px'}} type="number" id="maxQuantity" name="maxQuantity" />
+            <input
+              style={{ width: "200px" }}
+              type="number"
+              id="maxQuantity"
+              name="maxQuantity"
+            />
           </div>
-          <button style={{marginLeft:'300px', backgroundColor:'purple'}} type="submit">Add Product</button>
+          <button
+            style={{ marginLeft: "300px", backgroundColor: "purple" }}
+            type="submit"
+          >
+            Add Product
+          </button>
         </form>
       </div>
     </div>

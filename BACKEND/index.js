@@ -13,8 +13,8 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false,
   auth: {
-    user: "pubg200212111@gmail.com", 
-    pass: "mbmj gbew qeoz nflk", 
+    user: "pubg200212111@gmail.com",
+    pass: "mbmj gbew qeoz nflk",
   },
 });
 
@@ -28,7 +28,8 @@ const connection = mysql.createPool({
 });
 
 // Connect to the database (asynchronous)
-connection.getConnection()
+connection
+  .getConnection()
   .then((conn) => {
     console.log("Connected to MySQL database!");
     conn.release();
@@ -68,8 +69,8 @@ app.post("/users", async (req, res) => {
     // Send email after successful insertion
     const mailOptions = {
       from: {
-        name: "Dayul Motors", 
-        address: process.env.EMAIL_USER, 
+        name: "Dayul Motors",
+        address: process.env.EMAIL_USER,
       },
       to: email,
       subject: "Welcome!",
@@ -80,13 +81,17 @@ app.post("/users", async (req, res) => {
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error("Error sending email:", error);
-        res.status(500).send("Error sending email"); 
+        res.status(500).send("Error sending email");
       } else {
         console.log("Email sent:", info.response);
-        res.status(201).json({ message: "User added successfully", userId: results.insertId });
+        res
+          .status(201)
+          .json({
+            message: "User added successfully",
+            userId: results.insertId,
+          });
       }
     });
-
   } catch (error) {
     console.error("Error inserting user:", error);
     res.status(500).send("Error adding user");
@@ -98,11 +103,14 @@ app.get("/users/:id", async (req, res) => {
   console.log(id);
 
   try {
-    const [results] = await connection.execute("SELECT * FROM users WHERE id = ?", [id]);
+    const [results] = await connection.execute(
+      "SELECT * FROM users WHERE id = ?",
+      [id]
+    );
     if (results.length === 0) {
       res.status(404).send("User not found");
     } else {
-      res.json(results[0]); 
+      res.json(results[0]);
     }
   } catch (error) {
     console.error("Error fetching user:", error);
