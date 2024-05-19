@@ -76,14 +76,17 @@ app.post("/users", (req, res) => {
         html: "<b>Welcome to our service! We are glad you joined us.</b>",
       };
 
-      transporter.sendMail(mailOptions, (error, info) => {
-        console.error("Email sending started");
-        if (error) {
-          console.error("Error sending email:", error);
-        } else {
-          console.log("Email sent:", info.response);
-        }
-      });
+
+      setTimeout(() => {
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            console.error("Error sending email:", error);
+          } else {
+            console.log("Email sent:", info.response);
+          }
+        });
+      }, 2000); // Delay in milliseconds (2 seconds)
+
 
       res
         .status(201)
