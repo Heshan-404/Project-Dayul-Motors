@@ -3,6 +3,7 @@ import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Chip from "@mui/material/Chip";
 import HomeIcon from "@mui/icons-material/Home";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
 
 const StyledBreadcrumb = styled(Chip)(({ theme }) => {
   const backgroundColor =
@@ -22,7 +23,7 @@ const StyledBreadcrumb = styled(Chip)(({ theme }) => {
       backgroundColor: emphasize(backgroundColor, 0.12),
     },
   };
-}); // TypeScript only: need a type cast here because https://github.com/Microsoft/TypeScript/issues/26591
+});
 
 function handleClick(event) {
   event.preventDefault();
@@ -31,24 +32,36 @@ function handleClick(event) {
 
 export default function CustomizedBreadcrumbs(props) {
   return (
-    <div
-      role="presentation"
-      onClick={handleClick}
-      style={{ cursor: "pointer" }}
-    >
-      <Breadcrumbs aria-label="breadcrumb">
-        <StyledBreadcrumb
-          component="a"
-          href="#"
-          label="HOME"
-          icon={<HomeIcon fontSize="small" />}
-        />
-        <StyledBreadcrumb component="a" href="#" label="ALL PRODUCTS" />
-        <StyledBreadcrumb
-          label={props.cat}
-          deleteIcon={<ExpandMoreIcon />}
-        />
-      </Breadcrumbs>
+    <div style={{ width: "80%", margin: "0 auto" }}>
+      {" "}
+      {/* Container with width */}
+      <div
+        role="presentation"
+        onClick={handleClick}
+        style={{ cursor: "pointer" }}
+      >
+        <Breadcrumbs 
+          aria-label="breadcrumb" 
+          sx={{ display: 'flex' }} // Apply flexbox styling
+        >
+          <StyledBreadcrumb
+            component={Link}
+            to="/Home"
+            label="HOME"
+            icon={<HomeIcon fontSize="small" />}
+          />
+          <StyledBreadcrumb
+            component={Link} 
+            to="/Shop"      
+            label="ALL PRODUCTS" 
+          />
+          <StyledBreadcrumb
+            label={props.cat}
+            style={{ color: "red" }}
+            deleteIcon={<ExpandMoreIcon />}
+          />
+        </Breadcrumbs>
+      </div>
     </div>
   );
 }
