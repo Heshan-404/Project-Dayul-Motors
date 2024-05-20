@@ -4,7 +4,7 @@ import icon from "../../../assets/Project Images/Dayul Motors/Categories/Bearing
 
 function ItemCard(props) {
   return (
-    <div className="card mb-3 shadow-lg" style={{ border: "1px solid black", width: "100%" }}>
+    <div className="card mb-4 shadow-lg" style={{ border: "1px solid black", width: "200px",margin:"1px",marginBottom:"1px",gap:"1px"}}> {/* Reduced width */}
       <Link
         to={`/Shop/product/${encodeURIComponent(props.id)}`} 
         state={{ 
@@ -19,7 +19,7 @@ function ItemCard(props) {
         />
       </Link>
       <div className="card-body" style={{ backgroundColor: "black" }}>
-        <h5 className="card-title" style={{ color: "white" }}>
+        <h5 className="card-title" style={{ color: "white", fontSize: "14px" }}> {/* Reduced font size */}
           <Link
             to={`/Shop/product/${encodeURIComponent(props.name)}`}
             state={{ 
@@ -32,11 +32,11 @@ function ItemCard(props) {
             {props.name}
           </Link>
         </h5>
-        <p className="card-text" style={{ color: "white", fontSize: "15px" }}>
+        <p className="card-text" style={{ color: "white", fontSize: "12px" }}> {/* Reduced font size */}
           {props.desc}
         </p>
         <div style={{ color: "red" }}>
-          <h5 className="card-title ">{props.price}</h5>
+          <h5 className="card-title ">Rs.{props.price}/=</h5>
         </div>
       </div>
     </div>
