@@ -11,6 +11,7 @@ import Shop from "./pages/Shopping/Shop";
 import MainPage from "./components/ShowItem/Background/MainPage";
 import AboutUs from "./pages/AboutUsPage/AboutUs";
 import AdminUI from "./pages/AdminDashboard/AdminUI";
+import OrderDetail from "./components/AdminDashboard/OrderMNG/OrderDetail";
 function App() {
   useEffect(() => {
     AOS.init({ duration: 2000 });
@@ -28,8 +29,6 @@ function App() {
           {/* Nested route for displaying MainItem */}
         </Route>
         <Route path="/Shop/product/:itemId" element={<MainPage />} />
-
-        <Route path="/test" element={<ResponsiveDrawer />} />
 
         <Route path="/admin/orderDetail/:orderID" element={<OrderDetail />} />
       </Routes>
