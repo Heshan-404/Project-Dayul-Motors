@@ -11,7 +11,6 @@ import Shop from "./pages/Shopping/Shop";
 import MainPage from "./components/ShowItem/Background/MainPage";
 import AboutUs from "./pages/AboutUsPage/AboutUs";
 import AdminUI from "./pages/AdminDashboard/AdminUI";
-
 function App() {
   useEffect(() => {
     AOS.init({ duration: 2000 });
@@ -24,10 +23,15 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/admin" element={<AdminUI />} />
         <Route path="/about-us" element={<AboutUs />} />
+
         <Route path="/Shop" element={<Shop />}>
           {/* Nested route for displaying MainItem */}
         </Route>
         <Route path="/Shop/product/:itemId" element={<MainPage />} />
+
+        <Route path="/test" element={<ResponsiveDrawer />} />
+
+        <Route path="/admin/orderDetail/:orderID" element={<OrderDetail />} />
       </Routes>
     </BrowserRouter>
   );
