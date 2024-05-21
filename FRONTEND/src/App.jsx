@@ -11,18 +11,12 @@ import Shop from "./pages/Shopping/Shop";
 import MainPage from "./components/ShowItem/Background/MainPage";
 import AboutUs from "./pages/AboutUsPage/AboutUs";
 import AdminUI from "./pages/AdminDashboard/AdminUI";
-import ShowItem from "./pages/Shopping/ShowItem";
 
 function App() {
   useEffect(() => {
     AOS.init({ duration: 2000 });
   }, []);
 
-  const data = Array.from({ length: 30 }, (_, i) => ({
-    day: i + 1,
-    value: Math.floor(Math.random() * 100),
-    profit: Math.floor(Math.random() * (70000 - 40000 + 1)) + 40000,
-  }));
   return (
     <BrowserRouter>
       <Routes>
