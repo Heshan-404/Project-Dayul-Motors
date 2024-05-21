@@ -4,10 +4,10 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import Home from "../../../pages/HomePage/Home";
 import Aboutus from "../../../pages/AboutUsPage/AboutUs";
 import AdminAccountsPage from "../../../pages/AdminDashboard/AdminHome/AdminAccounts/AdminAccountsPage";
 import UserAccountsPage from "../../../pages/AdminDashboard/AdminHome/AdminAccounts/UserAccountsPage";
+import Dashboard from "./Dashboard/Dashboard";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -91,7 +91,7 @@ export default function BasicTabs() {
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
-        <Home />
+        <Dashboard />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
         <Aboutus />

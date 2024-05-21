@@ -12,7 +12,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 import ConfirmDialog from "./ConfirmDialog";
 import SnackbarAlert from "./SnackbarAlert";
-import { useSnackbar } from "notistack";
 
 export default function UserDataTable(props) {
   const [dataSet, setDataSet] = useState([
@@ -81,55 +80,57 @@ export default function UserDataTable(props) {
     },
   ]);
 
-  const [openFreezeDialog, setOpenFreezeDialog] = useState(false);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const [dialogAction, setDialogAction] = useState(""); // 'freeze' or 'unfreeze'
   const [editingRow, setEditingRow] = useState(null);
 
-  const { enqueueSnackbar } = useSnackbar();
-
-  const handleClickOpen = (userId) => {
+  const handleClickOpen = (userId, action) => {
     setSelectedUserId(userId);
-    setOpenFreezeDialog(true);
+    setDialogAction(action);
+    setOpenConfirmDialog(true);
   };
 
-  const handleCloseFreezeDialog = () => {
-    setOpenFreezeDialog(false);
+  const handleCloseDialog = () => {
+    setOpenConfirmDialog(false);
     setEditingRow(null);
   };
 
-  const handleDelete = async () => {
+  // Handle the Freeze/Unfreeze confirmation
+  const handleConfirm = async () => {
     try {
       // Simulate an API call with a delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      const updatedDataSet = dataSet.filter(
-        (row) => row.userID !== selectedUserId
-      );
-      setDataSet(updatedDataSet);
-      showSnackbar("User deleted successfully!", "success");
-    } catch (error) {
-      console.error("Error deleting user:", error);
-    }
-  };
 
-  const handleFreeze = async () => {
-    try {
-      // Simulate an API call with a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log(`Freezing user with ID: ${selectedUserId}`);
-      const updatedDataSet = dataSet.map((row) => {
-        if (row.userID === selectedUserId) {
-          return { ...row, status: "freeze" };
-        }
-        return row;
-      });
-      setDataSet(updatedDataSet);
-      setOpenFreezeDialog(false);
-      showSnackbar("User frozen successfully!", "success");
+      // Update the dataset and immediately update the state
+      setDataSet(
+        dataSet.map((row) => {
+          if (row.userID === selectedUserId) {
+            // Correctly set status based on dialogAction
+            return {
+              ...row,
+              status: dialogAction === "freeze" ? "freeze" : "active",
+            };
+          }
+          return row;
+        })
+      );
+
+      setOpenConfirmDialog(false);
+      showSnackbar(
+        `User ${
+          dialogAction === "freeze" ? "frozen" : "unfrozen"
+        } successfully!`,
+        "success"
+      );
     } catch (error) {
-      console.error("Error freezing user:", error);
+      console.error(
+        `Error ${dialogAction === "freeze" ? "freezing" : "unfreezing"} user:`,
+        error
+      );
     }
   };
 
@@ -277,14 +278,30 @@ export default function UserDataTable(props) {
                         >
                           Edit
                         </Button>
-                        <Button
-                          variant="contained"
-                          color="error"
-                          startIcon={<AcUnitIcon />}
-                          onClick={() => handleClickOpen(row.userID)}
-                        >
-                          Freeze
-                        </Button>
+                        {row.status === "active" ? (
+                          <Button
+                            variant="contained"
+                            color="error"
+                            sx={{ width: "130px" }}
+                            startIcon={<AcUnitIcon />}
+                            onClick={() =>
+                              handleClickOpen(row.userID, "freeze")
+                            }
+                          >
+                            Freeze
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="contained"
+                            sx={{ width: "130px" }}
+                            startIcon={<AcUnitIcon />}
+                            onClick={() =>
+                              handleClickOpen(row.userID, "active")
+                            }
+                          >
+                            Unfreeze
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </>
@@ -388,11 +405,11 @@ export default function UserDataTable(props) {
 
       {/* Freeze Confirmation Dialog  */}
       <ConfirmDialog
-        open={openFreezeDialog}
-        onClose={handleCloseFreezeDialog}
-        onConfirm={handleFreeze}
-        title="Confirm Freeze"
-        message="Are you sure you want to freeze this user?"
+        open={openConfirmDialog}
+        onClose={handleCloseDialog}
+        onConfirm={handleConfirm}
+        title={`Confirm ${dialogAction}`} // Dynamic title based on action
+        message={`Are you sure you want to ${dialogAction} this user?`}
       />
 
       {/* Snackbar Alert */}

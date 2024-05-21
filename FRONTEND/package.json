@@ -15,6 +15,7 @@
     "@mui/icons-material": "^5.15.17",
     "@mui/material": "^5.15.17",
     "@mui/x-data-grid": "^7.5.0",
+    "@shadcn/ui": "^0.0.4",
     "aos": "^2.3.4",
     "apexcharts": "^3.49.1",
     "bootstrap": "^5.3.3",
@@ -31,6 +32,7 @@
     "react-virtuoso": "^4.7.10",
     "recharts": "^2.12.7",
     "slick-carousel": "^1.8.1",
+    "styled-components": "^6.1.11",
     "x-data-grid": "^2.1.0"
   },
   "devDependencies": {
