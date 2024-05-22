@@ -17,7 +17,6 @@ import DialogTitle from "@mui/material/DialogTitle";
 import AcUnitIcon from "@mui/icons-material/AcUnit"; // Snow icon
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
-import { useSnackbar } from "notistack";
 
 // Separate component for Confirmation Dialog
 const ConfirmDialog = ({ open, onClose, onConfirm, title, message }) => {
@@ -68,7 +67,6 @@ export default function UserDataTable(props) {
       userID: "001",
       fullName: "John Doe",
       email: "john.doe@example.com",
-      password: "password123",
       phoneNumber: "123-456-7890",
       address: "123 Main St, Anytown, USA",
       status: "active",
@@ -77,7 +75,6 @@ export default function UserDataTable(props) {
       userID: "002",
       fullName: "Jane Smith",
       email: "jane.smith@example.com",
-      password: "securepassword",
       phoneNumber: "987-654-3210",
       address: "456 Oak Ave, Springfield, USA",
       status: "active",
@@ -86,7 +83,6 @@ export default function UserDataTable(props) {
       userID: "003",
       fullName: "David Wilson",
       email: "david.wilson@example.com",
-      password: "mypassword",
       phoneNumber: "555-123-4567",
       address: "789 Pine St, Cityville, USA",
       status: "active",
@@ -95,7 +91,6 @@ export default function UserDataTable(props) {
       userID: "004",
       fullName: "Sarah Jones",
       email: "sarah.jones@example.com",
-      password: "pass1234",
       phoneNumber: "222-333-4444",
       address: "101 Elm St, Townsville, USA",
       status: "freeze",
@@ -104,7 +99,6 @@ export default function UserDataTable(props) {
       userID: "005",
       fullName: "Michael Brown",
       email: "michael.brown@example.com",
-      password: "verysecure",
       phoneNumber: "888-999-0000",
       address: "202 Maple St, Villagetown, USA",
       status: "active",
@@ -113,7 +107,6 @@ export default function UserDataTable(props) {
       userID: "006",
       fullName: "Emily Davis",
       email: "emily.davis@example.com",
-      password: "password5",
       phoneNumber: "777-888-1111",
       address: "303 Birch St, Hamletville, USA",
       status: "freeze",
@@ -122,7 +115,6 @@ export default function UserDataTable(props) {
       userID: "007",
       fullName: "James Miller",
       email: "james.miller@example.com",
-      password: "password7",
       phoneNumber: "444-555-6666",
       address: "404 Cedar St, Countryshire, USA",
       status: "active",
@@ -136,8 +128,6 @@ export default function UserDataTable(props) {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [editingRow, setEditingRow] = useState(null);
 
-  const { enqueueSnackbar } = useSnackbar();
-
   const handleClickOpen = (userId) => {
     setSelectedUserId(userId);
     setOpenFreezeDialog(true);
@@ -146,19 +136,6 @@ export default function UserDataTable(props) {
   const handleCloseFreezeDialog = () => {
     setOpenFreezeDialog(false);
     setEditingRow(null);
-  };
-
-  const handleDelete = async () => {
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      const updatedDataSet = dataSet.filter(
-        (row) => row.userID !== selectedUserId
-      );
-      setDataSet(updatedDataSet);
-      showSnackbar("User deleted successfully!", "success");
-    } catch (error) {
-      console.error("Error deleting user:", error);
-    }
   };
 
   const handleFreeze = async () => {
@@ -176,6 +153,24 @@ export default function UserDataTable(props) {
       showSnackbar("User frozen successfully!", "success");
     } catch (error) {
       console.error("Error freezing user:", error);
+    }
+  };
+
+  const handleUnfreeze = async () => {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      console.log(`Unfreezing user with ID: ${selectedUserId}`);
+      const updatedDataSet = dataSet.map((row) => {
+        if (row.userID === selectedUserId) {
+          return { ...row, status: "active" };
+        }
+        return row;
+      });
+      setDataSet(updatedDataSet);
+      setOpenFreezeDialog(false);
+      showSnackbar("User unfrozen successfully!", "success");
+    } catch (error) {
+      console.error("Error unfreezing user:", error);
     }
   };
 
@@ -259,10 +254,11 @@ export default function UserDataTable(props) {
         <Table className="table" aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell style={{ textAlign: "center" }}>User ID</TableCell>
+              <TableCell style={{ textAlign: "center", width: "90px" }}>
+                User ID
+              </TableCell>
               <TableCell style={{ textAlign: "center" }}>Full Name</TableCell>
               <TableCell style={{ textAlign: "center" }}>Email</TableCell>
-              <TableCell style={{ textAlign: "center" }}>Password</TableCell>
               <TableCell style={{ textAlign: "center" }}>
                 Phone Number
               </TableCell>
@@ -294,9 +290,6 @@ export default function UserDataTable(props) {
                       {row.email}
                     </TableCell>
                     <TableCell style={{ textAlign: "center" }}>
-                      {row.password}
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
                       {row.phoneNumber}
                     </TableCell>
                     <TableCell style={{ textAlign: "center" }}>
@@ -321,14 +314,26 @@ export default function UserDataTable(props) {
                         >
                           Edit
                         </Button>
-                        <Button
-                          variant="contained"
-                          color="error"
-                          startIcon={<AcUnitIcon />}
-                          onClick={() => handleClickOpen(row.userID)}
-                        >
-                          Freeze
-                        </Button>
+                        {row.status === "active" ? (
+                          <Button
+                            variant="contained"
+                            color="error"
+                            sx={{ width: "130px" }}
+                            startIcon={<AcUnitIcon />}
+                            onClick={() => handleClickOpen(row.userID)}
+                          >
+                            Freeze
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="contained"
+                            sx={{ width: "130px" }}
+                            startIcon={<AcUnitIcon />}
+                            onClick={() => handleClickOpen(row.userID)}
+                          >
+                            Unfreeze
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </>
@@ -362,18 +367,6 @@ export default function UserDataTable(props) {
                           setEditingRow({
                             ...editingRow,
                             email: e.target.value,
-                          })
-                        }
-                      />
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      <TextField
-                        fullWidth
-                        defaultValue={row.password}
-                        onChange={(e) =>
-                          setEditingRow({
-                            ...editingRow,
-                            password: e.target.value,
                           })
                         }
                       />
@@ -430,13 +423,25 @@ export default function UserDataTable(props) {
         </Table>
       </TableContainer>
 
-      {/* Freeze Confirmation Dialog  */}
+      {/* Freeze/Unfreeze Confirmation Dialog  */}
       <ConfirmDialog
         open={openFreezeDialog}
         onClose={handleCloseFreezeDialog}
-        onConfirm={handleFreeze}
-        title="Confirm Freeze"
-        message="Are you sure you want to freeze this user?"
+        onConfirm={
+          selectedUserId &&
+          dataSet.find((row) => row.userID === selectedUserId).status ===
+            "active"
+            ? handleFreeze
+            : handleUnfreeze
+        }
+        title="Confirm Action"
+        message={
+          selectedUserId &&
+          dataSet.find((row) => row.userID === selectedUserId).status ===
+            "active"
+            ? "Are you sure you want to freeze this user?"
+            : "Are you sure you want to unfreeze this user?"
+        }
       />
 
       {/* Snackbar Alert */}

@@ -11,29 +11,26 @@ import Shop from "./pages/Shopping/Shop";
 import MainPage from "./components/ShowItem/Background/MainPage";
 import AboutUs from "./pages/AboutUsPage/AboutUs";
 import AdminUI from "./pages/AdminDashboard/AdminUI";
-import ShowItem from "./pages/Shopping/ShowItem";
-
+import OrderDetail from "./components/AdminDashboard/OrderMNG/OrderDetail";
 function App() {
   useEffect(() => {
     AOS.init({ duration: 2000 });
   }, []);
 
-  const data = Array.from({ length: 30 }, (_, i) => ({
-    day: i + 1,
-    value: Math.floor(Math.random() * 100),
-    profit: Math.floor(Math.random() * (70000 - 40000 + 1)) + 40000,
-  }));
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
-          <Route path="/admin" element={<AdminUI />} />
+        <Route path="/admin" element={<AdminUI />} />
         <Route path="/about-us" element={<AboutUs />} />
+
         <Route path="/Shop" element={<Shop />}>
           {/* Nested route for displaying MainItem */}
-        </Route> 
-          <Route path="/Shop/product/:itemId" element={<MainPage />} />
+        </Route>
+        <Route path="/Shop/product/:itemId" element={<MainPage />} />
+
+        <Route path="/admin/orderDetail/:orderID" element={<OrderDetail />} />
       </Routes>
     </BrowserRouter>
   );

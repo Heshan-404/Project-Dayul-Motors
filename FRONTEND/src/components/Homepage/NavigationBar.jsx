@@ -12,7 +12,12 @@ export default function NavigationBar() {
     <>
       <nav
         className="navbar fixed-top navbar-expand-lg navbar-dark m-0 p-0 ps-3 pe-3"
-        style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }} // Slightly translucent dark background
+        style={{
+          backgroundColor: "rgba(0, 0, 0, 0.8)",
+          position: "absolute",
+          top: "0",
+          left: "0",
+        }} // Slightly translucent dark background
       >
         <div className="container-fluid p-0 m-0">
           <Link to="/" className="navbar-brand">
