@@ -1,3 +1,4 @@
+const express = require("express");
 const { Pool } = require("pg");
 
 // Replace with your actual connection string
@@ -9,6 +10,8 @@ const pool = new Pool({
   connectionString: connectionString,
 });
 
+const app = express();
+
 // Function to get all users from the database
 const getUsers = async () => {
   try {
@@ -18,15 +21,23 @@ const getUsers = async () => {
     return result.rows;
   } catch (error) {
     console.error("Error getting users:", error);
-    throw error; // Re-throw the error so it can be handled appropriately
+    throw error;
   }
 };
 
-// Example usage:
-getUsers()
-  .then((users) => {
-    console.log("Users:", users);
-  })
-  .catch((error) => {
-    console.error("Error:", error);
-  });
+// Route to handle GET requests for /users
+app.get("/users", async (req, res) => {
+  try {
+    const users = await getUsers();
+    res.json(users);
+  } catch (error) {
+    console.error("Error in /users route:", error);
+    res.status(500).json({ error: "Failed to retrieve users" });
+  }
+});
+
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});
