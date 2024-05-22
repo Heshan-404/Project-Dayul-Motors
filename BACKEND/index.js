@@ -3,7 +3,7 @@ const { Pool } = require("pg");
 
 // Replace with your actual connection string
 const connectionString =
-  "postgresql://a_t_heshan:<ENTER-SQL-USER-PASSWORD>@tanned-rooster-6855.6xw.aws-ap-southeast-1.cockroachlabs.cloud:26257/dayul?sslmode=verify-full";
+  "postgresql://a_t_heshan:zvHJChsmcU2NdLqCoYmkRQ@tanned-rooster-6855.6xw.aws-ap-southeast-1.cockroachlabs.cloud:26257/dayul?sslmode=verify-full";
 
 // Create a new PostgreSQL pool
 const pool = new Pool({
