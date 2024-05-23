@@ -16,7 +16,7 @@ const app = express();
 const getUsers = async () => {
   try {
     const client = await pool.connect();
-    const result = await client.query("SELECT * FROM PhoneBook");
+    const result = await client.query("SELECT * FROM users");
     client.release();
     return result.rows;
   } catch (error) {
