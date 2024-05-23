@@ -2,10 +2,11 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "in.js",
+  "main": "./src/index.mjs",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node ./src/index.mjs"
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +18,8 @@
     "mysql2": "^3.9.7",
     "nodemailer": "^6.9.13",
     "nodemon": "^3.1.0",
-    "pg": "^8.11.5"
+    "pg": "^8.11.5",
+    "pino": "^9.1.0",
+    "pino-pretty": "^11.0.0"
   }
 }
