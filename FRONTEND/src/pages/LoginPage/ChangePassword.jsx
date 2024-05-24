@@ -1,4 +1,42 @@
+import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import axiosInstance from "../../axiosConfig"; // Adjust the import path as needed
+
 export default function ChangePassword() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { state } = location;
+  const email = state && state.email;
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [message, setMessage] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Perform password reset action
+    try {
+      const response = await axiosInstance.post("/auth/reset-password", {
+        password,
+        email,
+      });
+
+      if (response.status === 200) {
+        setMessage("Password reset successful. Redirecting to login page...");
+        setTimeout(() => {
+          navigate("/signin");
+        }, 3000); // Redirect to login page after 3 seconds
+      } else {
+        setMessage(response.data.message || "Failed to reset password");
+      }
+    } catch (error) {
+      setMessage(
+        error.response?.data?.message ||
+          "An error occurred. Please try again later."
+      );
+    }
+  };
+
   return (
     <div className="LoginPage">
       <style>{`
@@ -61,7 +99,8 @@ export default function ChangePassword() {
     }
     
     form *{
-        font-family:poppins,sans-serif; 
+        font-family:poppins,sans-serif;
+        color:;
         letter-spacing:0.5px;
         outline: none;
         border:none;
@@ -108,29 +147,35 @@ export default function ChangePassword() {
     
     
     
+    
     `}</style>
       <div className="background">
         <div className="shapeA" id="shapeA"></div>
         <div className="shapeB" id="shapeB"></div>
       </div>
-      <form action="">
+      <form onSubmit={handleSubmit}>
         <h3>Change Password</h3>
         Add new Password
         <label htmlFor="Password">Password :</label>
         <input
-          type="text"
+          type="password"
           name="Password"
           id="Password"
           placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
-        <label htmlFor=" Conform password"> Conform Password :</label>
+        <label htmlFor="ConfirmPassword">Confirm Password :</label>
         <input
-          type="Password"
-          name="Conform Password"
-          id="Conform Password"
-          placeholder="Password"
+          type="password"
+          name="ConfirmPassword"
+          id="ConfirmPassword"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
         />
-        <button type="button">Confirm</button>
+        {message && <p style={{ color: "red", fontSize: "12px" }}>{message}</p>}
+        <button type="submit">Confirm</button>
       </form>
     </div>
   );

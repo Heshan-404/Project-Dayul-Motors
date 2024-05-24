@@ -6,7 +6,7 @@ import CategoriesSection from "../../components/Homepage/CategoriesSlider/Catego
 
 export default function Home() {
   return (
-    <div className="bg-black" style={{ width: "100%" }}>
+    <div className="bg-white" style={{ width: "100%" }}>
       <LandingUI />
       <SparePartsSearchBar />
       <BrandsSection />
@@ -14,7 +14,6 @@ export default function Home() {
         className="m-5"
         style={{
           height: "1px",
-          backgroundColor: "white",
         }}
       ></div>
       <CategoriesSection />

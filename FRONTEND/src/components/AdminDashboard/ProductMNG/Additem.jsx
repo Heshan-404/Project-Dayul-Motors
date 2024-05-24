@@ -1,7 +1,5 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
-import "./Additem.css"; // Import CSS file for styling
-
 const DropdownWithAddOption = ({ options, addOptionLabel, onAddOption }) => {
   const [selectedOption, setSelectedOption] = useState("");
   const handleChange = (event) => {

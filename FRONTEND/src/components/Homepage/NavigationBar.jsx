@@ -1,10 +1,53 @@
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import logo from "../../assets/Project Images/Dayul Motors/Dayul Motors logo/Artboard 1.png";
 import callIcon from "../../assets/Project Images/Dayul Motors/HomePage/phoneIcon.png";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart"; // Import ShoppingCartIcon from MUI
 import Badge from "@mui/material/Badge"; // Import Badge from MUI
 
 export default function NavigationBar() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+
+    if (token && user) {
+      try {
+        const parsedUser = JSON.parse(user);
+        console.log("Parsed user:", parsedUser);
+
+        if (parsedUser && parsedUser.name) {
+          setIsLoggedIn(true);
+          setUserName(parsedUser.name);
+        } else {
+          console.error(
+            "User object does not have a name property:",
+            parsedUser
+          );
+        }
+      } catch (error) {
+        console.error("Failed to parse user JSON:", error);
+      }
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setIsLoggedIn(false);
+    navigate("/signin"); // Navigate to login page after logout
+  };
+
+  const handle = () => {
+    console.log("Current userName:", userName);
+  };
+
   // Placeholder for cart items count (replace with actual logic)
   const cartItemCount = 3; // Example: 3 items in cart
 
@@ -13,8 +56,8 @@ export default function NavigationBar() {
       <nav
         className="navbar fixed-top navbar-expand-lg navbar-dark m-0 p-0 ps-3 pe-3"
         style={{
-          backgroundColor: "rgba(0, 0, 0, 0.8)",
-          position: "absolute",
+          backgroundColor: "rgba(0, 0, 0,1)",
+          position: "fixed",
           top: "0",
           left: "0",
         }} // Slightly translucent dark background
@@ -110,18 +153,52 @@ export default function NavigationBar() {
                   {/* Add more spare parts as needed */}
                 </ul>
               </li>
-              {/* Login Button */}
-              <li className="nav-item ms-lg-3 my-2 my-lg-0">
-                <Link
-                  to="/login"
-                  className="btn btn-outline-light hover-blow-effect login-btn"
-                  style={{ transform: "translateY(3px)" }}
-                >
-                  {" "}
-                  {/* Translate button down by 3px */}
-                  Login
-                </Link>
-              </li>
+              {isLoggedIn ? (
+                <>
+                  <li className="nav-item ms-lg-3 my-2 my-lg-0">
+                    <span className="nav-link active fw-bold">
+                      Welcome, {userName}
+                    </span>
+                  </li>
+                  <li className="nav-item ms-lg-3 my-2 my-lg-0">
+                    <button
+                      className="btn btn-outline-light hover-blow-effect login-btn"
+                      onClick={handleLogout}
+                      style={{ transform: "translateY(3px)" }}
+                    >
+                      Logout
+                    </button>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li className="nav-item ms-lg-3 my-2 my-lg-0">
+                    <Link
+                      to="/signin"
+                      className="btn btn-outline-light hover-blow-effect login-btn"
+                      style={{ transform: "translateY(3px)" }}
+                    >
+                      Login
+                    </Link>
+                  </li>
+                  <li className="nav-item ms-lg-3 my-2 my-lg-0">
+                    <button
+                      onClick={handle}
+                      className="btn btn-outline-light hover-blow-effect login-btn"
+                      style={{ transform: "translateY(3px)" }}
+                    >
+                      Check
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="btn btn-outline-light hover-blow-effect login-btn"
+                      style={{ transform: "translateY(3px)" }}
+                    >
+                      logout
+                    </button>
+                  </li>
+                </>
+              )}
               {/* Shopping Cart */}
               <li className="nav-item ms-lg-3 my-2 my-lg-0">
                 <Link to="/cart" className="nav-link active fw-bold cart-icon">

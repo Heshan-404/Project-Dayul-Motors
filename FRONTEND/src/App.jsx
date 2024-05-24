@@ -20,7 +20,7 @@ import OrderDetail from "./components/AdminDashboard/OrderMNG/OrderDetail";
 function App() {
   useEffect(() => {
     AOS.init({ duration: 2000 });
-  }, []);
+  }, []); // This should log the value of REACT_APP_API_URL
 
   return (
     <BrowserRouter>
