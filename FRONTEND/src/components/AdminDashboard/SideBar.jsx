@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import PropTypes from "prop-types";
 import AppBar from "@mui/material/AppBar";
@@ -16,7 +17,6 @@ import logo from "../../assets/Project Images/Dayul Motors/Dayul Motors logo/Art
 import OrderIcon from "../../assets/Project Images/Dayul Motors/AdminSideBar/OrderMNG.png";
 import ProductIcon from "../../assets/Project Images/Dayul Motors/AdminSideBar/Products.png";
 import HomeIcon from "../../assets/Project Images/Dayul Motors/AdminSideBar/Home.png";
-import Home from "../../pages/HomePage/Home";
 import AdminHomePage from "../../pages/AdminDashboard/AdminHome/AdminHomePage";
 import ProductMNGPage from "../../pages/AdminDashboard/ProductMNG/ProductMNGPage";
 import OrderMNGPage from "../../pages/AdminDashboard/OrderMNGPage/OrderMNGPage";
@@ -25,7 +25,8 @@ const drawerWidth = 250;
 
 const SideBar = ({ window }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [selectedComponent, setSelectedComponent] = useState(null);
+  const [selectedComponent, setSelectedComponent] = useState(<AdminHomePage />);
+  const [activeItem, setActiveItem] = useState(null);
 
   const handleDrawerClose = () => {
     setMobileOpen(false);
@@ -35,8 +36,10 @@ const SideBar = ({ window }) => {
     setMobileOpen(!mobileOpen);
   };
 
-  const handleListItemClick = (component) => {
+  const handleListItemClick = (component, text, itemId) => {
     setSelectedComponent(component);
+    setTittleText(text);
+    setActiveItem(itemId); // Update active item
     setMobileOpen(false);
   };
 
@@ -60,22 +63,28 @@ const SideBar = ({ window }) => {
             text: "Home",
             icon: <img src={HomeIcon} width={"30px"} alt="Home Icon" />,
             component: <AdminHomePage />,
+            id: "home",
           },
           {
             text: "Product Management",
             icon: <img src={ProductIcon} width={"30px"} alt="Inbox Icon" />,
             component: <ProductMNGPage />,
+            id: "products",
           },
           {
             text: "Order Management",
             icon: <img src={OrderIcon} width={"30px"} alt="Mail Icon" />,
             component: <OrderMNGPage />,
+            id: "orders",
           },
         ].map((item, index) => (
           <ListItem
             button
             key={item.text}
-            onClick={() => handleListItemClick(item.component)}
+            onClick={() =>
+              handleListItemClick(item.component, item.text, item.id)
+            }
+            className={activeItem === item.id ? "active" : ""} // Add active class
           >
             <ListItemIcon>{item.icon}</ListItemIcon>
             <Typography variant="body1">{item.text}</Typography>
@@ -85,11 +94,20 @@ const SideBar = ({ window }) => {
     </div>
   );
 
+  const [titleText, setTittleText] = useState("Dashboard");
   const container =
     window !== undefined ? () => window().document.body : undefined;
 
   return (
     <Box sx={{ display: "flex" }}>
+      <div>
+        <style>{`
+          .active {
+            background-color: #f0f0f0; /* Example */
+            color: #000; /* Example */
+          }
+        `}</style>
+      </div>
       <CssBaseline />
       <AppBar
         position="fixed"
@@ -108,8 +126,13 @@ const SideBar = ({ window }) => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Responsive drawer
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            className="text-black"
+          >
+            {titleText}
           </Typography>
         </Toolbar>
       </AppBar>

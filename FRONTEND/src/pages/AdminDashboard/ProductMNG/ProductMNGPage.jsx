@@ -1,3 +1,9 @@
+import AllProducts from "../../../components/AdminDashboard/ProductMNG/AllProducts";
+
 export default function ProductMNGPage() {
-  return <div>ProductMNGPage</div>;
+  return (
+    <div>
+      <AllProducts />
+    </div>
+  );
 }

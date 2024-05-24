@@ -1,95 +1,107 @@
-import React, { useState } from "react";
-import Home from "../../../pages/HomePage/Home";
-import Footer from "../../Homepage/Footer";
+import * as React from "react";
+import PropTypes from "prop-types";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
+import Aboutus from "../../../pages/AboutUsPage/AboutUs";
+import AdminAccountsPage from "../../../pages/AdminDashboard/AdminHome/AdminAccounts/AdminAccountsPage";
+import UserAccountsPage from "../../../pages/AdminDashboard/AdminHome/AdminAccounts/UserAccountsPage";
+import Dashboard from "./Dashboard/Dashboard";
 
-const AdminNavBar = () => {
-  const [selectedColumn, setSelectedColumn] = useState(null);
-  const [hoveredColumn, setHoveredColumn] = useState(null);
+function CustomTabPanel(props) {
+  const { children, value, index, ...other } = props;
 
-  const handleColumnClick = (column) => {
-    setSelectedColumn(column);
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
+CustomTabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired,
+};
+
+function a11yProps(index) {
+  return {
+    id: `simple-tab-${index}`,
+    "aria-controls": `simple-tabpanel-${index}`,
   };
+}
 
-  const handleColumnHover = (column) => {
-    setHoveredColumn(column);
-  };
+export default function BasicTabs() {
+  const [value, setValue] = React.useState(0);
 
-  const renderColumnContent = () => {
-    switch (selectedColumn) {
-      case 1:
-        return <Home />;
-      case 2:
-        return <Footer />;
-      default:
-        return null;
-    }
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
   };
 
   return (
-    <div>
-      <div
-        className="admin-nav-bar"
-        style={{
-          backgroundColor: "white",
-          color: "grey", // Set text color to grey
-          display: "flex",
-          height: "60px", // Set navbar height
-          alignItems: "center", // Align items vertically in the center
-          padding: "0 20px", // Add padding to the navbar
-        }}
-      >
-        <div
-          className="column"
-          onClick={() => handleColumnClick(1)}
-          style={{
-            flex: 1,
-            color:
-              selectedColumn === 1 || hoveredColumn === 1 ? "black" : "inherit", // Set text color to black if selected or hovered
-            padding: "0 10px", // Add padding to each column
-            cursor: "pointer", // Set cursor to pointer
-          }}
-          onMouseEnter={() => handleColumnHover(1)}
-          onMouseLeave={() => handleColumnHover(null)}
+    <Box sx={{ width: "100%" }}>
+      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          aria-label="basic tabs example"
         >
-          Column 1
-        </div>
-        <div
-          className="column"
-          onClick={() => handleColumnClick(2)}
-          style={{
-            flex: 1,
-            color:
-              selectedColumn === 2 || hoveredColumn === 2 ? "black" : "inherit", // Set text color to black if selected or hovered
-            padding: "0 10px", // Add padding to each column
-            cursor: "pointer", // Set cursor to pointer
-          }}
-          onMouseEnter={() => handleColumnHover(2)}
-          onMouseLeave={() => handleColumnHover(null)}
-        >
-          Column 2
-        </div>
-        <div
-          className="column"
-          onClick={() => handleColumnClick(3)}
-          style={{ flex: 1, padding: "0 10px", cursor: "pointer" }}
-          onMouseEnter={() => handleColumnHover(3)}
-          onMouseLeave={() => handleColumnHover(null)}
-        >
-          Column 3
-        </div>
-        <div
-          className="column"
-          onClick={() => handleColumnClick(4)}
-          style={{ flex: 1, padding: "0 10px", cursor: "pointer" }}
-          onMouseEnter={() => handleColumnHover(4)}
-          onMouseLeave={() => handleColumnHover(null)}
-        >
-          Column 4
-        </div>
-      </div>
-      <div className="content">{selectedColumn && renderColumnContent()}</div>
-    </div>
+          <Tab
+            label="Statistics"
+            {...a11yProps(0)}
+            sx={{
+              "&.Mui-selected": {
+                backgroundColor: "lightblue",
+                color: "blue",
+              },
+            }}
+          />
+          <Tab
+            label="Settings"
+            {...a11yProps(1)}
+            sx={{
+              "&.Mui-selected": { backgroundColor: "lightblue", color: "blue" },
+            }}
+          />
+          <Tab
+            label="Admin Accounts"
+            {...a11yProps(2)}
+            sx={{
+              "&.Mui-selected": { backgroundColor: "lightblue", color: "blue" },
+            }}
+          />
+          <Tab
+            label="User Accounts"
+            {...a11yProps(3)}
+            sx={{
+              "&.Mui-selected": { backgroundColor: "lightblue", color: "blue" },
+            }}
+          />
+        </Tabs>
+      </Box>
+      <CustomTabPanel value={value} index={0}>
+        <Dashboard />
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={1}>
+        <Aboutus />
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={2}>
+        <AdminAccountsPage />
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={3}>
+        <UserAccountsPage />
+      </CustomTabPanel>
+    </Box>
   );
-};
-
-export default AdminNavBar;
+}

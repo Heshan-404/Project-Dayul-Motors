@@ -1,3 +1,8 @@
+import OrderNavBar from "../../../components/AdminDashboard/OrderMNG/OrderNavBar";
 export default function OrderMNGPage() {
-  return <div>OrderMNGPage</div>;
+  return (
+    <div>
+      <OrderNavBar />
+    </div>
+  );
 }
