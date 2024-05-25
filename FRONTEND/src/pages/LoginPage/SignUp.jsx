@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../axiosConfig"; // Adjust the import path as needed
+import NavigationBar from "../../components/Homepage/NavigationBar";
+import Footer from "../../components/Homepage/Footer";
+import { Button, styled, TextField } from "@mui/material";
+import { yellow } from "@mui/material/colors";
+import LoginIcon from "@mui/icons-material/Login";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -27,7 +32,7 @@ export default function Signup() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    setErrors({ ...errors, [name]: "" });
+    setErrors({ ...errors, [name]: validateField(name, value) });
   };
 
   const validateField = (name, value) => {
@@ -44,7 +49,11 @@ export default function Signup() {
         }
         break;
       case "phoneNo":
-        if (!value) message = "Phone Number is required";
+        if (!value) {
+          message = "Phone Number is required";
+        } else if (!/^0\d{9}$/.test(value)) {
+          message = "Phone Number must be 10 digits and start with 0";
+        }
         break;
       case "address":
         if (!value) message = "Address is required";
@@ -89,7 +98,7 @@ export default function Signup() {
 
     if (Object.keys(validationErrors).length === 0) {
       try {
-        const response = await axiosInstance.post("/auth/register", {
+        const response = await axiosInstance.post("/auth/user/register", {
           fullName: formData.fullName,
           email: formData.email,
           phoneNo: formData.phoneNo,
@@ -97,7 +106,7 @@ export default function Signup() {
           password: formData.password,
         });
 
-        if (response.status === 200) {
+        if (response.status === 201) {
           setSuccessMessage("Registration successful!");
           setFormData({
             fullName: "",
@@ -121,219 +130,228 @@ export default function Signup() {
     }
   };
 
+  useEffect(() => {
+    if (serverError || successMessage) {
+      const timer = setTimeout(() => {
+        setServerError("");
+        setSuccessMessage("");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [serverError, successMessage]);
+
+  const ColorButton = styled(Button)(({ theme }) => ({
+    color: theme.palette.getContrastText(yellow[500]),
+    backgroundColor: yellow[500],
+    "&:hover": {
+      backgroundColor: yellow[700],
+    },
+  }));
+
   return (
-    <div className="LoginPage">
-      <style>
-        {`
-          *,*:before,*:after{
-            padding: 0%;
-            margin: 0%;
-            box-sizing: bordeer-box;
+    <div>
+      <div
+        className="LoginPage"
+        style={{ marginTop: "150px", marginBottom: "100px" }}
+      >
+        <NavigationBar />
+        <style>{`
+        *, *:before, *:after {
+          padding: 0;
+          margin: 0;
+          box-sizing: border-box;
         }
-        body{
-            background-color: black;
-            color: white;
-        }
-        .background{
-            width: 430%;
-            height: 520%;
-            position: absolute;
-            left: 50%;
-            top:50%;
-            transform: (-50%,-50%);
-            
+         
+        .LoginPage {
+          display: flex; 
+          justify-content: center; 
         }
         
-        #shapeB{
-            height:200px;
-            width:200px;
-            position: absolute;
-            border-radius:50%; 
+        #shapeB, #shapeA {
+          height: 200px;
+          width: 200px;
+          position: absolute;
+          border-radius: 50%;
         }
-        #shapeA{
-            height:200px;
-            width:200px;
-            position: absolute;
-            border-radius:50%; 
+        #shapeB {
+          background-image: linear-gradient(#ad1894, #f67723);
+           
         }
-        #shapeB{
-            background-image: linear-gradient(#ad1894,#f67723);
-            left: -280px;
-            top: -120px;
+        #shapeA {
+          background-image: linear-gradient(to right, #ee1ea9, black);
+          
         }
-        #shapeA{
-            background-image: linear-gradient(to right,#ee1ea9,black);
-            right: 100px;
-            top: -80px;
+        form {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          height: 100%;
+          width: 400px;
+          background-color: rgba(255, 255, 255, 0.13);
+          border-radius: 10px;
+          backdrop-filter: blur(10px);
+          border: 2px solid rgba(255, 255, 255, 0.1);
+          box-shadow: 0 0 30px rgba(8, 7, 16, 0.6);
+          padding: 50px 35px;
+          z-index: 1;
         }
-        
-        .s{
-            height: 900px;
-            width: 400px;
-            background-color: rgba(255,255,255, 0.13);
-            position: absolute;
-            transform: translate(-50%,-50px);
-            top: 50%;
-            left: 50%;
-            border-radius: 3%;
-            backdrop-filter:blur(10px);
-            border: 2px solid rgba(255 ,255,255,0.1);
-            box-shadow: 0 0 30px rgba(8,7,16, 0.6);
-            padding: 50px 35px;
+        form * {
+          font-family: Poppins, sans-serif;
+          color: black;
+          letter-spacing: 0.5px;
+          outline: none;
+          border: none;
         }
-        
-        form *{
-            font-family:poppins,sans-serif;
-            color: #ffffff;
-            letter-spacing:0.5px;
-            outline: none;
-            border:none;
+        form h3 {
+          font-size: 32px;
+          font-weight: 500;
+          line-height: 42px;
+          text-align: center;
         }
-        form h3{
-            font-size: 32px;
-            font-weight: 500px;
-            line-height: 42px;
-            text-align: center;
+        form h4 {
+          font-size: 18px;
+          font-weight: 400;
+          line-height: 28px;
+          text-align: center;
+          margin-bottom: 30px;
         }
-        label{
-            display: block;
-            margin-top: 30px;
-            font-size: 16px;
-            font-weight: 500250;
+        .MuiTextField-root {
+          margin-top: 20px;
+          width: 100%;
         }
-        input{
-            display: block;
-            height: 40px;
-            width: 100%;
-            background-color: rgba(255 ,255,255,0.07);
-            border-radius: 3px;
-            padding:0 10px ;
-            margin-top: 8px;
-            font-size: 14px;
-            font-weight: 300px;
+        .button {
+          margin-top: 50px;
+          color: #080710;
+          width: 75%;
+          background-color: rgb(247, 255, 16);
+          padding: 10px 20px;
+          font-size: 15px;
+          font-weight: 600;
+          border-radius: 6px;
+          cursor: pointer;
         }
-        
-        ::placeholder{
-            color: #e5e5e5;
+        .error {
+          color: red;
+          font-size: 12px;
+          margin-top: 5px;
+          align-self: flex-start;
         }
-        
-        button{
-            margin-top: 50px;
-            color: #080710;
-            width: 75%;
-            background-color: rgb(247, 255, 16);
-            padding: 5px 10px;
-            font-size: 15px;
-            font-weight: 600;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-left: 40px;
+        .success, .server-error {
+          margin-top: 20px;
+          font-size: 12px;
+          text-align: center;
+          width: 100%;;
+          color:"red";
         }
-        
-        
-        
-        `}
-      </style>
-      <div className="background">
-        <div className="shapeA" id="shapeA"></div>
-        <div className="shapeB" id="shapeB"></div>
+        .fade {
+          animation: fadeOut 5s forwards;
+        }
+        @keyframes fadeOut {
+          0% { opacity: 1; }
+          80% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+      `}</style>
+        <div
+          className="shapeB"
+          id="shapeB"
+          style={{ margin: "-100px", marginLeft: "-450px" }}
+        ></div>
+        <div
+          className="shapeA"
+          id="shapeA"
+          style={{ marginLeft: "380px", marginTop: "620px" }}
+        ></div>
+        <form className="s" onSubmit={handleSubmit}>
+          <h3>Sign up</h3>
+          Register to Dayul motors
+          <TextField
+            label="Full Name"
+            variant="outlined"
+            type="text"
+            name="fullName"
+            id="fullName"
+            value={formData.fullName}
+            onChange={handleChange}
+            error={!!errors.fullName}
+            helperText={errors.fullName}
+          />
+          <TextField
+            label="Email Address"
+            variant="outlined"
+            type="email"
+            name="email"
+            id="email"
+            value={formData.email}
+            onChange={handleChange}
+            error={!!errors.email}
+            helperText={errors.email}
+          />
+          <TextField
+            label="Phone Number"
+            variant="outlined"
+            type="text"
+            name="phoneNo"
+            id="phoneNo"
+            value={formData.phoneNo}
+            onChange={handleChange}
+            error={!!errors.phoneNo}
+            helperText={errors.phoneNo}
+          />
+          <TextField
+            label="Address"
+            variant="outlined"
+            type="text"
+            name="address"
+            id="address"
+            value={formData.address}
+            onChange={handleChange}
+            error={!!errors.address}
+            helperText={errors.address}
+          />
+          <TextField
+            label="Password"
+            variant="outlined"
+            type="password"
+            name="password"
+            id="password"
+            value={formData.password}
+            onChange={handleChange}
+            error={!!errors.password}
+            helperText={errors.password}
+          />
+          <TextField
+            label="Confirm Password"
+            variant="outlined"
+            type="password"
+            name="confirmPassword"
+            id="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            error={!!errors.confirmPassword}
+            helperText={errors.confirmPassword}
+          />
+          <ColorButton
+            className="button"
+            type="submit"
+            variant="contained"
+            endIcon={<LoginIcon />}
+          >
+            Sign Up
+          </ColorButton>
+          {serverError && (
+            <div className="server-error fade" style={{ color: "red" }}>
+              {serverError}
+            </div>
+          )}
+          {successMessage && (
+            <div className="success fade" style={{ color: "red" }}>
+              {successMessage}
+            </div>
+          )}
+        </form>
       </div>
-      <form className="s" onSubmit={handleSubmit}>
-        <h3>Sign up</h3>
-        Register to Dayul motors
-        <label htmlFor="fullName">Full Name :</label>
-        <input
-          type="text"
-          name="fullName"
-          id="fullName"
-          placeholder="Full Name"
-          value={formData.fullName}
-          onChange={handleChange}
-          onBlur={() => {
-            const message = validateField("fullName", formData.fullName);
-            setErrors({ ...errors, fullName: message });
-          }}
-        />
-        {errors.fullName && <div className="error">{errors.fullName}</div>}
-        <label htmlFor="email">Email Address :</label>
-        <input
-          type="email"
-          name="email"
-          id="email"
-          placeholder="Email Address"
-          value={formData.email}
-          onChange={handleChange}
-          onBlur={() => {
-            const message = validateField("email", formData.email);
-            setErrors({ ...errors, email: message });
-          }}
-        />
-        {errors.email && <div className="error">{errors.email}</div>}
-        <label htmlFor="phoneNo">Phone Number :</label>
-        <input
-          type="text"
-          name="phoneNo"
-          id="phoneNo"
-          placeholder="Phone Number"
-          value={formData.phoneNo}
-          onChange={handleChange}
-          onBlur={() => {
-            const message = validateField("phoneNo", formData.phoneNo);
-            setErrors({ ...errors, phoneNo: message });
-          }}
-        />
-        {errors.phoneNo && <div className="error">{errors.phoneNo}</div>}
-        <label htmlFor="address">Address :</label>
-        <input
-          type="text"
-          name="address"
-          id="address"
-          placeholder="Address"
-          value={formData.address}
-          onChange={handleChange}
-          onBlur={() => {
-            const message = validateField("address", formData.address);
-            setErrors({ ...errors, address: message });
-          }}
-        />
-        {errors.address && <div className="error">{errors.address}</div>}
-        <label htmlFor="password">Password :</label>
-        <input
-          type="password"
-          name="password"
-          id="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          onBlur={() => {
-            const message = validateField("password", formData.password);
-            setErrors({ ...errors, password: message });
-          }}
-        />
-        {errors.password && <div className="error">{errors.password}</div>}
-        <label htmlFor="confirmPassword">Confirm Password :</label>
-        <input
-          type="password"
-          name="confirmPassword"
-          id="confirmPassword"
-          placeholder="Confirm Password"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          onBlur={() => {
-            const message = validateField(
-              "confirmPassword",
-              formData.confirmPassword
-            );
-            setErrors({ ...errors, confirmPassword: message });
-          }}
-        />
-        {errors.confirmPassword && (
-          <div className="error">{errors.confirmPassword}</div>
-        )}
-        <button type="submit">Register Now</button>
-        {successMessage && <div className="success">{successMessage}</div>}
-        {serverError && <div className="server-error">{serverError}</div>}
-      </form>
+      <Footer />
     </div>
   );
 }

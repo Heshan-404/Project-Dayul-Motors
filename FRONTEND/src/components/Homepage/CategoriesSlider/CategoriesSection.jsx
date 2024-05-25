@@ -7,7 +7,7 @@ export default function CategoriesSection() {
         className="text-left mt-4"
         data-aos="fade-in"
         style={{
-          color: "white",
+          color: "black",
           fontWeight: "bolder",
           fontSize: "30px",
         }}
@@ -18,7 +18,7 @@ export default function CategoriesSection() {
         <div className="col-6 pt-4">
           <p
             style={{
-              color: "white",
+              color: "black",
               fontWeight: "normal",
               fontSize: "20px",
               paddingRight: "150px",
@@ -32,7 +32,7 @@ export default function CategoriesSection() {
           <a
             href="/brands"
             style={{
-              color: "white",
+              color: "black",
               fontWeight: "bold",
               fontSize: "20px",
               float: "right",
