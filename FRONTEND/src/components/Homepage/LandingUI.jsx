@@ -1,4 +1,3 @@
-import NavigationBar from "./NavigationBar";
 import bgImg from "./BackGround2.jpg";
 import { useState } from "react";
 
@@ -62,7 +61,6 @@ export default function LandingUI() {
 
   return (
     <div>
-      <NavigationBar />
       <br />
       <div style={{ backgroundColor: "black" }}>
         <div style={styles.backgroundImageDiv}>
