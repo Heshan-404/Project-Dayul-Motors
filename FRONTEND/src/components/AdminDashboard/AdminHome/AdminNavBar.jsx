@@ -55,7 +55,9 @@ export default function BasicTabs() {
         <Tabs
           value={value}
           onChange={handleChange}
-          aria-label="basic tabs example"
+          variant="scrollable"
+          scrollButtons={false}
+          aria-label="scrollable prevent tabs example"
         >
           <Tab
             label="Statistics"

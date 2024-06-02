@@ -60,7 +60,7 @@ export default function NavigationBar() {
     setShowSessionExpiredModal(false);
   };
   return (
-    <>
+    <div style={{ width: "100vw" }}>
       <nav
         className="navbar fixed-top navbar-expand-lg navbar-dark m-0 p-0 ps-3 pe-3"
         style={{
@@ -68,6 +68,7 @@ export default function NavigationBar() {
           position: "fixed",
           top: "0",
           left: "0",
+          width: "100vw",
         }}
       >
         <div className="container-fluid p-0 m-0">
@@ -242,7 +243,7 @@ export default function NavigationBar() {
             z-index: 9999;
             left: 0;
             top: 0;
-            width: 100%;
+            width: 100vw;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(5px); /* Add blur effect */
@@ -270,6 +271,6 @@ export default function NavigationBar() {
           
         `}
       </style>
-    </>
+    </div>
   );
 }

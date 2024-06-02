@@ -21,6 +21,7 @@
     "axios": "^1.7.2",
     "bootstrap": "^5.3.3",
     "dotenv": "^16.4.5",
+    "formik": "^2.4.6",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
     "notistack": "^3.0.1",
@@ -37,7 +38,8 @@
     "recharts": "^2.12.7",
     "slick-carousel": "^1.8.1",
     "styled-components": "^6.1.11",
-    "x-data-grid": "^2.1.0"
+    "x-data-grid": "^2.1.0",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

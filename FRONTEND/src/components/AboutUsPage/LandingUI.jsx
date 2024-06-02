@@ -11,7 +11,12 @@ import {
 
 export default function LandingUI() {
   return (
-    <div style={{ backgroundColor: "#141414", overflowX: "hidden" }}>
+    <div
+      style={{
+        backgroundColor: "#141414",
+        overflowX: "hidden",
+      }}
+    >
       <NavigationBar />
 
       {/* Hero Section (without background image) */}
