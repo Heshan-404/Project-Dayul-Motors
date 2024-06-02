@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TextField, Button, Typography, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../axiosConfig";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -8,6 +9,7 @@ const AdminLogin = () => {
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [loginError, setLoginError] = useState("");
 
   const validateEmail = (value) => {
     if (!value.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i)) {
@@ -37,12 +39,24 @@ const AdminLogin = () => {
     validatePassword(passwordValue);
   };
 
-  const handleLogin = () => {
-    // Your login logic goes here
-    console.log("Email:", email);
-    console.log("Password:", password);
-    // After successful login, you can navigate to the desired page
-    navigate("/home");
+  const handleLogin = async () => {
+    try {
+      const result = await axiosInstance.post("/auth/admin/login", {
+        email,
+        password,
+      });
+      console.log("Login successful:", result.data.token);
+
+      // Save the token and user details as needed
+      localStorage.setItem("adminToken", result.data.token);
+      localStorage.setItem("adminLevel", result.data.user.level); // Save the admin level
+
+      // After successful login, navigate to the desired page
+      navigate("/admin");
+    } catch (error) {
+      console.error("Login error:", error);
+      setLoginError(error.response?.data?.message || "Login failed");
+    }
   };
 
   return (
@@ -82,6 +96,11 @@ const AdminLogin = () => {
         error={!!passwordError}
         helperText={passwordError}
       />
+      {loginError && (
+        <Typography color="error" variant="body2" align="center" gutterBottom>
+          {loginError}
+        </Typography>
+      )}
       <Button
         variant="contained"
         color="primary"
