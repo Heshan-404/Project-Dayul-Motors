@@ -12,6 +12,7 @@ import MainPage from "./components/ShowItem/Background/MainPage";
 import AboutUs from "./pages/AboutUsPage/AboutUs";
 import AdminUI from "./pages/AdminDashboard/AdminUI";
 import OrderDetail from "./components/AdminDashboard/OrderMNG/OrderDetail";
+import Profile from "./pages/Profile/Profile";
 function App() {
   useEffect(() => {
     AOS.init({ duration: 2000 });
@@ -31,6 +32,7 @@ function App() {
         <Route path="/Shop/product/:itemId" element={<MainPage />} />
 
         <Route path="/admin/orderDetail/:orderID" element={<OrderDetail />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </BrowserRouter>
   );
