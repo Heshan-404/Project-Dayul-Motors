@@ -84,7 +84,9 @@ export default function PendingOrders({ orders = [], searchValue }) {
                   <TableCell align="center">{row.orderId}</TableCell>
                   <TableCell align="center">{row.orderDate}</TableCell>
                   <TableCell align="center">{row.orderTime}</TableCell>
-                  <TableCell align="center">{row.amount}</TableCell>
+                  <TableCell align="center">
+                    {"LKR. " + row.amount + ".00"}
+                  </TableCell>
                   <TableCell align="center">
                     <Link to={`/admin/PendingOrders/${row.orderId}`}>
                       <Button color="primary" variant="contained">
