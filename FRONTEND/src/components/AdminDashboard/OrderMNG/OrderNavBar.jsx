@@ -1,44 +1,84 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, Tab, Box, TextField, InputAdornment } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AllOrders from "./AllOrder";
 import ActiveOrders from "./ActiveOrders";
 import PendingOrders from "./PendingOrders";
-import OrderItem from "./OrderItems"; // Update paths if needed
 import CanceledOrders from "./CanceledOrders";
 import CompletedOrders from "./CompletedOrders";
+import axiosInstance from "../../../axiosConfig";
 
-const OrderNavBar = ({ ordersData }) => {
+const OrderNavBar = () => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [searchValue, setSearchValue] = useState("");
+  const [ordersData, setOrdersData] = useState({});
   const [orderCounts, setOrderCounts] = useState([
-    { id: 1, label: "All Orders", count: 0 },
-    { id: 2, label: "Active Orders", count: 0 },
-    { id: 3, label: "Pending", count: 0 },
-    { id: 4, label: "Cancelled", count: 0 },
-    { id: 5, label: "Completed", count: 0 },
+    { id: 0, label: "All Orders", count: 0 },
+    { id: 1, label: "Active Orders", count: 0 },
+    { id: 2, label: "Pending", count: 0 },
+    { id: 3, label: "Canceled", count: 0 },
+    { id: 4, label: "Completed", count: 0 },
   ]);
 
-  useEffect(() => {
-    if (ordersData && ordersData.length > 0) {
-      const counts = ordersData.reduce(
-        (acc, order) => {
-          // **Update this logic based on your order data structure:**
-          // Example: Assuming you have an "orderStatus" field in your orders
-          if (order.orderStatus === "Active Orders") {
-            acc[2].count++;
-          } else if (order.orderStatus === "Pending") {
-            acc[3].count++;
-          } // ... add more conditions for other statuses ...
-          acc[1].count++;
-          return acc;
-        },
-        [...orderCounts]
+  const fetchOrders = async () => {
+    try {
+      const token = localStorage.getItem("adminToken");
+      const response = await axiosInstance.get(
+        "/auth/admin/protected/fetch_all_orders",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-
-      setOrderCounts(counts);
+      console.log(response);
+      return response.data.categorizedOrders;
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      return null;
     }
-  }, [ordersData]);
+  };
+
+  useEffect(() => {
+    const getOrders = async () => {
+      const orders = await fetchOrders();
+      if (orders) {
+        setOrdersData(orders);
+
+        // Calculate counts
+        const counts = [
+          { id: 0, label: "All Orders", count: 0 },
+          {
+            id: 1,
+            label: "Active Orders",
+            count: orders.Active ? orders.Active.count : 0,
+          },
+          {
+            id: 2,
+            label: "Pending",
+            count: orders.Pending ? orders.Pending.count : 0,
+          },
+          {
+            id: 3,
+            label: "Canceled",
+            count: orders.Canceled ? orders.Canceled.count : 0,
+          },
+          {
+            id: 4,
+            label: "Completed",
+            count: orders.Completed ? orders.Completed.count : 0,
+          },
+        ];
+
+        // All Orders count is the sum of all counts
+        counts[0].count = counts.reduce((acc, curr) => acc + curr.count, 0);
+
+        setOrderCounts(counts);
+      }
+    };
+
+    getOrders();
+  }, []);
 
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
@@ -50,20 +90,42 @@ const OrderNavBar = ({ ordersData }) => {
   };
 
   const renderTabContent = () => {
+    const allOrders = Object.values(ordersData).flatMap(
+      (status) => status.orders
+    );
     switch (selectedTab) {
       case 0:
-        return <AllOrders searchValue={searchValue} />;
+        return <AllOrders orders={allOrders} searchValue={searchValue} />;
       case 1:
-        return <ActiveOrders searchValue={searchValue} />;
+        return (
+          <ActiveOrders
+            orders={ordersData.Active?.orders || []}
+            searchValue={searchValue}
+          />
+        );
       case 2:
-        return <PendingOrders searchValue={searchValue} />;
+        return (
+          <PendingOrders
+            orders={ordersData.Pending?.orders || []}
+            searchValue={searchValue}
+          />
+        );
       case 3:
-        return <CanceledOrders searchValue={searchValue} />;
+        return (
+          <CanceledOrders
+            orders={ordersData.Canceled?.orders || []}
+            searchValue={searchValue}
+          />
+        );
       case 4:
-        return <CompletedOrders searchValue={searchValue} />;
-
+        return (
+          <CompletedOrders
+            orders={ordersData.Completed?.orders || []}
+            searchValue={searchValue}
+          />
+        );
       default:
-        return <AllOrders searchValue={searchValue} />;
+        return <AllOrders orders={allOrders} searchValue={searchValue} />;
     }
   };
 
