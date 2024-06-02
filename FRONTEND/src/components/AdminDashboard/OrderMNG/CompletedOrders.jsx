@@ -92,7 +92,13 @@ export default function CompletedOrders({ orders = [], searchValue }) {
                       to={`/admin/orderDetail/${row.orderId}`}
                       target="_blank"
                     >
-                      <Button color="primary" variant="contained">
+                      <Button
+                        color="primary"
+                        variant="contained"
+                        onClick={() => {
+                          localStorage.setItem("selected_orderid", row.orderId);
+                        }}
+                      >
                         View
                       </Button>
                     </Link>

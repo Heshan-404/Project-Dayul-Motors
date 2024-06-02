@@ -45,7 +45,7 @@ function App() {
         <Route path="/adminSign" element={<AdminLogin />}></Route>
         <Route path="/Shop" element={<Shop />}></Route>
         <Route path="/Shop/product/:itemId" element={<MainPage />} />
-        <Route path="/admin/orderDetail/:orderID" element={<OrderDetail />} />
+        <Route path="/admin/orderDetail/:orderid" element={<OrderDetail />} />
         <Route path="/cart" element={<Aboutus />}></Route>
         <Route path="/test" element={<ResponsiveDrawer />}></Route>
       </Routes>
