@@ -1,8 +1,10 @@
+/* eslint-disable react/prop-types */
+import { useState } from "react";
 import ItemCard from "../ItemCard/ItemCard";
 import image from "../../../assets/Project Images/Dayul Motors/Categories/Bearing.jpg";
 
 export default function Background(props) {
-  const itemData = [
+  const [itemData, setItemData] = useState([
     {
       id: "1",
       name: "Bearing",
@@ -11,7 +13,7 @@ export default function Background(props) {
       price: 3000,
       image: image,
       availableQuantity: 15,
-      category: "ABC",
+      category: "Electrical Parts",
     },
     {
       id: "2",
@@ -21,7 +23,7 @@ export default function Background(props) {
       price: 1500,
       image: image,
       availableQuantity: 20,
-      category: "ABC",
+      category: "Electrical Parts",
     },
     {
       id: "3",
@@ -41,7 +43,7 @@ export default function Background(props) {
       price: 5000,
       image: image,
       availableQuantity: 12,
-      category: "Safety Gear",
+      category: "Engine Parts",
     },
     {
       id: "5",
@@ -51,7 +53,7 @@ export default function Background(props) {
       price: 3500,
       image: image,
       availableQuantity: 15,
-      category: "Safety Gear",
+      category: "Engine Parts",
     },
     {
       id: "6",
@@ -61,7 +63,7 @@ export default function Background(props) {
       price: 1200,
       image: image,
       availableQuantity: 15,
-      category: "Safety Gear",
+      category: "Fuel System Parts",
     },
     {
       id: "7",
@@ -71,90 +73,45 @@ export default function Background(props) {
       price: 1200,
       image: image,
       availableQuantity: 15,
-      category: "Safety Gear",
+      category: "Fuel System Parts",
     },
     // Add more items as needed...
-  ];
+  ]);
 
-  var noCategory;
-  if (props.cat === undefined) {
-    noCategory = true;
-  } else {
-    noCategory = false;
-  }
+  const noCategory = props.cat === undefined;
 
-  var countSameCategory = 0;
-  itemData.map((item, index) => (
-    <>
-      {!noCategory && <>{item.category == props.cat && countSameCategory++}</>}
-    </>
-  ));
+  // Filter and sort items by category and name
+  const filteredItems = itemData
+    .filter((item) => noCategory || item.category === props.cat)
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  // Handle item click to remove the clicked item
+  const handleItemClick = (id) => {
+    setItemData((prevData) => prevData.filter((item) => item.id !== id));
+  };
+
   return (
     <>
-      {noCategory && (
-        <div
-          className="container"
-          style={{ marginBottom: "200px", marginLeft: "250px", margin: "1px" }}
-        >
-          <div className="row row-cols-2 row-cols-md-4 g-4">
-            {itemData.map((item, index) => (
-              <div className="col" key={index}>
-                <ItemCard
-                  id={item.id}
-                  name={item.name}
-                  brand={item.brand}
-                  desc={item.desc}
-                  price={item.price}
-                  image={item.image} // Pass the image prop
-                />
-              </div>
-            ))}
-          </div>
+      <div
+        className="container"
+        style={{ marginBottom: "200px", marginLeft: "250px", margin: "1px" }}
+      >
+        <div className="row row-cols-2 row-cols-md-4 g-4">
+          {filteredItems.map((item, index) => (
+            <div className="col" key={index}>
+              <ItemCard
+                id={item.id}
+                name={item.name}
+                brand={item.brand}
+                desc={item.desc}
+                price={item.price}
+                image={item.image}
+                onClick={handleItemClick} // Pass the onClick handler
+              />
+            </div>
+          ))}
         </div>
-      )}
-      {!noCategory && (
-        <div className="container" style={{ marginBottom: "400px" }}>
-          <div className="row row-cols-1 row-cols-md-3 g-3">
-            {itemData.map((item, index) => (
-              <div className="col" key={index}>
-                {countSameCategory > 3 && (
-                  <>
-                    {item.category == props.cat && (
-                      <>
-                        {item.id != props.id && (
-                          <>
-                            <ItemCard
-                              id={item.id}
-                              name={item.name}
-                              brand={item.brand}
-                              desc={item.desc}
-                              price={item.price}
-                              image={item.image} // Pass the image prop
-                            />
-                          </>
-                        )}
-                      </>
-                    )}
-                  </>
-                )}
-                {countSameCategory <= 3 && (
-                  
-                  <div className="col" key={index}>
-                    <ItemCard
-                      id={item.id}
-                      name={item.name}
-                      brand={item.brand}
-                      desc={item.desc}
-                      price={item.price}
-                      image={item.image} // Pass the image prop
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      </div>
     </>
   );
 }
