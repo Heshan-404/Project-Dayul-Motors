@@ -83,7 +83,7 @@ export default function SparePartsSearchBar() {
         className="text-center mt-4"
         data-aos="fade-up"
         style={{
-          color: "white",
+          color: "black",
           fontWeight: "bolder",
           fontSize: "30px",
           marginBottom: "16px",
