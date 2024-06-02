@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+/* eslint-disable react/prop-types */
+import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -11,33 +12,46 @@ import Typography from "@mui/material/Typography";
 import { Button } from "@mui/material";
 import { Link } from "react-router-dom";
 
-function createData(id, orderId, orderDate, orderTime, amount, status) {
-  return { id, orderId, orderDate, orderTime, amount, status };
-}
-
-const originalRows = [
-  createData(1, "10010", "2024-05-14", "10:30 AM", 100.0, "Completed"),
-  createData(2, "10004", "2024-05-15", "12:45 PM", 150.0, "Canceled"),
-  createData(3, "10003", "2024-05-16", "09:15 AM", 120.0, "Completed"),
-  createData(4, "10002", "2024-05-17", "03:20 PM", 200.0, "Completed"),
-  createData(5, "10001", "2024-05-18", "11:00 AM", 180.0, "Canceled"),
-];
-
+// Table column headers
 const headCells = [
   { id: "orderId", label: "Order ID" },
   { id: "orderDate", label: "Order Date" },
   { id: "orderTime", label: "Order Time" },
   { id: "amount", label: "Amount" },
   { id: "status", label: "Status" },
+  { id: "paymentmethod", label: "Payment Method" },
   { id: "Action", label: "Action" },
 ];
 
-export default function AllOrders({ searchValue }) {
-  const [rows, setRows] = useState(originalRows);
+export default function AllOrders({ orders = [], searchValue }) {
+  const [rows, setRows] = useState([]);
 
   useEffect(() => {
+    // Transforming orders data to the table row format
+    const transformedRows = orders.map((order, index) => {
+      // Parse the order time string into a Date object
+
+      return {
+        id: index + 1,
+        orderId: order.orderid,
+        orderDate: order.orderdate,
+        orderTime: order.ordertime,
+        amount: order.totalamount,
+        status: order.orderstatus,
+        paymentmethod: order.paymentmethod,
+      };
+    });
+
+    // Sort rows by orderId in descending order
+    transformedRows.sort((a, b) => {
+      if (a.orderId > b.orderId) return -1;
+      if (a.orderId < b.orderId) return 1;
+      return 0;
+    });
+
     if (searchValue) {
-      const filteredRows = originalRows.filter((row) => {
+      // Filtering rows based on search input
+      const filteredRows = transformedRows.filter((row) => {
         return (
           (row.orderId &&
             row.orderId.toLowerCase().includes(searchValue.toLowerCase())) ||
@@ -50,9 +64,9 @@ export default function AllOrders({ searchValue }) {
       });
       setRows(filteredRows);
     } else {
-      setRows(originalRows);
+      setRows(transformedRows);
     }
-  }, [searchValue]);
+  }, [orders, searchValue]);
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -76,10 +90,16 @@ export default function AllOrders({ searchValue }) {
                   <TableCell align="center">{row.orderId}</TableCell>
                   <TableCell align="center">{row.orderDate}</TableCell>
                   <TableCell align="center">{row.orderTime}</TableCell>
-                  <TableCell align="center">{row.amount}</TableCell>
-                  <TableCell align="center">{row.status}</TableCell>
                   <TableCell align="center">
-                    <Link to={`/admin/orderDetail/${row.orderId}`}>
+                    {"LKR. " + row.amount + ".00"}
+                  </TableCell>
+                  <TableCell align="center">{row.status}</TableCell>
+                  <TableCell align="center">{row.paymentmethod}</TableCell>
+                  <TableCell align="center">
+                    <Link
+                      to={`/admin/orderDetail/${row.orderId}`}
+                      target="_blank"
+                    >
                       <Button color="primary" variant="contained">
                         View
                       </Button>
