@@ -1,9 +1,20 @@
+/* eslint-disable no-unused-vars */
 import Background from "../../Shopping/Background/Background";
 import image from "../../../assets/Project Images/Dayul Motors/Brands/Edited/Bajaj.jpg";
 import CustomizedBreadcrumbs from "../Breadcrimb/Breadcrumb";
 import MainItem from "./MainItem";
 import { useParams } from "react-router-dom";
 import Footer from "../../Homepage/Footer";
+import NavigationBar from "../../Homepage/NavigationBar";
+import { styled } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+
+const StyledMainContainer = styled(Box)(({ theme }) => ({
+  minHeight: "calc(100vh - 64px)", // Adjust height to avoid footer overlap
+  padding: "20px", // Add padding to the container
+  backgroundColor: "#f2f3f8", // Background color for the container
+  marginTop: "64px", // Space for the navigation bar
+}));
 
 export default function MainPage() {
   // Example price
@@ -18,7 +29,7 @@ export default function MainPage() {
       price: 3000,
       image: image,
       availableQuantity: 15,
-      category: "ABC",
+      category: "Electrical Parts",
     },
     {
       id: "2",
@@ -28,7 +39,7 @@ export default function MainPage() {
       price: 1500,
       image: image,
       availableQuantity: 20,
-      category: "ABC",
+      category: "Electrical Parts",
     },
     {
       id: "3",
@@ -44,7 +55,7 @@ export default function MainPage() {
       id: "4",
       name: "Motorcycle Helmet",
       brand: "Bajaj",
-      desc: "Stylish and safe motorcycle helmet",
+      desc: "Safe motorcycle helmet",
       price: 5000,
       image: image,
       availableQuantity: 12,
@@ -58,7 +69,7 @@ export default function MainPage() {
       price: 3500,
       image: image,
       availableQuantity: 15,
-      category: "Safety Gear",
+      category: "Engine Parts",
     },
     {
       id: "6",
@@ -68,7 +79,7 @@ export default function MainPage() {
       price: 1200,
       image: image,
       availableQuantity: 15,
-      category: "Safety Gear",
+      category: "Fuel System Parts",
     },
     {
       id: "7",
@@ -78,33 +89,34 @@ export default function MainPage() {
       price: 1200,
       image: image,
       availableQuantity: 15,
-      category: "Engine Parts",
+      category: "Fuel System Parts",
     },
     // Add more items as needed...
   ];
-  const itemDetails = itemData.find((item) => item.id === itemId); // Use "id" property to match
-  console.log(itemDetails);
+  const itemDetails = itemData.find((item) => item.id === itemId);
+
   if (!itemDetails) {
     return <div>Item not found!</div>;
   }
 
-  // Log the item name (corrected template literal)
+  // Log the item name
   console.log(`Item Name: ${itemDetails.name}`);
   return (
-    <div className="" style={{ backgroundColor: "#f2f3f8" }}>
-      <CustomizedBreadcrumbs
-        cat={itemDetails.category}
-        style={{ innerWidth: "200px" }}
-      />
-      <MainItem
-        brand={itemDetails.brand}
-        name={itemDetails.name}
-        price={itemDetails.price}
-        desc={itemDetails.desc}
-        image={itemDetails.image}
-        quantity={itemDetails.availableQuantity}
-      />
-      <Background cat={itemDetails.category} id={itemDetails.id} />
+    <div>
+      <NavigationBar />
+      <StyledMainContainer>
+        <CustomizedBreadcrumbs cat={itemDetails.category} />
+        <MainItem
+          brand={itemDetails.brand}
+          name={itemDetails.name}
+          price={itemDetails.price}
+          desc={itemDetails.desc}
+          image={itemDetails.image}
+          quantity={itemDetails.availableQuantity}
+        />
+        <Background cat={itemDetails.category} id={itemDetails.id} />
+        <Background />
+      </StyledMainContainer>
       <Footer />
     </div>
   );

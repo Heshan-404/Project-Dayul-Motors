@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { emphasize, styled } from "@mui/material/styles";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Chip from "@mui/material/Chip";
@@ -12,7 +13,8 @@ const StyledBreadcrumb = styled(Chip)(({ theme }) => {
       : theme.palette.grey[800];
   return {
     backgroundColor,
-    height: theme.spacing(3),
+    height: theme.spacing(4), // Increase height to make it larger
+    fontSize: theme.typography.fontSize * 1.2, // Increase font size
     color: theme.palette.text.primary,
     fontWeight: theme.typography.fontWeightRegular,
     "&:hover, &:focus": {
@@ -32,7 +34,7 @@ function handleClick(event) {
 
 export default function CustomizedBreadcrumbs(props) {
   return (
-    <div style={{ width: "80%", margin: "0 auto" }}>
+    <div style={{ width: "80%", marginLeft: "20px" }}>
       {" "}
       {/* Container with width */}
       <div
@@ -40,21 +42,17 @@ export default function CustomizedBreadcrumbs(props) {
         onClick={handleClick}
         style={{ cursor: "pointer" }}
       >
-        <Breadcrumbs 
-          aria-label="breadcrumb" 
-          sx={{ display: 'flex' }} // Apply flexbox styling
+        <Breadcrumbs
+          aria-label="breadcrumb"
+          sx={{ display: "flex" }} // Apply flexbox styling
         >
           <StyledBreadcrumb
             component={Link}
             to="/Home"
             label="HOME"
-            icon={<HomeIcon fontSize="small" />}
+            icon={<HomeIcon fontSize="large" />} // Increase icon size
           />
-          <StyledBreadcrumb
-            component={Link} 
-            to="/Shop"      
-            label="ALL PRODUCTS" 
-          />
+          <StyledBreadcrumb component={Link} to="/Shop" label="ALL PRODUCTS" />
           <StyledBreadcrumb
             label={props.cat}
             style={{ color: "red" }}

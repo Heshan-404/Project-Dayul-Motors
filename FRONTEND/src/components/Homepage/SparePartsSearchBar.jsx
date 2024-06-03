@@ -78,7 +78,7 @@ export default function SparePartsSearchBar() {
   };
 
   return (
-    <>
+    <div style={{ width: "100vw" }}>
       <h1
         className="text-center mt-4"
         data-aos="fade-up"
@@ -178,6 +178,6 @@ export default function SparePartsSearchBar() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

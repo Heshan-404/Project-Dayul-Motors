@@ -32,7 +32,7 @@ export default function LandingUI() {
       backgroundImage: `url(${bgImg})`,
       backgroundSize: "cover",
       backgroundPosition: "center",
-      width: "100%",
+      width: "100vw",
       minHeight: "100vh",
       display: "flex",
       alignItems: "center",
@@ -40,7 +40,7 @@ export default function LandingUI() {
       padding: "0 20px",
     },
     contentContainer: {
-      maxWidth: "1000px",
+      maxWidth: "100vw",
     },
     heading: {
       color: "white",
@@ -60,7 +60,7 @@ export default function LandingUI() {
   };
 
   return (
-    <div>
+    <div style={{ width: "100vw" }}>
       <br />
       <div style={{ backgroundColor: "black" }}>
         <div style={styles.backgroundImageDiv}>
