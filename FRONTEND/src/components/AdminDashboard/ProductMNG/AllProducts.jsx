@@ -103,15 +103,8 @@ function ProductTable() {
     setSearchQuery(event.target.value);
   };
 
-  const handleAddProduct = (newProduct) => {
-    setTableData((prevData) => [
-      ...prevData,
-      {
-        ...newProduct,
-        id: prevData.length + 1,
-        imageSrc: "default-image-url",
-      },
-    ]);
+  const handleAddProduct = () => {
+    handleRefresh();
   };
 
   const handleViewDetails = (product) => {
@@ -163,10 +156,7 @@ function ProductTable() {
         }
       );
       // Update the table data
-      const updatedData = tableData.map((item) =>
-        item.productid === selectedProduct.productid ? selectedProduct : item
-      );
-      setTableData(updatedData);
+      handleRefresh();
       setIsEditing(false);
       setSelectedProduct(null);
       console.log("Form Data:", formData); // Log the form data
