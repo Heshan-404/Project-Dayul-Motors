@@ -59,8 +59,8 @@ const Sidebar = ({ onItemClick, selectedItem }) => {
 
   return (
     <div
-      className="d-flex flex-column align-items-stretch flex-shrink-0 bg-white"
-      style={{ width: "200px", marginTop: "64px" }} // Added marginTop to move down
+      className="d-flex flex-column  flex-shrink-0 bg-white "
+      style={{ width: "250px", marginTop: "64px" }} // Added marginTop to move down
     >
       <a
         href="/"

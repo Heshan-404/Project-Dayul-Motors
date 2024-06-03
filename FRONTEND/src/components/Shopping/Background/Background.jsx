@@ -94,7 +94,12 @@ export default function Background(props) {
     <>
       <div
         className="container"
-        style={{ marginBottom: "200px", marginLeft: "250px", margin: "1px" }}
+        style={{
+          marginBottom: "200px",
+          marginLeft: "250px",
+          margin: "1px",
+          width: "100vw",
+        }}
       >
         <div className="row row-cols-2 row-cols-md-4 g-4">
           {filteredItems.map((item, index) => (
