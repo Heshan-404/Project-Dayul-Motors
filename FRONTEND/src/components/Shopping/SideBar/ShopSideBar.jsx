@@ -257,7 +257,7 @@ const Content = ({
       </div>
       <Background
         cat={selectedItem === "All Categories" ? undefined : selectedItem}
-        brand={selectedBrand}
+        brand={selectedBrand} // Pass selected brand to Background
         searchInput={searchInput} // Pass search input to Background
       />
     </div>
@@ -266,7 +266,7 @@ const Content = ({
 
 function ShopSideBar() {
   const [selectedItem, setSelectedItem] = useState("All Categories");
-  const [selectedBrand, setSelectedBrand] = useState(null);
+  const [selectedBrand, setSelectedBrand] = useState(null); // State for selected brand
   const [searchInput, setSearchInput] = useState("");
   const [itemSearchInput, setItemSearchInput] = useState("");
 
@@ -275,13 +275,13 @@ function ShopSideBar() {
   };
 
   const handleBrandClick = (brand) => {
-    setSelectedBrand(brand);
+    setSelectedBrand(brand); // Update selected brand state
   };
 
   // Clear Filters Function (Defined outside components)
   const handleClearFilters = () => {
     setSelectedItem("All Categories");
-    setSelectedBrand(null);
+    setSelectedBrand(null); // Reset selected brand
     setSearchInput("");
     setItemSearchInput("");
   };
@@ -290,8 +290,8 @@ function ShopSideBar() {
     <div>
       <NavigationBar />
       <BrandImagesBar
-        onBrandClick={handleBrandClick}
-        selectedBrand={selectedBrand}
+        onBrandClick={handleBrandClick} // Pass brand click handler
+        selectedBrand={selectedBrand} // Pass selected brand
       />
       <div
         style={{
@@ -317,7 +317,7 @@ function ShopSideBar() {
         >
           <Content
             selectedItem={selectedItem}
-            selectedBrand={selectedBrand}
+            selectedBrand={selectedBrand} // Pass selected brand
             searchInput={itemSearchInput}
             onSearchChange={setItemSearchInput}
           />
