@@ -1,3 +1,7 @@
 html {
     overflow-x: hidden; /* Hide horizontal scrollbar */
   }
+  .increase-scale:hover {
+    transform: scale(1.1);
+    transition: transform 0.3s ease; 
+}

@@ -4,7 +4,7 @@ import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Chip from "@mui/material/Chip";
 import HomeIcon from "@mui/icons-material/Home";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Link } from "react-router-dom"; // Import Link from react-router-dom
+import { Link } from "react-router-dom";
 
 const StyledBreadcrumb = styled(Chip)(({ theme }) => {
   const backgroundColor =
@@ -13,8 +13,8 @@ const StyledBreadcrumb = styled(Chip)(({ theme }) => {
       : theme.palette.grey[800];
   return {
     backgroundColor,
-    height: theme.spacing(4), // Increase height to make it larger
-    fontSize: theme.typography.fontSize * 1.2, // Increase font size
+    height: theme.spacing(4),
+    fontSize: theme.typography.fontSize * 1.2,
     color: theme.palette.text.primary,
     fontWeight: theme.typography.fontWeightRegular,
     "&:hover, &:focus": {
@@ -50,10 +50,11 @@ export default function CustomizedBreadcrumbs(props) {
             component={Link}
             to="/Home"
             label="HOME"
-            icon={<HomeIcon fontSize="large" />} // Increase icon size
+            icon={<HomeIcon fontSize="large" />}
           />
           <StyledBreadcrumb component={Link} to="/Shop" label="ALL PRODUCTS" />
           <StyledBreadcrumb
+            component={Link} // Navigate to the category page
             label={props.cat}
             style={{ color: "red" }}
             deleteIcon={<ExpandMoreIcon />}
