@@ -27,7 +27,7 @@ const OrderNavBar = () => {
         "/auth/admin/protected/fetch_all_orders",
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `${token}`,
           },
         }
       );
