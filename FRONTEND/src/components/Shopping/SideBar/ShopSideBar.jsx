@@ -108,9 +108,9 @@ const Sidebar = ({
     selectedItem !== "All Categories" || searchInput.trim() !== "";
 
   return (
-    <div
+    <div 
       className="d-flex flex-column align-items-stretch flex-shrink-0 bg-white"
-      style={{ width: "200px", marginTop: "4px" }}
+      style={{ width: "200px", marginTop: "4px" }} 
     >
       <a
         href="/"

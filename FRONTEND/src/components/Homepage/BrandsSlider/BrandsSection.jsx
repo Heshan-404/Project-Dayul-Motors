@@ -2,7 +2,7 @@ import newWindowIcon from "../../../assets/Project Images/Dayul Motors/HomePage/
 import CardSet from "./CardSet";
 export default function BrandsSection() {
   return (
-    <div style={{ marginTop: "80px" }} className="ms-4" data-aos="fade-left">
+    <div style={{ width: "100vw" }} data-aos="fade-left">
       <h1
         className="text-left mt-4"
         data-aos="fade-in"
@@ -15,7 +15,7 @@ export default function BrandsSection() {
         Top Searches <br />
         By Brands
       </h1>
-      <div className="row">
+      <div className="row" style={{ width: "100vw" }}>
         <div className="col-6 pt-4">
           <p
             style={{

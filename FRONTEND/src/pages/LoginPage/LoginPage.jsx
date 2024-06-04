@@ -91,12 +91,13 @@ export default function LoginPage() {
 
   return (
     <div>
-      <div
-        className="LoginPage"
-        style={{ marginTop: "20px", marginBottom: "20px" }}
-      >
-        <NavigationBar />
-        <style>{`
+      <NavigationBar />
+      <div style={{ width: "100vw" }}>
+        <div
+          className="LoginPage"
+          style={{ marginTop: "20px", marginBottom: "20px" }}
+        >
+          <style>{`
         h6:hover {
           color: #666666; /* Change to desired hover color */
         }
@@ -202,77 +203,78 @@ export default function LoginPage() {
           100% { opacity: 0; }
         }
       `}</style>
-        <div>
-          <div className="background">
-            <div
-              className="shapeB"
-              id="shapeB"
-              style={{ margin: "-80px" }}
-            ></div>
-            <div
-              className="shapeA"
-              id="shapeA"
-              style={{ margin: "280px", marginTop: "400px" }}
-            ></div>
-            <form onSubmit={handleLogin}>
-              <h3>Sign in</h3>
-              <h4>Log in to Dayul Motors</h4>
-              <TextField
-                label="Email"
-                variant="outlined"
-                type="text"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                error={!!emailError}
-                helperText={emailError}
-              />
-              <TextField
-                label="Password"
-                variant="outlined"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                error={!!passwordError}
-                helperText={passwordError}
-              />
-              {formError && (
-                <Alert severity="error" className="fade">
-                  {formError}
-                </Alert>
-              )}
-              {error && (
-                <Alert severity="error" className="fade">
-                  {error}
-                </Alert>
-              )}
-              <Stack spacing={2} direction="row">
-                <ColorButton
-                  startIcon={<LoginIcon style={{ fill: "black" }} />}
-                  size="large"
-                  variant="contained"
-                  type="submit"
-                  className="mt-3"
-                >
-                  Login Now
-                </ColorButton>
-              </Stack>
-              <div className="d-flex">
-                <Link to="/signup" style={{ textDecoration: "none" }}>
-                  <h6>Create Account</h6>
-                </Link>
-                <Link
-                  to="/forget-password"
-                  style={{ textDecoration: "none" }}
-                  className="ms-4"
-                >
-                  <h6>Forget Password</h6>
-                </Link>
-              </div>
-            </form>
+          <div>
+            <div className="background ">
+              <div
+                className="shapeB"
+                id="shapeB"
+                style={{ margin: "-80px" }}
+              ></div>
+              <div
+                className="shapeA"
+                id="shapeA"
+                style={{ margin: "280px", marginTop: "400px" }}
+              ></div>
+              <form onSubmit={handleLogin}>
+                <h3>Sign in</h3>
+                <h4>Log in to Dayul Motors</h4>
+                <TextField
+                  label="Email"
+                  variant="outlined"
+                  type="text"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  error={!!emailError}
+                  helperText={emailError}
+                />
+                <TextField
+                  label="Password"
+                  variant="outlined"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  error={!!passwordError}
+                  helperText={passwordError}
+                />
+                {formError && (
+                  <Alert severity="error" className="fade">
+                    {formError}
+                  </Alert>
+                )}
+                {error && (
+                  <Alert severity="error" className="fade">
+                    {error}
+                  </Alert>
+                )}
+                <Stack spacing={2} direction="row">
+                  <ColorButton
+                    startIcon={<LoginIcon style={{ fill: "black" }} />}
+                    size="large"
+                    variant="contained"
+                    type="submit"
+                    className="mt-3"
+                  >
+                    Login Now
+                  </ColorButton>
+                </Stack>
+                <div className="d-flex">
+                  <Link to="/signup" style={{ textDecoration: "none" }}>
+                    <h6>Create Account</h6>
+                  </Link>
+                  <Link
+                    to="/forget-password"
+                    style={{ textDecoration: "none" }}
+                    className="ms-4"
+                  >
+                    <h6>Forget Password</h6>
+                  </Link>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
+        <Footer />
       </div>
-      <Footer />
     </div>
   );
 }

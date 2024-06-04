@@ -7,24 +7,19 @@ import UserDataTable from "./UserDataTable";
 
 function SearchBar() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [dataTable, setDataTable] = useState(
-    <UserDataTable searchTerm={searchTerm} />
-  );
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    setDataTable(<UserDataTable searchTerm={searchTerm} />);
   };
 
   const handleInputChange = (event) => {
     setSearchTerm(event.target.value);
   };
-
   return (
     <div>
       <form onSubmit={handleSubmit}>
         <TextField
-          label="Email or ID"
+          label="Email or ID or Phone Number"
           variant="outlined"
           fullWidth
           value={searchTerm}
@@ -46,7 +41,9 @@ function SearchBar() {
           Search
         </Button>
       </form>
-      <div className="col-md-12">{dataTable}</div>
+      <div className="col-md-12">
+        <UserDataTable searchTerm={searchTerm} />
+      </div>
     </div>
   );
 }

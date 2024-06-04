@@ -113,7 +113,7 @@ export default function Background(props) {
   return (
     <>
       <div
-        className="container"
+        className="container" 
         style={{ marginBottom: "40px", paddingLeft: "100px" }}
       >
         <div className="row row-cols-2 row-cols-md-4 g-4">

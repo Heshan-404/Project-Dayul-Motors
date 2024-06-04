@@ -150,11 +150,11 @@ export default function Signup() {
 
   return (
     <div>
+      <NavigationBar />
       <div
         className="LoginPage"
         style={{ marginTop: "150px", marginBottom: "100px" }}
       >
-        <NavigationBar />
         <style>{`
         *, *:before, *:after {
           padding: 0;
