@@ -295,7 +295,8 @@ function ProductTable() {
                     <div className="d-flex">
                       <img
                         src={brand.imageurl}
-                        width={"20px"}
+                        width={"35px"}
+                        height={"auto"}
                         style={{ marginRight: "15px" }}
                       />
                       {brand.brandname}
