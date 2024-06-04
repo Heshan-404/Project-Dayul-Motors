@@ -78,22 +78,21 @@ export default function Background(props) {
     // Add more items as needed...
   ]);
 
-  // Remove the noBrand condition:
-  // const noBrand = props.brand === undefined;
   const noCategory = props.cat === undefined;
   const searchInput = props.searchInput ?? "";
+  const selectedBrand = props.brand ?? undefined;
 
-  // Filter items based on category and search input
+  // Filter items based on category, brand, and search input
   const filteredItems = itemData.filter((item) => {
     // Apply category filter
     if (!noCategory && item.category !== props.cat) {
       return false;
     }
 
-    // Remove the brand filter:
-    // if (!noBrand && !noCategory && item.brand !== props.brand) {
-    //   return false;
-    // }
+    // Apply brand filter (no category restriction)
+    if (selectedBrand && item.brand !== selectedBrand) {
+      return false;
+    }
 
     // Apply search input filter (no category or brand restriction)
     if (
