@@ -39,7 +39,7 @@ export default function Background(props) {
       id: "4",
       name: "Motorcycle Helmet",
       brand: "Bajaj",
-      desc: "Safe motorcycle helmet",
+      desc: "Protective and comfortable motorcycle jacket",
       price: 5000,
       image: image,
       availableQuantity: 12,
@@ -78,12 +78,33 @@ export default function Background(props) {
     // Add more items as needed...
   ]);
 
+  // Remove the noBrand condition:
+  // const noBrand = props.brand === undefined;
   const noCategory = props.cat === undefined;
+  const searchInput = props.searchInput ?? "";
 
-  // Filter and sort items by category and name
-  const filteredItems = itemData
-    .filter((item) => noCategory || item.category === props.cat)
-    .sort((a, b) => a.name.localeCompare(b.name));
+  // Filter items based on category and search input
+  const filteredItems = itemData.filter((item) => {
+    // Apply category filter
+    if (!noCategory && item.category !== props.cat) {
+      return false;
+    }
+
+    // Remove the brand filter:
+    // if (!noBrand && !noCategory && item.brand !== props.brand) {
+    //   return false;
+    // }
+
+    // Apply search input filter (no category or brand restriction)
+    if (
+      searchInput &&
+      !item.name.toLowerCase().includes(searchInput.toLowerCase())
+    ) {
+      return false;
+    }
+
+    return true; // Item passes all filters
+  });
 
   // Handle item click to remove the clicked item
   const handleItemClick = (id) => {
@@ -93,13 +114,8 @@ export default function Background(props) {
   return (
     <>
       <div
-        className="container"
-        style={{
-          marginBottom: "200px",
-          marginLeft: "250px",
-          margin: "1px",
-          width: "100vw",
-        }}
+        className="container" 
+        style={{ marginBottom: "40px", paddingLeft: "100px" }}
       >
         <div className="row row-cols-2 row-cols-md-4 g-4">
           {filteredItems.map((item, index) => (
@@ -111,7 +127,7 @@ export default function Background(props) {
                 desc={item.desc}
                 price={item.price}
                 image={item.image}
-                onClick={handleItemClick} // Pass the onClick handler
+                onClick={handleItemClick}
               />
             </div>
           ))}
