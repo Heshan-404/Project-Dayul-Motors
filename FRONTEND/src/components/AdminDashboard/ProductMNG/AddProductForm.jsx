@@ -349,7 +349,8 @@ function AddProductForm({ open, handleClose, handleAddProduct }) {
                   <div>
                     <img
                       src={brand.imageurl}
-                      width={"17px"}
+                      width={"50px"}
+                      height={"auto"}
                       style={{ marginRight: "30px", marginLeft: "30px" }}
                     />
                     {brand.brandname}
@@ -379,7 +380,8 @@ function AddProductForm({ open, handleClose, handleAddProduct }) {
                   <div>
                     <img
                       src={category.imageurl}
-                      width={"17px"}
+                      width={"40px"}
+                      height={"auto"}
                       style={{ marginRight: "30px", marginLeft: "30px" }}
                     />
                     {category.categoryname}
