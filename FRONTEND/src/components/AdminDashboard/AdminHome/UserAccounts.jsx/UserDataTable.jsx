@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+/* eslint-disable no-unused-vars */
+import { useState, useEffect } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -12,81 +13,38 @@ import EditIcon from "@mui/icons-material/Edit";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 import ConfirmDialog from "./ConfirmDialog";
 import SnackbarAlert from "./SnackbarAlert";
+import axiosInstance from "../../../../axiosConfig";
 
 export default function UserDataTable(props) {
-  const [dataSet, setDataSet] = useState([
-    {
-      userID: "001",
-      fullName: "John Doe",
-      email: "john.doe@example.com",
-      password: "password123",
-      phoneNumber: "123-456-7890",
-      address: "123 Main St, Anytown, USA",
-      status: "active",
-    },
-    {
-      userID: "002",
-      fullName: "Jane Smith",
-      email: "jane.smith@example.com",
-      password: "securepassword",
-      phoneNumber: "987-654-3210",
-      address: "456 Oak Ave, Springfield, USA",
-      status: "active",
-    },
-    {
-      userID: "003",
-      fullName: "David Wilson",
-      email: "david.wilson@example.com",
-      password: "mypassword",
-      phoneNumber: "555-123-4567",
-      address: "789 Pine St, Cityville, USA",
-      status: "active",
-    },
-    {
-      userID: "004",
-      fullName: "Sarah Jones",
-      email: "sarah.jones@example.com",
-      password: "pass1234",
-      phoneNumber: "222-333-4444",
-      address: "101 Elm St, Townsville, USA",
-      status: "freeze",
-    },
-    {
-      userID: "005",
-      fullName: "Michael Brown",
-      email: "michael.brown@example.com",
-      password: "verysecure",
-      phoneNumber: "888-999-0000",
-      address: "202 Maple St, Villagetown, USA",
-      status: "active",
-    },
-    {
-      userID: "006",
-      fullName: "Emily Davis",
-      email: "emily.davis@example.com",
-      password: "password5",
-      phoneNumber: "777-888-1111",
-      address: "303 Birch St, Hamletville, USA",
-      status: "freeze",
-    },
-    {
-      userID: "007",
-      fullName: "James Miller",
-      email: "james.miller@example.com",
-      password: "password7",
-      phoneNumber: "444-555-6666",
-      address: "404 Cedar St, Countryshire, USA",
-      status: "active",
-    },
-  ]);
-
+  const [dataSet, setDataSet] = useState([]);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [selectedUserId, setSelectedUserId] = useState(null);
-  const [dialogAction, setDialogAction] = useState(""); // 'freeze' or 'unfreeze'
+  const [dialogAction, setDialogAction] = useState(""); // 'activate' or 'freeze'
   const [editingRow, setEditingRow] = useState(null);
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await axiosInstance.get(
+        "/auth/admin/protected/fetch_all_users",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          },
+        }
+      );
+      setDataSet(response.data.users);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      showSnackbar("Failed to fetch user data.", "error");
+    }
+  };
 
   const handleClickOpen = (userId, action) => {
     setSelectedUserId(userId);
@@ -99,36 +57,37 @@ export default function UserDataTable(props) {
     setEditingRow(null);
   };
 
-  // Handle the Freeze/Unfreeze confirmation
+  // Handle the Activate/Freeze confirmation
   const handleConfirm = async () => {
     try {
-      // Simulate an API call with a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Update the dataset and immediately update the state
-      setDataSet(
-        dataSet.map((row) => {
-          if (row.userID === selectedUserId) {
-            // Correctly set status based on dialogAction
-            return {
-              ...row,
-              status: dialogAction === "freeze" ? "freeze" : "active",
-            };
-          }
-          return row;
-        })
+      const status = dialogAction === "activate" ? "active" : "freeze";
+      const result = await axiosInstance.put(
+        `/auth/admin/protected/user_freeze_unfreeze/${selectedUserId}`,
+        { status },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          },
+        }
+      );
+      setDataSet((prevDataSet) =>
+        prevDataSet.map((row) =>
+          row.userid === selectedUserId ? { ...row, status } : row
+        )
       );
 
       setOpenConfirmDialog(false);
       showSnackbar(
         `User ${
-          dialogAction === "freeze" ? "frozen" : "unfrozen"
+          dialogAction === "activate" ? "activated" : "frozen"
         } successfully!`,
         "success"
       );
     } catch (error) {
       console.error(
-        `Error ${dialogAction === "freeze" ? "freezing" : "unfreezing"} user:`,
+        `Error ${
+          dialogAction === "activate" ? "activating" : "freezing"
+        } user:`,
         error
       );
     }
@@ -139,38 +98,40 @@ export default function UserDataTable(props) {
   };
 
   const handleSave = async () => {
+    console.log(editingRow);
     try {
-      // Simulate an API call with a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log("Saving changes:", editingRow);
-      const updatedDataSet = dataSet.map((row) => {
-        if (row.userID === editingRow.userID) {
-          return editingRow;
+      const response = await axiosInstance.put(
+        `/auth/admin/protected/user_update/${editingRow.userid}`,
+        {
+          fullname: editingRow.fullname,
+          email: editingRow.email,
+          phoneno: editingRow.phoneno,
+          address: editingRow.address,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          },
         }
-        return row;
-      });
-      setDataSet(updatedDataSet);
+      );
+
+      // Update the local state with the new data
+      setDataSet((prevDataSet) =>
+        prevDataSet.map((row) =>
+          row.userid === editingRow.userid ? editingRow : row
+        )
+      );
+      // Exit editing mode
       setEditingRow(null);
+      // Refresh the data from the backend
+      fetchUserData();
+      // Show a success message to the user
       showSnackbar("Changes saved successfully!", "success");
     } catch (error) {
       console.error("Error saving changes:", error);
+      showSnackbar("Failed to save changes.", "error");
     }
   };
-
-  // Filter data based on search term
-  const filteredDataSet = dataSet.filter((row) => {
-    if (props.searchTerm === "") {
-      return true;
-    } else {
-      return (
-        row.userID.includes(props.searchTerm) ||
-        row.email.toLowerCase().includes(props.searchTerm.toLowerCase()) ||
-        row.fullName.toLowerCase().includes(props.searchTerm.toLowerCase()) ||
-        row.phoneNumber.includes(props.searchTerm) ||
-        row.address.toLowerCase().includes(props.searchTerm.toLowerCase())
-      );
-    }
-  });
 
   const handleSnackbarClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -184,75 +145,70 @@ export default function UserDataTable(props) {
     setSnackbarSeverity(severity);
     setOpenSnackbar(true);
   };
+  const filteredDataSet = dataSet.filter((row) => {
+    if (props.searchTerm === "") {
+      return true;
+    } else {
+      return (
+        row.userid.includes(props.searchTerm) ||
+        row.email.toLowerCase().includes(props.searchTerm.toLowerCase()) ||
+        row.fullname.toLowerCase().includes(props.searchTerm.toLowerCase()) ||
+        row.phoneno.includes(props.searchTerm) ||
+        row.address.toLowerCase().includes(props.searchTerm.toLowerCase())
+      );
+    }
+  });
 
   return (
     <div className="table-container">
-      <style>
-        {`
-          /* Styles for responsive table */
-          .table-container {
-            overflow-x: auto;
-            width: 100%;
-          }
-
-          .table {
-            width: 100%;
-            table-layout: auto; /* Let columns adjust to content width */
-          }
-
-          /* Optional: Prevent text wrapping for smaller screens */
-          @media (max-width: 768px) {
-            .table th, 
-            .table td {
-              white-space: nowrap;
-              font-size: 14px; /* Reduce font size for smaller screens */
-            }
-          }
-        `}
-      </style>
       <TableContainer component={Paper}>
         <Table className="table" aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell style={{ textAlign: "center" }}>User ID</TableCell>
+              <TableCell style={{ textAlign: "center", width: "200px" }}>
+                User ID
+              </TableCell>
               <TableCell style={{ textAlign: "center" }}>Full Name</TableCell>
-              <TableCell style={{ textAlign: "center" }}>Email</TableCell>
-              <TableCell style={{ textAlign: "center" }}>Password</TableCell>
+              <TableCell style={{ textAlign: "center", width: "100px" }}>
+                Email
+              </TableCell>
+
               <TableCell style={{ textAlign: "center" }}>
                 Phone Number
               </TableCell>
               <TableCell style={{ textAlign: "center" }}>Address</TableCell>
               <TableCell style={{ textAlign: "center" }}>Status</TableCell>
-              <TableCell style={{ textAlign: "center" }}>Actions</TableCell>
+
+              <TableCell style={{ textAlign: "center", width: "240px" }}>
+                Actions
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredDataSet.map((row) => (
               <TableRow
-                key={row.userID}
+                key={row.userid}
                 sx={{ "&:last-child td, &:last-child th": { borderTop: 1 } }}
               >
                 {/* Render row data normally if not editing */}
-                {editingRow?.userID !== row.userID ? (
+                {editingRow?.userid !== row.userid ? (
                   <>
                     <TableCell
                       component="th"
                       scope="row"
                       style={{ textAlign: "center" }}
                     >
-                      {row.userID}
+                      {row.userid}
                     </TableCell>
                     <TableCell style={{ textAlign: "center" }}>
-                      {row.fullName}
+                      {row.fullname}
                     </TableCell>
                     <TableCell style={{ textAlign: "center" }}>
                       {row.email}
                     </TableCell>
+
                     <TableCell style={{ textAlign: "center" }}>
-                      {row.password}
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      {row.phoneNumber}
+                      {row.phoneno}
                     </TableCell>
                     <TableCell style={{ textAlign: "center" }}>
                       {row.address}
@@ -266,13 +222,11 @@ export default function UserDataTable(props) {
                       {row.status}
                     </TableCell>
                     <TableCell style={{ textAlign: "center" }}>
-                      <div
-                        style={{ display: "flex", justifyContent: "center" }}
-                      >
+                      <div className="d-flex">
                         <Button
                           variant="contained"
                           color="warning"
-                          sx={{ marginRight: "10px" }}
+                          sx={{ marginRight: "10px", width: "100%" }}
                           startIcon={<EditIcon />}
                           onClick={() => handleEdit(row)}
                         >
@@ -282,10 +236,10 @@ export default function UserDataTable(props) {
                           <Button
                             variant="contained"
                             color="error"
-                            sx={{ width: "130px" }}
+                            sx={{ width: "100%" }}
                             startIcon={<AcUnitIcon />}
                             onClick={() =>
-                              handleClickOpen(row.userID, "freeze")
+                              handleClickOpen(row.userid, "freeze")
                             }
                           >
                             Freeze
@@ -293,10 +247,10 @@ export default function UserDataTable(props) {
                         ) : (
                           <Button
                             variant="contained"
-                            sx={{ width: "130px" }}
+                            sx={{ width: "100%" }}
                             startIcon={<AcUnitIcon />}
                             onClick={() =>
-                              handleClickOpen(row.userID, "active")
+                              handleClickOpen(row.userid, "activate")
                             }
                           >
                             Unfreeze
@@ -313,16 +267,16 @@ export default function UserDataTable(props) {
                       scope="row"
                       style={{ textAlign: "center" }}
                     >
-                      {row.userID}
+                      {row.userid}
                     </TableCell>
                     <TableCell style={{ textAlign: "center" }}>
                       <TextField
                         fullWidth
-                        defaultValue={row.fullName}
+                        defaultValue={row.fullname}
                         onChange={(e) =>
                           setEditingRow({
                             ...editingRow,
-                            fullName: e.target.value,
+                            fullname: e.target.value,
                           })
                         }
                       />
@@ -339,26 +293,15 @@ export default function UserDataTable(props) {
                         }
                       />
                     </TableCell>
+
                     <TableCell style={{ textAlign: "center" }}>
                       <TextField
                         fullWidth
-                        defaultValue={row.password}
+                        defaultValue={row.phoneno}
                         onChange={(e) =>
                           setEditingRow({
                             ...editingRow,
-                            password: e.target.value,
-                          })
-                        }
-                      />
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      <TextField
-                        fullWidth
-                        defaultValue={row.phoneNumber}
-                        onChange={(e) =>
-                          setEditingRow({
-                            ...editingRow,
-                            phoneNumber: e.target.value,
+                            phoneno: e.target.value,
                           })
                         }
                       />
@@ -379,21 +322,24 @@ export default function UserDataTable(props) {
                       {editingRow.status}
                     </TableCell>
                     <TableCell style={{ textAlign: "center" }}>
-                      <Button
-                        variant="contained"
-                        color="success"
-                        sx={{ marginRight: "10px", width: "98px" }}
-                        onClick={handleSave}
-                      >
-                        Save
-                      </Button>
-                      <Button
-                        variant="contained"
-                        color="error"
-                        onClick={() => setEditingRow(null)}
-                      >
-                        Cancel
-                      </Button>
+                      <div className="d-flex">
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          sx={{ marginRight: "10px", width: "100%" }}
+                          onClick={handleSave}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          sx={{ width: "100%" }}
+                          onClick={() => setEditingRow(null)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
                     </TableCell>
                   </>
                 )}
@@ -403,16 +349,17 @@ export default function UserDataTable(props) {
         </Table>
       </TableContainer>
 
-      {/* Freeze Confirmation Dialog  */}
       <ConfirmDialog
         open={openConfirmDialog}
         onClose={handleCloseDialog}
         onConfirm={handleConfirm}
-        title={`Confirm ${dialogAction}`} // Dynamic title based on action
-        message={`Are you sure you want to ${dialogAction} this user?`}
+        title={`Confirm ${
+          dialogAction === "activate" ? "Activation" : "Freeze"
+        }`}
+        message={`Are you sure you want to ${
+          dialogAction === "activate" ? "Activate" : "Freeze"
+        } this user?`}
       />
-
-      {/* Snackbar Alert */}
       <SnackbarAlert
         open={openSnackbar}
         onClose={handleSnackbarClose}

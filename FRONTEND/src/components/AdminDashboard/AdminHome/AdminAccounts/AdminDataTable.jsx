@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -17,6 +18,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import AcUnitIcon from "@mui/icons-material/AcUnit"; // Snow icon
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
+import axiosInstance from "../../../../axiosConfig";
 
 // Separate component for Confirmation Dialog
 const ConfirmDialog = ({ open, onClose, onConfirm, title, message }) => {
@@ -62,74 +64,39 @@ const SnackbarAlert = ({ open, onClose, severity, message }) => {
 };
 
 export default function UserDataTable(props) {
-  const [dataSet, setDataSet] = useState([
-    {
-      userID: "001",
-      fullName: "John Doe",
-      email: "john.doe@example.com",
-      phoneNumber: "123-456-7890",
-      address: "123 Main St, Anytown, USA",
-      status: "active",
-    },
-    {
-      userID: "002",
-      fullName: "Jane Smith",
-      email: "jane.smith@example.com",
-      phoneNumber: "987-654-3210",
-      address: "456 Oak Ave, Springfield, USA",
-      status: "active",
-    },
-    {
-      userID: "003",
-      fullName: "David Wilson",
-      email: "david.wilson@example.com",
-      phoneNumber: "555-123-4567",
-      address: "789 Pine St, Cityville, USA",
-      status: "active",
-    },
-    {
-      userID: "004",
-      fullName: "Sarah Jones",
-      email: "sarah.jones@example.com",
-      phoneNumber: "222-333-4444",
-      address: "101 Elm St, Townsville, USA",
-      status: "freeze",
-    },
-    {
-      userID: "005",
-      fullName: "Michael Brown",
-      email: "michael.brown@example.com",
-      phoneNumber: "888-999-0000",
-      address: "202 Maple St, Villagetown, USA",
-      status: "active",
-    },
-    {
-      userID: "006",
-      fullName: "Emily Davis",
-      email: "emily.davis@example.com",
-      phoneNumber: "777-888-1111",
-      address: "303 Birch St, Hamletville, USA",
-      status: "freeze",
-    },
-    {
-      userID: "007",
-      fullName: "James Miller",
-      email: "james.miller@example.com",
-      phoneNumber: "444-555-6666",
-      address: "404 Cedar St, Countryshire, USA",
-      status: "active",
-    },
-  ]);
-
+  const [dataSet, setDataSet] = useState([]);
   const [openFreezeDialog, setOpenFreezeDialog] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [selectedadminid, setSelectedadminid] = useState(null);
   const [editingRow, setEditingRow] = useState(null);
+  const [adminLevel, setAdminLevel] = useState(1);
 
-  const handleClickOpen = (userId) => {
-    setSelectedUserId(userId);
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await axiosInstance.get(
+        "/auth/admin/protected/details",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          },
+        }
+      );
+      setDataSet(response.data.adminDetails);
+      setAdminLevel(response.data.adminLevel);
+    } catch (error) {
+      console.error("Error fetching admin data:", error);
+      showSnackbar("Failed to fetch admin data.", "error");
+    }
+  };
+
+  const handleClickOpen = (adminid) => {
+    setSelectedadminid(adminid);
     setOpenFreezeDialog(true);
   };
 
@@ -140,37 +107,51 @@ export default function UserDataTable(props) {
 
   const handleFreeze = async () => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log(`Freezing user with ID: ${selectedUserId}`);
-      const updatedDataSet = dataSet.map((row) => {
-        if (row.userID === selectedUserId) {
-          return { ...row, status: "freeze" };
+      const response = await axiosInstance.put(
+        `/auth/admin/protected/admin_freeze/${selectedadminid}`,
+        { status: "freeze" },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          },
         }
-        return row;
-      });
-      setDataSet(updatedDataSet);
+      );
+      console.log(response.data);
+      setDataSet((prevDataSet) =>
+        prevDataSet.map((row) =>
+          row.adminid === selectedadminid ? { ...row, status: "freeze" } : row
+        )
+      );
       setOpenFreezeDialog(false);
       showSnackbar("User frozen successfully!", "success");
     } catch (error) {
       console.error("Error freezing user:", error);
+      showSnackbar("Failed to freeze user.", "error");
     }
   };
 
   const handleUnfreeze = async () => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log(`Unfreezing user with ID: ${selectedUserId}`);
-      const updatedDataSet = dataSet.map((row) => {
-        if (row.userID === selectedUserId) {
-          return { ...row, status: "active" };
+      const response = await axiosInstance.put(
+        `/auth/admin/protected/admin_unfreeze/${selectedadminid}`,
+        { status: "active" },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          },
         }
-        return row;
-      });
-      setDataSet(updatedDataSet);
+      );
+      console.log(response.data);
+      setDataSet((prevDataSet) =>
+        prevDataSet.map((row) =>
+          row.adminid === selectedadminid ? { ...row, status: "active" } : row
+        )
+      );
       setOpenFreezeDialog(false);
       showSnackbar("User unfrozen successfully!", "success");
     } catch (error) {
       console.error("Error unfreezing user:", error);
+      showSnackbar("Failed to unfreeze user.", "error");
     }
   };
 
@@ -180,19 +161,36 @@ export default function UserDataTable(props) {
 
   const handleSave = async () => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log("Saving changes:", editingRow);
-      const updatedDataSet = dataSet.map((row) => {
-        if (row.userID === editingRow.userID) {
-          return editingRow;
+      const response = await axiosInstance.put(
+        `/auth/admin/protected/admin_update/${editingRow.adminid}`,
+        {
+          fullname: editingRow.fullname,
+          email: editingRow.email,
+          phoneno: editingRow.phoneno,
+          level: editingRow.level,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          },
         }
-        return row;
-      });
-      setDataSet(updatedDataSet);
+      );
+
+      // Update the local state with the new data
+      setDataSet((prevDataSet) =>
+        prevDataSet.map((row) =>
+          row.adminid === editingRow.adminid ? editingRow : row
+        )
+      );
+      // Exit editing mode
       setEditingRow(null);
+      // Refresh the data from the backend
+      fetchUserData();
+      // Show a success message to the user
       showSnackbar("Changes saved successfully!", "success");
     } catch (error) {
       console.error("Error saving changes:", error);
+      showSnackbar("Failed to save changes.", "error");
     }
   };
 
@@ -202,11 +200,11 @@ export default function UserDataTable(props) {
       return true;
     } else {
       return (
-        row.userID.includes(props.searchTerm) ||
+        row.adminid.includes(props.searchTerm) ||
         row.email.toLowerCase().includes(props.searchTerm.toLowerCase()) ||
-        row.fullName.toLowerCase().includes(props.searchTerm.toLowerCase()) ||
-        row.phoneNumber.includes(props.searchTerm) ||
-        row.address.toLowerCase().includes(props.searchTerm.toLowerCase())
+        row.fullname.toLowerCase().includes(props.searchTerm.toLowerCase()) ||
+        row.phoneno.includes(props.searchTerm) ||
+        row.level.toLowerCase().includes(props.searchTerm.toLowerCase())
       );
     }
   });
@@ -226,20 +224,9 @@ export default function UserDataTable(props) {
   };
 
   return (
-    <div className="table-container">
+    <div className="table-container mt-3">
       <style>
-        {`
-          /* Styles for responsive table */
-          .table-container {
-            overflow-x: auto;
-            width: 100%;
-          }
-
-          .table {
-            width: 100%;
-            table-layout: auto; /* Let columns adjust to content width */
-          }
-
+        {`  
           /* Optional: Prevent text wrapping for smaller screens */
           @media (max-width: 768px) {
             .table th, 
@@ -248,52 +235,62 @@ export default function UserDataTable(props) {
               font-size: 14px; /* Reduce font size for smaller screens */
             }
           }
-        `}
+
+  `}
       </style>
-      <TableContainer component={Paper}>
+
+      <TableContainer style={{ width: "100%" }} component={Paper}>
         <Table className="table" aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell style={{ textAlign: "center", width: "90px" }}>
-                User ID
+              <TableCell style={{ textAlign: "center", width: "200px" }}>
+                Admin ID
               </TableCell>
               <TableCell style={{ textAlign: "center" }}>Full Name</TableCell>
-              <TableCell style={{ textAlign: "center" }}>Email</TableCell>
+              <TableCell style={{ textAlign: "center", width: "100px" }}>
+                Email
+              </TableCell>
+
               <TableCell style={{ textAlign: "center" }}>
                 Phone Number
               </TableCell>
-              <TableCell style={{ textAlign: "center" }}>Address</TableCell>
+              <TableCell style={{ textAlign: "center" }}>Level</TableCell>
               <TableCell style={{ textAlign: "center" }}>Status</TableCell>
-              <TableCell style={{ textAlign: "center" }}>Actions</TableCell>
+              {adminLevel == 3 && (
+                <TableCell style={{ textAlign: "center", width: "240px" }}>
+                  Actions
+                </TableCell>
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredDataSet.map((row) => (
               <TableRow
-                key={row.userID}
+                key={row.adminid}
                 sx={{ "&:last-child td, &:last-child th": { borderTop: 1 } }}
               >
                 {/* Render row data normally if not editing */}
-                {editingRow?.userID !== row.userID ? (
+                {editingRow?.adminid !== row.adminid ? (
                   <>
                     <TableCell
                       component="th"
                       scope="row"
                       style={{ textAlign: "center" }}
                     >
-                      {row.userID}
+                      {row.adminid}
                     </TableCell>
                     <TableCell style={{ textAlign: "center" }}>
-                      {row.fullName}
+                      {row.fullname}
                     </TableCell>
                     <TableCell style={{ textAlign: "center" }}>
                       {row.email}
                     </TableCell>
+
                     <TableCell style={{ textAlign: "center" }}>
-                      {row.phoneNumber}
+                      {row.phoneno}
                     </TableCell>
                     <TableCell style={{ textAlign: "center" }}>
-                      {row.address}
+                      {row.level}
                     </TableCell>
                     <TableCell
                       style={{
@@ -308,7 +305,7 @@ export default function UserDataTable(props) {
                         <Button
                           variant="contained"
                           color="warning"
-                          sx={{ marginRight: "10px" }}
+                          sx={{ marginRight: "10px", width: "100%" }}
                           startIcon={<EditIcon />}
                           onClick={() => handleEdit(row)}
                         >
@@ -318,18 +315,18 @@ export default function UserDataTable(props) {
                           <Button
                             variant="contained"
                             color="error"
-                            sx={{ width: "130px" }}
+                            sx={{ width: "100%" }}
                             startIcon={<AcUnitIcon />}
-                            onClick={() => handleClickOpen(row.userID)}
+                            onClick={() => handleClickOpen(row.adminid)}
                           >
                             Freeze
                           </Button>
                         ) : (
                           <Button
                             variant="contained"
-                            sx={{ width: "130px" }}
+                            sx={{ width: "100%" }}
                             startIcon={<AcUnitIcon />}
-                            onClick={() => handleClickOpen(row.userID)}
+                            onClick={() => handleClickOpen(row.adminid)}
                           >
                             Unfreeze
                           </Button>
@@ -345,16 +342,16 @@ export default function UserDataTable(props) {
                       scope="row"
                       style={{ textAlign: "center" }}
                     >
-                      {row.userID}
+                      {row.adminid}
                     </TableCell>
                     <TableCell style={{ textAlign: "center" }}>
                       <TextField
                         fullWidth
-                        defaultValue={row.fullName}
+                        defaultValue={row.fullname}
                         onChange={(e) =>
                           setEditingRow({
                             ...editingRow,
-                            fullName: e.target.value,
+                            fullname: e.target.value,
                           })
                         }
                       />
@@ -371,14 +368,15 @@ export default function UserDataTable(props) {
                         }
                       />
                     </TableCell>
+
                     <TableCell style={{ textAlign: "center" }}>
                       <TextField
                         fullWidth
-                        defaultValue={row.phoneNumber}
+                        defaultValue={row.phoneno}
                         onChange={(e) =>
                           setEditingRow({
                             ...editingRow,
-                            phoneNumber: e.target.value,
+                            phoneno: e.target.value,
                           })
                         }
                       />
@@ -386,11 +384,11 @@ export default function UserDataTable(props) {
                     <TableCell style={{ textAlign: "center" }}>
                       <TextField
                         fullWidth
-                        defaultValue={row.address}
+                        defaultValue={row.level}
                         onChange={(e) =>
                           setEditingRow({
                             ...editingRow,
-                            address: e.target.value,
+                            level: e.target.value,
                           })
                         }
                       />
@@ -399,21 +397,24 @@ export default function UserDataTable(props) {
                       {editingRow.status}
                     </TableCell>
                     <TableCell style={{ textAlign: "center" }}>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        sx={{ marginRight: "10px", width: "90px" }}
-                        onClick={handleSave}
-                      >
-                        Save
-                      </Button>
-                      <Button
-                        variant="contained"
-                        color="error"
-                        onClick={() => setEditingRow(null)}
-                      >
-                        Cancel
-                      </Button>
+                      <div className="d-flex">
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          sx={{ marginRight: "10px", width: "100%" }}
+                          onClick={handleSave}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          sx={{ width: "100%" }}
+                          onClick={() => setEditingRow(null)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
                     </TableCell>
                   </>
                 )}
@@ -428,16 +429,16 @@ export default function UserDataTable(props) {
         open={openFreezeDialog}
         onClose={handleCloseFreezeDialog}
         onConfirm={
-          selectedUserId &&
-          dataSet.find((row) => row.userID === selectedUserId).status ===
+          selectedadminid &&
+          dataSet.find((row) => row.adminid === selectedadminid).status ===
             "active"
             ? handleFreeze
             : handleUnfreeze
         }
         title="Confirm Action"
         message={
-          selectedUserId &&
-          dataSet.find((row) => row.userID === selectedUserId).status ===
+          selectedadminid &&
+          dataSet.find((row) => row.adminid === selectedadminid).status ===
             "active"
             ? "Are you sure you want to freeze this user?"
             : "Are you sure you want to unfreeze this user?"

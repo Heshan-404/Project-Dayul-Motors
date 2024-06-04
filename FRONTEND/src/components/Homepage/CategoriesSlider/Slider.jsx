@@ -6,6 +6,7 @@ const Slider = () => {
       id="carouselExampleInterval"
       className="carousel slide"
       data-bs-ride="carousel"
+      style={{ width: "100vw" }}
     >
       <div className="carousel-inner">
         <div className="carousel-item active" data-bs-interval="4000">
