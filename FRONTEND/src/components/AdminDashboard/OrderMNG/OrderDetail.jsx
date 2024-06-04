@@ -1,234 +1,191 @@
-/* eslint-disable no-unused-vars */
-import { useState, useEffect } from "react";
-import axios from "axios";
-import { useParams } from "react-router-dom";
+import { Button, Menu, MenuItem, useMediaQuery, useTheme, Grid, Typography, Box } from "@mui/material";
+import { useState } from "react";
 import OrderItems from "./OrderItems";
-import axiosInstance from "../../../axiosConfig";
-import { Button } from "@mui/material";
 
 const OrderDetail = () => {
-  const { orderid } = useParams();
-  const [orderDetails, setOrderDetails] = useState(null);
-  const [orderStatus, setOrderStatus] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  useEffect(() => {
-    const fetchOrderDetails = async () => {
-      try {
-        const response = await axiosInstance.get(
-          `/auth/admin/protected/order/${orderid}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-            },
-          }
-        );
-        setOrderDetails(response.data);
-        setOrderStatus(response.data.orderstatus);
-        setSelectedStatus(response.data.orderstatus);
-      } catch (error) {
-        console.error("Error fetching order details:", error);
-      }
-    };
-
-    fetchOrderDetails();
-  }, [orderid]);
-
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
+  const [orderStatus, setOrderStatus] = useState("Complete");
+  const [selectedStatus, setSelectedStatus] = useState(orderStatus);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleStatusChange = (newStatus) => {
     setSelectedStatus(newStatus);
-    toggleDropdown(); // Close the dropdown after selecting a status
+    setAnchorEl(null); // Close the dropdown
   };
 
-  const handleSave = async () => {
-    try {
-      await axios.put(`/api/orders/update-status/${orderid}`, {
-        status: selectedStatus,
-      });
-      setOrderStatus(selectedStatus);
-    } catch (error) {
-      console.error("Error updating order status:", error);
-    }
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  if (!orderDetails) {
-    return <div>Loading...</div>;
-  }
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleSave = () => {
+    setOrderStatus(selectedStatus);
+    console.log("Saving order status:", selectedStatus);
+  };
 
   return (
-    <div
-      style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}
+    <Box
+      sx={{
+        padding: "20px",
+        fontFamily: "Arial, sans-serif",
+        border: "1px solid #ccc",
+        borderRadius: "5px",
+      }}
     >
-      <div
-        style={{ gridRow: "1", gridColumn: "1 / span 2", textAlign: "center" }}
-      >
-        <h2 style={{ color: "#282c34" }}>Order Details</h2>
-      </div>
-
-      <div
-        style={{
-          gridRow: "2",
-          gridColumn: "1",
-          textAlign: "left",
-          padding: "20px",
+      {/* Header Row */}
+      <Box
+        sx={{
+          textAlign: "center",
+          backgroundColor: "blue",  // Blue background for header
+          color: "white",  // White text for better contrast
+          padding: "10px",
+          borderRadius: "5px",
+          marginBottom: "20px",
         }}
       >
-        <h3 style={{ color: "#282c34", marginBottom: "15px" }}>
-          Customer Info:
-        </h3>
-        <table style={{ textAlign: "left", marginLeft: "100px" }}>
-          <tbody>
-            <tr>
-              <td style={{ fontWeight: "bold", marginRight: "8px" }}>Name:</td>
-              <td>{orderDetails.customer_name}</td>
-            </tr>
-            <tr>
-              <td style={{ fontWeight: "bold", marginRight: "8px" }}>Email:</td>
-              <td>{orderDetails.customer_email}</td>
-            </tr>
-            <tr>
-              <td style={{ fontWeight: "bold", marginRight: "8px" }}>Phone:</td>
-              <td>{orderDetails.customer_phone}</td>
-            </tr>
-            <tr>
-              <td style={{ fontWeight: "bold", marginRight: "8px" }}>
-                Address:
-              </td>
-              <td>{orderDetails.customer_address}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        <Typography variant="h4" component="h2" sx={{ margin: 0 }}>Order Details</Typography>
+      </Box>
 
-      <div
-        style={{
-          gridRow: "2",
-          gridColumn: "2",
-          textAlign: "left",
-          padding: "20px",
-        }}
-      >
-        <h3 style={{ color: "#282c34", marginBottom: "15px" }}>Order Info:</h3>
-        <table style={{ textAlign: "left", marginLeft: "100px" }}>
-          <tbody>
-            <tr>
-              <td style={{ fontWeight: "bold", marginRight: "8px" }}>
-                Order Date:
-              </td>
-              <td>{new Date(orderDetails.orderdate).toLocaleDateString()}</td>
-            </tr>
-            <tr>
-              <td style={{ fontWeight: "bold", marginRight: "8px" }}>
-                Order Time:
-              </td>
-              <td>{orderDetails.ordertime}</td>
-            </tr>
-            <tr>
-              <td style={{ fontWeight: "bold", marginRight: "8px" }}>
-                Payment:
-              </td>
-              <td>{orderDetails.paymentmethod}</td>
-            </tr>
-            <tr>
-              <td style={{ fontWeight: "bold", marginRight: "8px" }}>
-                Status:
-              </td>
-              <td>
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <button
-                    style={{
-                      padding: "8px 12px",
-                      border: "2px solid black",
-                      borderRadius: "4px",
-                      fontSize: "16px",
-                      cursor: "pointer",
-                      color: "black",
-                      backgroundColor:
-                        selectedStatus === "Canceled"
-                          ? "red"
-                          : selectedStatus === "Completed"
-                          ? "green"
-                          : "#eee",
-                    }}
-                    onClick={toggleDropdown}
-                  >
-                    {selectedStatus}
-                    <span
-                      style={{ marginLeft: "5px" }}
-                      className="dropdown-arrow"
-                    >
-                      ▼
-                    </span>
-                  </button>
-                  {isDropdownOpen && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        backgroundColor: "",
-                        boxShadow: "0px 8px 16px 0px rgba(0, 0, 0, 0.2)",
-                        zIndex: "1",
-                        right: "0",
-                      }}
-                    >
-                      <button
-                        style={{
-                          display: "block",
-                          padding: "8px 12px",
-                          textAlign: "left",
-                          width: "100%",
-                          border: "none",
-                          backgroundColor: "green",
-                          cursor: "pointer",
-                          color: "white",
-                        }}
-                        onClick={() => handleStatusChange("Completed")}
-                      >
-                        Completed
-                      </button>
-                      <button
-                        style={{
-                          display: "block",
-                          padding: "8px 12px",
-                          textAlign: "left",
-                          width: "100%",
-                          border: "none",
-                          backgroundColor: "red",
-                          cursor: "pointer",
-                          color: "white",
-                        }}
-                        onClick={() => handleStatusChange("Canceled")}
-                      >
-                        Canceled
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td style={{ fontWeight: "bold", marginRight: "8px" }}>
-                Amount:
-              </td>
-              <td>{orderDetails.totalamount}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <Grid container spacing={2}>
+        {/* Order Info */}
+        <Grid item xs={12} md={6}>
+          <Box sx={{ padding: "10px" }}>
+            <Typography variant="h6" component="h3" sx={{ color: "#282c34", marginBottom: "15px", marginLeft: "40px" }}>
+              Order Information:
+            </Typography>
+            <Box component="table" sx={{ marginLeft: "40px" }}>
+              <Box component="tbody">
+                <Box component="tr">
+                  <Box component="td" sx={{ fontWeight: "bold", width: "100px" }}>Order ID:</Box>
+                  <Box component="td" sx={{ marginLeft: "20px" }}>19601</Box>
+                </Box>
+                <Box component="tr">
+                  <Box component="td" sx={{ fontWeight: "bold", width: "100px" }}>Order Date:</Box>
+                  <Box component="td" sx={{ marginLeft: "20px" }}>2024.05.05</Box>
+                </Box>
+                <Box component="tr">
+                  <Box component="td" sx={{ fontWeight: "bold", width: "100px" }}>Order Time:</Box>
+                  <Box component="td" sx={{ marginLeft: "20px" }}>14:12</Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        </Grid>
 
-      <div
-        style={{ gridRow: "3", gridColumn: "1 / span 2", textAlign: "center" }}
-      >
-        <Button variant="contained" onClick={handleSave}>
-          Save
-        </Button>
-      </div>
+        {/* Change Status and Save Button */}
+        <Grid item xs={12} md={6} sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", paddingRight: isMobile ? "10px" : "70px", paddingBottom: isMobile ? "10px" : "0" }}>
+          <Box sx={{ display: "flex", alignItems: "center", flexDirection: isMobile ? "column" : "row" }}>
+            <Button
+              variant="outlined"
+              onClick={handleClick}
+              sx={{
+                backgroundColor:
+                  selectedStatus === "Canceled"
+                    ? "red"
+                    : selectedStatus === "Completed"
+                    ? "green"
+                    : "#eee",
+                color: selectedStatus === "Canceled" || selectedStatus === "Completed" ? "white" : "black",
+                marginBottom: isMobile ? "10px" : "0",
+              }}
+            >
+              {selectedStatus} ▼
+            </Button>
+            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
+              <MenuItem
+                onClick={() => handleStatusChange("Completed")}
+                sx={{ backgroundColor: "green", color: "white" }}
+              >
+                Completed
+              </MenuItem>
+              <MenuItem
+                onClick={() => handleStatusChange("Canceled")}
+                sx={{ backgroundColor: "red", color: "white" }}
+              >
+                Canceled
+              </MenuItem>
+            </Menu>
+            <Button
+              variant="contained"
+              sx={{ marginLeft: isMobile ? "0" : "10px", marginTop: isMobile ? "10px" : "0" }}
+              color="primary"
+              onClick={handleSave}
+            >
+              Save
+            </Button>
+          </Box>
+        </Grid>
 
-      <OrderItems />
-    </div>
+        {/* Customer Info */}
+        <Grid item xs={12} md={6}>
+          <Box sx={{ padding: "15px", marginLeft: isMobile ? "0" : "40px" }}>
+            <Typography variant="h6" component="h3" sx={{ color: "#282c34", marginBottom: "15px" }}>
+              Customer Information:
+            </Typography>
+            <Box component="table">
+              <Box component="tbody">
+                <Box component="tr">
+                  <Box component="td" sx={{ fontWeight: "bold", marginRight: "8px" }}>ID:</Box>
+                  <Box component="td">#706</Box>
+                </Box>
+                <Box component="tr">
+                  <Box component="td" sx={{ fontWeight: "bold", marginRight: "8px" }}>Name:</Box>
+                  <Box component="td">A. B. Hersh</Box>
+                </Box>
+                <Box component="tr">
+                  <Box component="td" sx={{ fontWeight: "bold", marginRight: "8px" }}>Email:</Box>
+                  <Box component="td">hersh@example.com</Box>
+                </Box>
+                <Box component="tr">
+                  <Box component="td" sx={{ fontWeight: "bold", marginRight: "8px" }}>Phone:</Box>
+                  <Box component="td">876-123-4567</Box>
+                </Box>
+                <Box component="tr">
+                  <Box component="td" sx={{ fontWeight: "bold", marginRight: "8px" }}>Address:</Box>
+                  <Box component="td">1231, Main St, Anytown</Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        </Grid>
+
+        {/* Payment Info */}
+        <Grid item xs={12} md={6}>
+          <Box sx={{ padding: "20px" }}>
+            <Typography variant="h6" component="h3" sx={{ color: "#282c34", marginBottom: "15px", marginLeft: "100px" }}>
+              Payment Information:
+            </Typography>
+            <Box component="table" sx={{ textAlign: "left", marginLeft: "100px" }}>
+              <Box component="tbody">
+                <Box component="tr">
+                  <Box component="td" sx={{ fontWeight: "bold", marginRight: "50px" }}>Payment:</Box>
+                  <Box component="td">Credit</Box>
+                </Box>
+                <Box component="tr">
+                  <Box component="td" sx={{ fontWeight: "bold", marginRight: "8px" }}>Status:</Box>
+                  <Box component="td">{orderStatus}</Box>
+                </Box>
+                <Box component="tr">
+                  <Box component="td" sx={{ fontWeight: "bold", marginRight: "8px" }}>Amount:</Box>
+                  <Box component="td">Rs. 4,308.80</Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        </Grid>
+
+        {/* Order Items */}
+        <Grid item xs={12}>
+          <Box sx={{ padding: "20px" }}>
+            <OrderItems />
+          </Box>
+        </Grid>
+      </Grid>
+    </Box>
   );
 };
 
