@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit } from "@fortawesome/free-solid-svg-icons";
 import "@fortawesome/fontawesome-svg-core/styles.css";
@@ -210,16 +210,15 @@ function Profile() {
           </div>
           <div className="form-group">
             <label htmlFor="email">Email Address:</label>
-            
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={email}
-                onChange={handleInputChange}
-                placeholder="Enter your email address"
-              />
-           
+
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={email}
+              onChange={handleInputChange}
+              placeholder="Enter your email address"
+            />
           </div>
           <div className="form-group">
             <label htmlFor="mobileNumber">Mobile Number:</label>
@@ -263,17 +262,15 @@ function Profile() {
           </div>
           <div className="form-group">
             <label htmlFor="password">Password:</label>
-            
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={password}
-                onChange={handleInputChange}
-                placeholder="Enter your password"
-              />
-            
-           
+
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={password}
+              onChange={handleInputChange}
+              placeholder="Enter your password"
+            />
           </div>
           <Button type="submit" variant="contained" color="success">
             Save
