@@ -20,6 +20,7 @@ import Aboutus from "./pages/AboutUsPage/AboutUs";
 import AdminLogin from "./components/AdminDashboard/AdminLogin";
 import ProtectedRouteToAdminSignin from "./ProtectedRouteToAdminSignin";
 import ResponsiveDrawer from "./pages/Test2";
+import Profile from "./pages/Profile/Profile";
 
 function App() {
   useEffect(() => {
@@ -48,6 +49,7 @@ function App() {
         <Route path="/admin/orderDetail/:orderid" element={<OrderDetail />} />
         <Route path="/cart" element={<Aboutus />}></Route>
         <Route path="/test" element={<ResponsiveDrawer />}></Route>
+        <Route path="/profile" element={<Profile />}></Route>
       </Routes>
     </BrowserRouter>
   );
