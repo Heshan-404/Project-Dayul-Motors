@@ -83,12 +83,12 @@ export default function UserDataTable(props) {
         "/auth/admin/protected/details",
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+            Authorization: `${localStorage.getItem("adminToken")}`,
           },
         }
       );
       setDataSet(response.data.adminDetails);
-      setAdminLevel(response.data.adminLevel);
+      setAdminLevel(localStorage.getItem("adminLevel"));
     } catch (error) {
       console.error("Error fetching admin data:", error);
       showSnackbar("Failed to fetch admin data.", "error");
@@ -112,7 +112,7 @@ export default function UserDataTable(props) {
         { status: "freeze" },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+            Authorization: `${localStorage.getItem("adminToken")}`,
           },
         }
       );
@@ -137,7 +137,7 @@ export default function UserDataTable(props) {
         { status: "active" },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+            Authorization: `${localStorage.getItem("adminToken")}`,
           },
         }
       );
@@ -171,7 +171,7 @@ export default function UserDataTable(props) {
         },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+            Authorization: `${localStorage.getItem("adminToken")}`,
           },
         }
       );
@@ -272,6 +272,7 @@ export default function UserDataTable(props) {
                 {/* Render row data normally if not editing */}
                 {editingRow?.adminid !== row.adminid ? (
                   <>
+                    {console.log(row)}
                     <TableCell
                       component="th"
                       scope="row"
@@ -300,39 +301,41 @@ export default function UserDataTable(props) {
                     >
                       {row.status}
                     </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      <div className="d-flex">
-                        <Button
-                          variant="contained"
-                          color="warning"
-                          sx={{ marginRight: "10px", width: "100%" }}
-                          startIcon={<EditIcon />}
-                          onClick={() => handleEdit(row)}
-                        >
-                          Edit
-                        </Button>
-                        {row.status === "active" ? (
+                    {adminLevel == 3 && (
+                      <TableCell style={{ textAlign: "center" }}>
+                        <div className="d-flex">
                           <Button
                             variant="contained"
-                            color="error"
-                            sx={{ width: "100%" }}
-                            startIcon={<AcUnitIcon />}
-                            onClick={() => handleClickOpen(row.adminid)}
+                            color="warning"
+                            sx={{ marginRight: "10px", width: "100%" }}
+                            startIcon={<EditIcon />}
+                            onClick={() => handleEdit(row)}
                           >
-                            Freeze
+                            Edit
                           </Button>
-                        ) : (
-                          <Button
-                            variant="contained"
-                            sx={{ width: "100%" }}
-                            startIcon={<AcUnitIcon />}
-                            onClick={() => handleClickOpen(row.adminid)}
-                          >
-                            Unfreeze
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
+                          {row.status === "active" ? (
+                            <Button
+                              variant="contained"
+                              color="error"
+                              sx={{ width: "100%" }}
+                              startIcon={<AcUnitIcon />}
+                              onClick={() => handleClickOpen(row.adminid)}
+                            >
+                              Freeze
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="contained"
+                              sx={{ width: "100%" }}
+                              startIcon={<AcUnitIcon />}
+                              onClick={() => handleClickOpen(row.adminid)}
+                            >
+                              Unfreeze
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    )}
                   </>
                 ) : (
                   // Render editable fields if editing

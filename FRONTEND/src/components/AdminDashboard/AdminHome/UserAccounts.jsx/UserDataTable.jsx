@@ -35,7 +35,7 @@ export default function UserDataTable(props) {
         "/auth/admin/protected/fetch_all_users",
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+            Authorization: `${localStorage.getItem("adminToken")}`,
           },
         }
       );
@@ -66,7 +66,7 @@ export default function UserDataTable(props) {
         { status },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+            Authorization: `${localStorage.getItem("adminToken")}`,
           },
         }
       );
@@ -110,7 +110,7 @@ export default function UserDataTable(props) {
         },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+            Authorization: `${localStorage.getItem("adminToken")}`,
           },
         }
       );

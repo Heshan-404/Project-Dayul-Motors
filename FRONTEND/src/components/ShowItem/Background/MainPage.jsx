@@ -2,7 +2,7 @@
 import Background from "../../Shopping/Background/Background";
 import CustomizedBreadcrumbs from "../Breadcrimb/Breadcrumb";
 import MainItem from "./MainItem";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Footer from "../../Homepage/Footer";
 import NavigationBar from "../../Homepage/NavigationBar";
 import { styled } from "@mui/material/styles";
@@ -27,11 +27,15 @@ export default function MainPage() {
   const [sameCategoryProducts, setSameCategoryProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [categoryName, setCategoryName] = useState(null); // State for category name
-  const [categoryID, setCategoryID] = useState(null); // State for category name
+  const [categoryID, setCategoryID] = useState(null); // State for category ID
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    const fetchProductDetails = async () => {
+    // Fetch data when itemId changes
+    const fetchData = async () => {
+      setIsLoading(true); // Set isLoading to true before fetching
+
       try {
         const response = await axiosInstance.get(`/shop/products/${itemId}`);
         setItemDetails(response.data);
@@ -55,33 +59,27 @@ export default function MainPage() {
         setCategoryID(category);
         setCategoryName(categoryname);
 
-        setIsLoading(false); // Update isLoading in MainPage
+        setIsLoading(false); // Update isLoading when done
       } catch (error) {
         console.error("Error fetching data:", error);
         setIsLoading(false);
       }
     };
 
-    fetchProductDetails();
-  }, [itemId]);
+    fetchData();
+  }, [itemId]); // Run when itemId changes
 
   if (!itemDetails) {
     return (
-      <div>
-        {isLoading ? (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "200px",
-            }}
-          >
-            <CircularProgress />
-          </div>
-        ) : (
-          <div>Item not found!</div>
-        )}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "200px",
+        }}
+      >
+        {isLoading ? <CircularProgress /> : <div>Item not found!</div>}
       </div>
     );
   }
