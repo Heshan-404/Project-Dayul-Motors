@@ -23,6 +23,7 @@ const OrderNavBar = () => {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("adminToken");
+      console.log(token);
       const response = await axiosInstance.get(
         "/auth/admin/protected/fetch_all_orders",
         {
