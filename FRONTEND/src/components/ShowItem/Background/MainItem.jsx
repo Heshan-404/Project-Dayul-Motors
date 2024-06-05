@@ -1,9 +1,20 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import "../../../index.css";
 import axiosInstance from "../../../axiosConfig";
+import {
+  Snackbar,
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+} from "@mui/material"; // Import MUI components
 
 function MainItem() {
   const [quantity, setQuantity] = useState(1);
@@ -11,7 +22,11 @@ function MainItem() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCartPopupVisible, setIsCartPopupVisible] = useState(false); // State for confirmation popup
   const [isCartAdded, setIsCartAdded] = useState(false); // State for success popup
+  const [errorMessage, setErrorMessage] = useState(null); // State for error messages
+  const [showStockError, setShowStockError] = useState(false); // State for stock error popup
+  const [stockErrorMessage, setStockErrorMessage] = useState(null); // State for stock error message
   const { productID } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Fetch product data using Axios
@@ -24,6 +39,7 @@ function MainItem() {
       .catch((error) => {
         console.error("Error fetching product data:", error);
         setIsLoading(false);
+        setErrorMessage("Error fetching product data. Please try again later.");
       });
   }, [productID]);
 
@@ -44,6 +60,10 @@ function MainItem() {
   };
 
   const confirmAddToCart = async () => {
+    if (!localStorage.getItem("token") || !localStorage.getItem("userid")) {
+      navigate("/signin");
+      return;
+    }
     // 2. Send data to the backend API
     try {
       const response = await axiosInstance.post(
@@ -51,7 +71,7 @@ function MainItem() {
         {
           productid: productID,
           quantity: quantity,
-          userid: "Your_User_ID", // Replace with actual user ID
+          userid: localStorage.getItem("userid"), // Replace with actual user ID
         },
         {
           headers: {
@@ -63,6 +83,8 @@ function MainItem() {
 
       // 3. Show success popup if successful
       setIsCartAdded(true);
+      setErrorMessage(null); // Clear any previous error message
+      setShowStockError(false); // Clear any previous stock error
       setTimeout(() => {
         setIsCartAdded(false);
       }, 3000);
@@ -72,6 +94,17 @@ function MainItem() {
     } catch (error) {
       console.error("Error adding cart item to database:", error);
       setIsCartPopupVisible(false); // Hide the dialog on error
+
+      // Handle stock errors specifically
+      if (error.response.status === 400 && error.response.data.message) {
+        setShowStockError(true);
+        setStockErrorMessage(error.response.data.message);
+      } else {
+        setErrorMessage(
+          error.response?.data?.message ||
+            "Error adding item to cart. Please try again."
+        );
+      }
     }
   };
 
@@ -215,58 +248,80 @@ function MainItem() {
         `}</style>
       </div>
 
-      {/* Confirmation Popup */}
-      {isCartPopupVisible && (
-        <div
-          className="cart-popup"
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            backgroundColor: "white",
-            padding: "20px",
-            border: "1px solid #ccc",
-            borderRadius: "5px",
-            zIndex: 1000, // Make sure it's on top of other elements
-          }}
-        >
-          <h3>Add to Cart Confirmation</h3>
-          <p>Are you sure you want to add this item to your cart?</p>
-          <div className="mt-3">
-            <button className="btn btn-primary" onClick={confirmAddToCart}>
-              Confirm
-            </button>
-            <button
-              className="btn btn-secondary ml-2"
-              onClick={cancelAddToCart}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Confirmation Popup (Using MUI Dialog) */}
+      <Dialog
+        open={isCartPopupVisible}
+        onClose={() => setIsCartPopupVisible(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Add to Cart Confirmation"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to add this item to your cart?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsCartPopupVisible(false)}>Cancel</Button>
+          <Button onClick={confirmAddToCart} autoFocus>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-      {/* Success Popup */}
-      {isCartAdded && (
-        <div
-          className="cart-popup"
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            backgroundColor: "white",
-            padding: "20px",
-            border: "1px solid #ccc",
-            borderRadius: "5px",
-            zIndex: 1000, // Make sure it's on top of other elements
-          }}
-        >
-          <h3>Item Added!</h3>
-          <p>The item has been added to your cart.</p>
-        </div>
-      )}
+      {/* Success Popup (Using MUI Dialog) */}
+      <Dialog
+        open={isCartAdded}
+        onClose={() => setIsCartAdded(false)}
+        aria-labelledby="success-dialog-title"
+        aria-describedby="success-dialog-description"
+      >
+        <DialogTitle id="success-dialog-title">{"Item Added!"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="success-dialog-description">
+            The item has been added to your cart.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsCartAdded(false)} autoFocus>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Error Popup (Using MUI Dialog) */}
+      <Dialog
+        open={errorMessage !== null}
+        onClose={() => setErrorMessage(null)}
+        aria-labelledby="error-dialog-title"
+        aria-describedby="error-dialog-description"
+      >
+        <DialogTitle id="error-dialog-title">{"Error"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="error-dialog-description">
+            {errorMessage}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setErrorMessage(null)} autoFocus>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Stock Error Popup (Using MUI Snackbar) */}
+      <Snackbar
+        open={showStockError}
+        autoHideDuration={2000} // Auto-close after 2 seconds
+        onClose={() => setShowStockError(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }} // Centered position
+      >
+        <Alert severity="error" sx={{ width: "400px" }}>
+          {stockErrorMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

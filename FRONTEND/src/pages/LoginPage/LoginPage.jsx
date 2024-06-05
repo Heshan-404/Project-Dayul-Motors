@@ -70,6 +70,7 @@ export default function LoginPage() {
 
       if (response.status === 200) {
         localStorage.setItem("token", response.data.token);
+        localStorage.setItem("userid", response.data.token.userid);
         localStorage.setItem("username", response.data.user.name);
         navigate("/home");
       } else {

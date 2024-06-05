@@ -16,11 +16,12 @@ import ForgetPassword from "./pages/LoginPage/FogetPassword";
 import ChangePassword from "./pages/LoginPage/ChangePassword";
 import OrderDetail from "./components/AdminDashboard/OrderMNG/OrderDetail";
 import ProtectedRouteToHome from "./ProtectedRouteToHome";
-import Aboutus from "./pages/AboutUsPage/AboutUs";
 import AdminLogin from "./components/AdminDashboard/AdminLogin";
 import ProtectedRouteToAdminSignin from "./ProtectedRouteToAdminSignin";
-import ResponsiveDrawer from "./pages/Test2";
-import Profile from "./pages/Profile/Profile";
+import ResponsiveDrawer from "./pages/Test2"; 
+import Checkout from "./pages/ShoppingCart/Checkout";
+import Cart from "./pages/ShoppingCart/ShoppingCart"; 
+import Profile from "./pages/Profile/Profile"; 
 
 function App() {
   useEffect(() => {
@@ -47,7 +48,9 @@ function App() {
         <Route path="/Shop" element={<Shop />}></Route>
         <Route path="/Shop/product/:productID" element={<MainPage />} />
         <Route path="/admin/orderDetail/:orderid" element={<OrderDetail />} />
-        <Route path="/cart" element={<Aboutus />}></Route>
+
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
         <Route path="/test" element={<ResponsiveDrawer />}></Route>
         <Route path="/profile" element={<Profile />}></Route>
       </Routes>
