@@ -1,29 +1,37 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import NavigationBar from "../../Homepage/NavigationBar";
 import Footer from "../../Homepage/Footer";
-import Background from "../Background/Background";
 import image from "../../../assets/Project Images/Dayul Motors/Categories/Bearing.jpg";
 import all from "../../../assets/Project Images/Dayul Motors/ShopSideBar/select-all.png";
 import brake from "../../../assets/Project Images/Dayul Motors/ShopSideBar/small_BrakeParts-S.jpg";
-import bajaj from "../../../assets/Project Images/Dayul Motors/Brands/Edited/Bajaj.jpg";
-import choho from "../../../assets/Project Images/Dayul Motors/Brands/Edited/NOK.jpg";
-import nachi from "../../../assets/Project Images/Dayul Motors/Brands/Edited/Nachi.jpg";
-import toro from "../../../assets/Project Images/Dayul Motors/Brands/Edited/Varroc.jpg";
-import honda from "../../../assets/Project Images/Dayul Motors/Brands/Edited/small_honda.jpg";
 import list from "../../../assets/Project Images/Dayul Motors/ShopSideBar/list.webp";
 import search from "../../../assets/Project Images/Dayul Motors/HomePage/searchIcon.png";
 
+import CircularProgress from "@mui/material/CircularProgress";
+import Pagination from "@mui/material/Pagination";
+import Stack from "@mui/material/Stack";
+import Background from "../Background/Background";
+import axiosInstance from "../../../axiosConfig";
+import axios from "axios";
+
 // BrandImagesBar Component
 const BrandImagesBar = ({ onBrandClick, selectedBrand }) => {
-  const brands = [
-    { name: "Bajaj", img: bajaj },
-    { name: "Honda", img: choho },
-    { name: "Yamaha", img: nachi },
-    { name: "Suzuki", img: toro },
-    { name: "NOK", img: honda },
-  ];
+  const [brands, setBrands] = useState([]);
+
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const response = await axiosInstance.get(`/shop/brands`);
+        setBrands(response.data);
+      } catch (error) {
+        console.error("Error fetching brands:", error);
+      }
+    };
+
+    fetchBrands();
+  }, []);
 
   return (
     <div
@@ -40,29 +48,30 @@ const BrandImagesBar = ({ onBrandClick, selectedBrand }) => {
           fontWeight: "bold",
         }}
       >
-        <span
-          className="fs-5 fw-semibold"
-          style={{ marginRight: "55px", width: "30px", height: "30px" }}
-        >
-          BRANDS
-        </span>
+        <img
+          src={list}
+          alt="List Icon"
+          style={{ marginRight: "10px", width: "30px", height: "30px" }}
+        />
+        <span className="fs-5 fw-semibold">LIST OF BRAND</span>
       </div>
       {brands.map((brand) => (
         <div
-          key={brand.name}
+          key={brand.brandid}
           className={`brand-image-item ${
-            selectedBrand === brand.name ? "selected" : ""
+            selectedBrand === brand.brandid ? "selected" : ""
           }`}
-          onClick={() => onBrandClick(brand.name)}
+          onClick={() => onBrandClick(brand.brandid)}
           style={{ cursor: "pointer", margin: "0 10px" }}
         >
           <img
-            src={brand.img}
-            alt={brand.name}
+            src={brand.imageurl}
+            alt={brand.brandname}
             style={{
-              width: "100px",
-              height: "70px",
-              border: selectedBrand === brand.name ? "2px solid blue" : "none",
+              width: "70px",
+              height: "auto",
+              border:
+                selectedBrand === brand.brandid ? "2px solid blue" : "none",
               borderRadius: "8px",
             }}
           />
@@ -78,24 +87,35 @@ const Sidebar = ({
   selectedItem,
   searchInput,
   onSearchChange,
-  handleClearFilters, // import handleClearFilters
+  handleClearFilters,
+  showClearButton,
 }) => {
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axiosInstance.get(`/shop/categories`);
+        setCategories(response.data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   const sidebarItems = [
-    { title: "All Categories", icon: all },
-    { title: "Engine Parts", icon: image },
-    { title: "Brake Parts", icon: brake },
-    { title: "Suspension Parts", icon: image },
-    { title: "Transmission Parts", icon: image },
-    { title: "Electrical Parts", icon: image },
-    { title: "Body Parts", icon: image },
-    { title: "Exhaust Parts", icon: image },
-    { title: "Fuel System Parts", icon: image },
-    { title: "Cooling Parts", icon: image },
-    { title: "Wheels and Tires", icon: image },
+    { title: "All Categories", icon: all, id: undefined },
+    ...categories.map((category) => ({
+      title: category.categoryname,
+      icon: image,
+      id: category.categoryid,
+    })),
   ];
 
   const handleSearchChange = (e) => {
-    const value = e.target.value.replace(/[^a-zA-Z\s]/g, ""); // Allow letters and spaces
+    const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
     onSearchChange(value);
   };
 
@@ -103,14 +123,13 @@ const Sidebar = ({
     item.title.toLowerCase().includes(searchInput.toLowerCase())
   );
 
-  // Check if any filters are applied
   const areFiltersApplied =
     selectedItem !== "All Categories" || searchInput.trim() !== "";
 
   return (
-    <div 
+    <div
       className="d-flex flex-column align-items-stretch flex-shrink-0 bg-white"
-      style={{ width: "200px", marginTop: "4px" }} 
+      style={{ width: "200px", marginTop: "4px" }}
     >
       <a
         href="/"
@@ -143,7 +162,7 @@ const Sidebar = ({
         }}
       >
         {/* Show the clear filter button only if filters are applied */}
-        {areFiltersApplied && (
+        {showClearButton && (
           <button
             onClick={handleClearFilters}
             style={{
@@ -189,11 +208,11 @@ const Sidebar = ({
         {filteredItems.map((item) => (
           <a
             href="#"
-            key={item.title}
+            key={item.id || item.title}
             className={`list-group-item list-group-item-action py-3 lh-tight ${
-              selectedItem === item.title ? "active" : ""
+              selectedItem === item.id ? "active" : ""
             }`}
-            onClick={() => onItemClick(item.title)}
+            onClick={() => onItemClick(item.id)}
           >
             <img
               src={item.icon}
@@ -214,10 +233,23 @@ const Content = ({
   selectedBrand,
   searchInput,
   onSearchChange,
+  onLoadingComplete,
 }) => {
+  const [isSearching, setIsSearching] = useState(false);
+
   const handleSearchChange = (e) => {
-    const value = e.target.value.replace(/[^a-zA-Z\s]/g, ""); // Allow letters and spaces
+    const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
     onSearchChange(value);
+
+    if (value !== "") {
+      setIsSearching(true);
+      setTimeout(() => {
+        setIsSearching(false);
+        onLoadingComplete();
+      }, 2000);
+    } else {
+      setIsSearching(false);
+    }
   };
 
   return (
@@ -255,43 +287,76 @@ const Content = ({
           }}
         />
       </div>
-      <Background
-        cat={selectedItem === "All Categories" ? undefined : selectedItem}
-        brand={selectedBrand} // Pass selected brand to Background
-        searchInput={searchInput} // Pass search input to Background
-      />
+      {/* Loading Indicator (only for search) */}
+      {isSearching && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "200px",
+          }}
+        >
+          {" "}
+          <CircularProgress />
+        </div>
+      )}
+
+      {/* Background (Product List) */}
+      {!isSearching && (
+        <Background
+          cat={selectedItem}
+          brand={selectedBrand}
+          searchInput={searchInput}
+          onLoadingComplete={onLoadingComplete}
+        />
+      )}
     </div>
   );
 };
 
 function ShopSideBar() {
-  const [selectedItem, setSelectedItem] = useState("All Categories");
-  const [selectedBrand, setSelectedBrand] = useState(null); // State for selected brand
+  const [selectedItem, setSelectedItem] = useState(undefined);
+  const [selectedBrand, setSelectedBrand] = useState(null);
   const [searchInput, setSearchInput] = useState("");
   const [itemSearchInput, setItemSearchInput] = useState("");
+  const [showClearButton, setShowClearButton] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleItemClick = (item) => {
-    setSelectedItem(item);
+  const handleItemClick = (itemId) => {
+    setSelectedItem(itemId);
+    setShowClearButton(true);
+    setIsLoading(true);
+
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
   };
 
-  const handleBrandClick = (brand) => {
-    setSelectedBrand(brand); // Update selected brand state
+  const handleBrandClick = (brandId) => {
+    setSelectedBrand(brandId);
+    setShowClearButton(true);
+    setIsLoading(true);
+
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
   };
 
-  // Clear Filters Function (Defined outside components)
   const handleClearFilters = () => {
-    setSelectedItem("All Categories");
-    setSelectedBrand(null); // Reset selected brand
+    setSelectedItem(undefined);
+    setSelectedBrand(null);
     setSearchInput("");
     setItemSearchInput("");
+    setShowClearButton(false);
   };
 
   return (
     <div>
       <NavigationBar />
       <BrandImagesBar
-        onBrandClick={handleBrandClick} // Pass brand click handler
-        selectedBrand={selectedBrand} // Pass selected brand
+        onBrandClick={handleBrandClick}
+        selectedBrand={selectedBrand}
       />
       <div
         style={{
@@ -306,7 +371,8 @@ function ShopSideBar() {
           selectedItem={selectedItem}
           searchInput={searchInput}
           onSearchChange={setSearchInput}
-          handleClearFilters={handleClearFilters} // Pass the function to Sidebar
+          handleClearFilters={handleClearFilters}
+          showClearButton={showClearButton}
         />
         <div
           style={{
@@ -315,12 +381,31 @@ function ShopSideBar() {
             marginTop: "10px",
           }}
         >
-          <Content
-            selectedItem={selectedItem}
-            selectedBrand={selectedBrand} // Pass selected brand
-            searchInput={itemSearchInput}
-            onSearchChange={setItemSearchInput}
-          />
+          {/* Loading Indicator */}
+          {isLoading && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "200px",
+              }}
+            >
+              {" "}
+              <CircularProgress />
+            </div>
+          )}
+
+          {/* Background (Product List) */}
+          {!isLoading && (
+            <Content
+              selectedItem={selectedItem}
+              selectedBrand={selectedBrand}
+              searchInput={itemSearchInput}
+              onSearchChange={setItemSearchInput}
+              onLoadingComplete={() => setIsLoading(false)}
+            />
+          )}
         </div>
       </div>
       <Footer />

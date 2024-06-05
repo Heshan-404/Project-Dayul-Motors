@@ -1,121 +1,132 @@
 /* eslint-disable no-unused-vars */
 import Background from "../../Shopping/Background/Background";
-import image from "../../../assets/Project Images/Dayul Motors/Brands/Edited/Bajaj.jpg";
 import CustomizedBreadcrumbs from "../Breadcrimb/Breadcrumb";
 import MainItem from "./MainItem";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Footer from "../../Homepage/Footer";
 import NavigationBar from "../../Homepage/NavigationBar";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
+import { useEffect, useState } from "react";
+import { CircularProgress } from "@mui/material";
+
+import axiosInstance from "../../../axiosConfig";
 
 const StyledMainContainer = styled(Box)(({ theme }) => ({
-  minHeight: "calc(100vh - 64px)", // Adjust height to avoid footer overlap
-  padding: "20px", // Add padding to the container
-  backgroundColor: "#f2f3f8", // Background color for the container
-  marginTop: "64px", // Space for the navigation bar
+  minHeight: "calc(100vh - 64px)",
+  padding: "20px",
+  backgroundColor: "#f2f3f8",
+  marginTop: "64px",
 }));
 
 export default function MainPage() {
-  // Example price
   const params = useParams();
-  const itemId = params.itemId;
-  const itemData = [
-    {
-      id: "1",
-      name: "Bearing",
-      brand: "Bajaj",
-      desc: "High-quality bearings for smooth operation",
-      price: 3000,
-      image: image,
-      availableQuantity: 15,
-      category: "Electrical Parts",
-    },
-    {
-      id: "2",
-      name: "Spark Plug",
-      brand: "Bajaj",
-      desc: "Reliable spark plugs for optimal ignition",
-      price: 1500,
-      image: image,
-      availableQuantity: 20,
-      category: "Electrical Parts",
-    },
-    {
-      id: "3",
-      name: "Oil Filter",
-      brand: "Bajaj",
-      desc: "Premium oil filters for engine protection",
-      price: 800,
-      image: image,
-      availableQuantity: 10,
-      category: "Engine Parts",
-    },
-    {
-      id: "4",
-      name: "Motorcycle Helmet",
-      brand: "Bajaj",
-      desc: "Safe motorcycle helmet",
-      price: 5000,
-      image: image,
-      availableQuantity: 12,
-      category: "Engine Parts",
-    },
-    {
-      id: "5",
-      name: "Motorcycle Jacket",
-      brand: "Bajaj",
-      desc: "Protective and comfortable motorcycle jacket",
-      price: 3500,
-      image: image,
-      availableQuantity: 15,
-      category: "Engine Parts",
-    },
-    {
-      id: "6",
-      name: "Motorcycle Gloves",
-      brand: "Bajaj",
-      desc: "Durable and grippy motorcycle gloves",
-      price: 1200,
-      image: image,
-      availableQuantity: 15,
-      category: "Fuel System Parts",
-    },
-    {
-      id: "7",
-      name: "Motorcycle Gloves",
-      brand: "NOK",
-      desc: "Durable and grippy motorcycle gloves",
-      price: 1200,
-      image: image,
-      availableQuantity: 15,
-      category: "Fuel System Parts",
-    },
-    // Add more items as needed...
-  ];
-  const itemDetails = itemData.find((item) => item.id === itemId);
+  const itemId = params.productID;
+  const [itemDetails, setItemDetails] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // Loading state
+  const [sameCategoryProducts, setSameCategoryProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [categoryName, setCategoryName] = useState(null); // State for category name
+  const [categoryID, setCategoryID] = useState(null); // State for category name
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      try {
+        const response = await axiosInstance.get(`/shop/products/${itemId}`);
+        setItemDetails(response.data);
+
+        // Fetch products in the same category
+        const category = response.data.categoryid;
+        const categoryProductsResponse = await axiosInstance.get(
+          `/shop/products/category/${category}`
+        );
+        setSameCategoryProducts(categoryProductsResponse.data);
+
+        // Fetch all products
+        const allProductsResponse = await axiosInstance.get(`/shop/products`);
+        setAllProducts(allProductsResponse.data);
+
+        // Fetch category name
+        const categoryNameResponse = await axiosInstance.get(
+          `/shop/categories/${category}`
+        );
+        const { categoryname } = categoryNameResponse.data[0];
+        setCategoryID(category);
+        setCategoryName(categoryname);
+
+        setIsLoading(false); // Update isLoading in MainPage
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchProductDetails();
+  }, [itemId]);
 
   if (!itemDetails) {
-    return <div>Item not found!</div>;
+    return (
+      <div>
+        {isLoading ? (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "200px",
+            }}
+          >
+            <CircularProgress />
+          </div>
+        ) : (
+          <div>Item not found!</div>
+        )}
+      </div>
+    );
   }
 
-  // Log the item name
-  console.log(`Item Name: ${itemDetails.name}`);
+  const filteredSameCategoryProducts = sameCategoryProducts.filter(
+    (product) => product.productid !== itemId
+  );
+
   return (
     <div>
       <NavigationBar />
       <StyledMainContainer>
-        <CustomizedBreadcrumbs cat={itemDetails.category} />
+        <CustomizedBreadcrumbs cat={categoryName} catid={categoryID} />
+        {/* Pass categoryName to Breadcrumb */}
         <MainItem
-          brand={itemDetails.brand}
-          name={itemDetails.name}
+          id={itemId}
+          brand={itemDetails.brandname}
+          name={itemDetails.productname}
           price={itemDetails.price}
-          desc={itemDetails.desc}
-          image={itemDetails.image}
-          quantity={itemDetails.availableQuantity}
+          desc={itemDetails.description}
+          image={itemDetails.imageurl}
+          quantity={itemDetails.quantity}
         />
-        <Background cat={itemDetails.category} id={itemDetails.id} />
-        <Background />
+        <div className="mt-4">
+          {/* Section for same category products */}
+          <h2 style={{ marginLeft: "130px" }}>
+            Other Products in {categoryName}
+          </h2>
+          <Background
+            cat={itemDetails.categoryid}
+            products={filteredSameCategoryProducts}
+            id={itemId}
+            isLoading={isLoading} // Pass isLoading to Background
+            setIsLoading={setIsLoading} // Pass setIsLoading to Background
+          />
+
+          {/* Section for all other products */}
+          <h2 style={{ marginLeft: "130px" }}>All Other Products</h2>
+          <Background
+            products={allProducts}
+            id={itemId}
+            isLoading={isLoading}
+            setIsLoading={setIsLoading}
+          />
+        </div>
       </StyledMainContainer>
       <Footer />
     </div>
