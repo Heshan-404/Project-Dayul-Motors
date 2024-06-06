@@ -3,19 +3,9 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../../axiosConfig";
-import {
-  Snackbar,
-  Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
-  CircularProgress,
-} from "@mui/material";
+import { CircularProgress, Button } from "@mui/material";
 import NavigationBar from "../../components/Homepage/NavigationBar";
 import Footer from "../../components/Homepage/Footer";
 
@@ -24,11 +14,6 @@ export default function Cart() {
   const [isLoading, setIsLoading] = useState(true);
   const [totalPrice, setTotalPrice] = useState(0);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isCartPopupVisible, setIsCartPopupVisible] = useState(false);
-  const [isCartAdded, setIsCartAdded] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [showStockError, setShowStockError] = useState(false);
-  const [stockErrorMessage, setStockErrorMessage] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -98,10 +83,18 @@ export default function Cart() {
     }
   }, []);
 
+  const updateTotalPrice = (updatedCartData) => {
+    const newTotalPrice = updatedCartData.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
+    setTotalPrice(newTotalPrice);
+  };
+
   const handleQtyChange = async (cartid, productid, newQty) => {
     setIsUpdating(true);
     try {
-      const response = await axiosInstance.put(
+      await axiosInstance.put(
         `/shopcart/cart/update/${cartid}/${productid}`,
         {
           quantity: newQty,
@@ -112,13 +105,17 @@ export default function Cart() {
           },
         }
       );
-      setCartData(
-        cartData.map((item) =>
-          item.cartid === cartid && item.productid === productid
-            ? { ...item, quantity: parseInt(newQty, 10) }
-            : item
-        )
+      const updatedCartData = cartData.map((item) =>
+        item.cartid === cartid && item.productid === productid
+          ? {
+              ...item,
+              quantity: parseInt(newQty, 10),
+              totalItemPrice: item.price * parseInt(newQty, 10),
+            }
+          : item
       );
+      setCartData(updatedCartData);
+      updateTotalPrice(updatedCartData);
     } catch (error) {
       console.error("Error updating cart item:", error);
     } finally {
@@ -161,84 +158,27 @@ export default function Cart() {
           },
         }
       );
-      setCartData(
-        cartData.filter(
-          (item) => item.cartid !== cartid || item.productid !== productid
-        )
+      const updatedCartData = cartData.filter(
+        (item) => item.cartid !== cartid || item.productid !== productid
       );
+      setCartData(updatedCartData);
+      updateTotalPrice(updatedCartData);
     } catch (error) {
       console.error("Error deleting cart item:", error);
     }
   };
 
-  const handleAddToCart = async () => {
-    setIsCartPopupVisible(true);
-  };
-
-  const confirmAddToCart = async () => {
-    if (!localStorage.getItem("token") || !localStorage.getItem("userid")) {
-      navigate("/signin");
-      return;
-    }
-    try {
-      const response = await axiosInstance.post(
-        "/shopcart/cart",
-        {
-          productid: productID,
-          quantity: quantity,
-          userid: localStorage.getItem("userid"),
-        },
-        {
-          headers: {
-            Authorization: "Bearer " + localStorage.getItem("token"),
-          },
-        }
-      );
-      console.log(response);
-
-      setIsCartAdded(true);
-      setErrorMessage(null);
-      setShowStockError(false);
-      setTimeout(() => {
-        setIsCartAdded(false);
-      }, 3000);
-
-      setIsCartPopupVisible(false);
-    } catch (error) {
-      console.error("Error adding cart item to database:", error);
-      setIsCartPopupVisible(false);
-
-      if (error.response.status === 400 && error.response.data.message) {
-        setShowStockError(true);
-        setStockErrorMessage(error.response.data.message);
-      } else {
-        setErrorMessage(
-          error.response?.data?.message ||
-            "Error adding item to cart. Please try again."
-        );
-      }
-    }
-  };
-
-  const cancelAddToCart = () => {
-    setIsCartPopupVisible(false);
-  };
-
-  const handleContinueShopping = () => {
-    navigate("/shopcart");
+  const handleNavigateToShop = () => {
+    navigate("/shop");
   };
 
   if (isLoading) {
     return (
       <div
-        className="mb-3 d-flex align-items-start"
-        style={{ maxWidth: "700px", marginLeft: "130px" }}
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "50vh", backgroundColor: "#f2f2f2" }}
       >
-        <div style={{ width: "350px" }}>
-          <div className="spinner-border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
+        <CircularProgress size={60} /> {/* Increased size for visibility */}
       </div>
     );
   }
@@ -384,18 +324,30 @@ export default function Cart() {
         .checkout-btn:hover {
           background-color: #218838;
         }
+
+        .stock-warning {
+          color: red;
+          margin-top: 5px;
+          font-size: 14px;
+        }
       `}</style>
-        <button
-          onClick={handleContinueShopping}
-          className="shopping-continue-btn"
+        <Button
+          onClick={handleNavigateToShop}
+          variant="contained"
+          color="primary"
+          startIcon={<ShoppingCartIcon />}
+          style={{
+            position: "absolute",
+            left: 20,
+            top: 20,
+          }}
         >
-          Shopping Cart
-        </button>
-        <div
-          className="cart-header"
-          style={{ paddingTop: "40px", paddingBottom: "0px" }}
-        >
-          <h1>Shopping Cart</h1>
+          Continue Shopping
+        </Button>
+        <div className="cart-header">
+          <h1 onClick={handleNavigateToShop} style={{ cursor: "pointer" }}>
+            Shopping Cart
+          </h1>
           <p>You have {cartData.length} items in your cart</p>
         </div>
         <div className="cart">

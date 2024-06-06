@@ -11,8 +11,10 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  CircularProgress,
   Skeleton,
 } from "@mui/material";
+// Import MUI components
 
 function MainItem() {
   const [quantity, setQuantity] = useState(1);
@@ -20,6 +22,7 @@ function MainItem() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCartPopupVisible, setIsCartPopupVisible] = useState(false);
   const [isCartAdded, setIsCartAdded] = useState(false);
+  const [isCartAdding, setIsCartAdding] = useState(false); // State for loading indicator
   const [errorMessage, setErrorMessage] = useState(null);
   const [showStockError, setShowStockError] = useState(false);
   const [stockErrorMessage, setStockErrorMessage] = useState(null);
@@ -64,6 +67,8 @@ function MainItem() {
       navigate("/signin");
       return;
     }
+    // 2. Show loading indicator
+    setIsCartAdding(true);
     try {
       const response = await axiosInstance.post(
         "/shop/cart",
@@ -79,16 +84,20 @@ function MainItem() {
         }
       );
       console.log(response);
+      // 4. Hide loading indicator and show success popup
+      setIsCartAdding(false);
       setIsCartAdded(true);
       setErrorMessage(null);
       setShowStockError(false);
       setTimeout(() => {
         setIsCartAdded(false);
       }, 3000);
+      // 5. Hide the confirmation dialog
       setIsCartPopupVisible(false);
     } catch (error) {
       console.error("Error adding cart item to database:", error);
-      setIsCartPopupVisible(false);
+      setIsCartAdding(false); // Hide the loading indicator on error
+      setIsCartPopupVisible(false); // Hide the dialog on error
       if (error.response.status === 400 && error.response.data.message) {
         setShowStockError(true);
         setStockErrorMessage(error.response.data.message);
@@ -424,6 +433,98 @@ function MainItem() {
         color: black; 
       }
       `}</style>
+
+      {/* Confirmation Popup (Using MUI Dialog) */}
+      <Dialog
+        open={isCartPopupVisible}
+        onClose={() => setIsCartPopupVisible(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Add to Cart Confirmation"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to add this item to your cart?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsCartPopupVisible(false)}>Cancel</Button>
+          <Button onClick={confirmAddToCart} autoFocus>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success Popup (Using MUI Dialog) */}
+      <Dialog
+        open={isCartAdded}
+        onClose={() => setIsCartAdded(false)}
+        aria-labelledby="success-dialog-title"
+        aria-describedby="success-dialog-description"
+      >
+        <DialogTitle id="success-dialog-title">{"Item Added!"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="success-dialog-description">
+            The item has been added to your cart.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsCartAdded(false)} autoFocus>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Loading Indicator (Using MUI CircularProgress) */}
+      <Dialog
+        open={isCartAdding}
+        onClose={() => setIsCartAdding(false)}
+        disableBackdropClick
+        disableEscapeKeyDown
+        aria-labelledby="loading-dialog-title"
+        aria-describedby="loading-dialog-description"
+      >
+        <DialogTitle id="loading-dialog-title">{"Adding to Cart"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="loading-dialog-description">
+            <CircularProgress />
+          </DialogContentText>
+        </DialogContent>
+      </Dialog>
+
+      {/* Error Popup (Using MUI Dialog) */}
+      <Dialog
+        open={errorMessage !== null}
+        onClose={() => setErrorMessage(null)}
+        aria-labelledby="error-dialog-title"
+        aria-describedby="error-dialog-description"
+      >
+        <DialogTitle id="error-dialog-title">{"Error"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="error-dialog-description">
+            {errorMessage}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setErrorMessage(null)} autoFocus>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Stock Error Popup (Using MUI Snackbar) */}
+      <Snackbar
+        open={showStockError}
+        autoHideDuration={2000} // Auto-close after 2 seconds
+        onClose={() => setShowStockError(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }} // Centered position
+      >
+        <Alert severity="error" sx={{ width: "400px" }}>
+          {stockErrorMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }
