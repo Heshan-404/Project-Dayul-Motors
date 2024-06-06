@@ -3,6 +3,7 @@ import { useState } from "react";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Link } from "react-router-dom";
 import "../../../index.css";
+
 function MainItem(props) {
   const [quantity, setQuantity] = useState(1);
   const availableQuantity = props.quantity;
@@ -59,8 +60,8 @@ function MainItem(props) {
       <div className="ml-3" style={{ margin: "10px" }}>
         {/* Item Name */}
         <div>
-          <h5 className="card-title mt-3">
-            {props.name} {/* Removed brand display */}
+          <h5 className="card-title mt-3" style={{ fontWeight: "bold" }}>
+            {props.name} {/* Card name is now bold */}
           </h5>
         </div>
         <div>
@@ -158,7 +159,6 @@ function MainItem(props) {
           .available-quantity {
             font-style: italic;
             color: #888;
-            marginLeft: 200000px;
           }
         `}</style>
       </div>
