@@ -14,6 +14,7 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  CircularProgress,
 } from "@mui/material"; // Import MUI components
 
 function MainItem() {
@@ -21,6 +22,7 @@ function MainItem() {
   const [productData, setProductData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCartPopupVisible, setIsCartPopupVisible] = useState(false); // State for confirmation popup
+  const [isCartAdding, setIsCartAdding] = useState(false); // State for loading indicator
   const [isCartAdded, setIsCartAdded] = useState(false); // State for success popup
   const [errorMessage, setErrorMessage] = useState(null); // State for error messages
   const [showStockError, setShowStockError] = useState(false); // State for stock error popup
@@ -64,7 +66,10 @@ function MainItem() {
       navigate("/signin");
       return;
     }
-    // 2. Send data to the backend API
+    // 2. Show loading indicator
+    setIsCartAdding(true);
+
+    // 3. Send data to the backend API
     try {
       const response = await axiosInstance.post(
         "/shop/cart",
@@ -81,7 +86,8 @@ function MainItem() {
       );
       console.log(response);
 
-      // 3. Show success popup if successful
+      // 4. Hide loading indicator and show success popup
+      setIsCartAdding(false);
       setIsCartAdded(true);
       setErrorMessage(null); // Clear any previous error message
       setShowStockError(false); // Clear any previous stock error
@@ -89,10 +95,11 @@ function MainItem() {
         setIsCartAdded(false);
       }, 3000);
 
-      // 4. Hide the confirmation dialog
+      // 5. Hide the confirmation dialog
       setIsCartPopupVisible(false);
     } catch (error) {
       console.error("Error adding cart item to database:", error);
+      setIsCartAdding(false); // Hide the loading indicator on error
       setIsCartPopupVisible(false); // Hide the dialog on error
 
       // Handle stock errors specifically
@@ -289,6 +296,23 @@ function MainItem() {
             Close
           </Button>
         </DialogActions>
+      </Dialog>
+
+      {/* Loading Indicator (Using MUI CircularProgress) */}
+      <Dialog
+        open={isCartAdding}
+        onClose={() => setIsCartAdding(false)}
+        disableBackdropClick
+        disableEscapeKeyDown
+        aria-labelledby="loading-dialog-title"
+        aria-describedby="loading-dialog-description"
+      >
+        <DialogTitle id="loading-dialog-title">{"Adding to Cart"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="loading-dialog-description">
+            <CircularProgress />
+          </DialogContentText>
+        </DialogContent>
       </Dialog>
 
       {/* Error Popup (Using MUI Dialog) */}
