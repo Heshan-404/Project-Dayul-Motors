@@ -106,9 +106,11 @@ const Checkout = () => {
 
       const response = await axiosInstance.post("/checkout", orderData);
       console.log("Order placed successfully:", response.data);
-      setCartItems([]);
-      setShowInvoice(true); // Show the Invoice after order placement
-      navigate("/success");
+
+      // Redirect to success page or display a confirmation message
+      navigate("/success", { state: { orderId: response.data.orderId } });
+
+      setProcessing(false);
     } catch (error) {
       console.error("Error processing order:", error);
       setProcessing(false);

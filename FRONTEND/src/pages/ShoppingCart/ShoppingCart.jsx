@@ -341,10 +341,16 @@ export default function Cart() {
             top: 20,
           }}
         >
+<<<<<<< HEAD
           Shopping Cart
+=======
+          Continue Shopping
+>>>>>>> d75885bff4c0a86a699eb5d2e6e43d316ea27392
         </Button>
         <div className="cart-header">
-          <h1>Shopping Cart</h1>
+          <h1 onClick={handleNavigateToShop} style={{ cursor: "pointer" }}>
+            Shopping Cart
+          </h1>
           <p>You have {cartData.length} items in your cart</p>
         </div>
         <div className="cart">
