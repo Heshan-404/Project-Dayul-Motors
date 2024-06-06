@@ -2,7 +2,8 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import axiosInstance from "../../axiosConfig";
 import {
   Snackbar,
@@ -14,7 +15,7 @@ import {
   DialogActions,
   Button,
   CircularProgress,
-} from "@mui/material"; // Import MUI components
+} from "@mui/material";
 import NavigationBar from "../../components/Homepage/NavigationBar";
 import Footer from "../../components/Homepage/Footer";
 
@@ -22,18 +23,17 @@ export default function Cart() {
   const [cartData, setCartData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [isUpdating, setIsUpdating] = useState(false); // State for progress indicator
-  const [isCartPopupVisible, setIsCartPopupVisible] = useState(false); // State for confirmation popup
-  const [isCartAdded, setIsCartAdded] = useState(false); // State for success popup
-  const [errorMessage, setErrorMessage] = useState(null); // State for error messages
-  const [showStockError, setShowStockError] = useState(false); // State for stock error popup
-  const [stockErrorMessage, setStockErrorMessage] = useState(null); // State for stock error message
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isCartPopupVisible, setIsCartPopupVisible] = useState(false);
+  const [isCartAdded, setIsCartAdded] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [showStockError, setShowStockError] = useState(false);
+  const [stockErrorMessage, setStockErrorMessage] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCartData = async () => {
       try {
-        // 1. Fetch cart items (IDs and quantities)
         const cartResponse = await axiosInstance.get("/shopcart/cart", {
           headers: {
             Authorization: "Bearer " + localStorage.getItem("token"),
@@ -42,11 +42,10 @@ export default function Cart() {
 
         const cartItems = cartResponse.data;
 
-        // 2. Fetch product details (stock and price)
         const productIds = cartItems.map((item) => item.productid);
         const productResponse = await axiosInstance.post(
           "/shopcart/products/details",
-          { productIds }, // Send array of product IDs
+          { productIds },
           {
             headers: {
               Authorization: "Bearer " + localStorage.getItem("token"),
@@ -55,8 +54,6 @@ export default function Cart() {
         );
 
         const products = productResponse.data;
-        console.log(products);
-        // 3. Validate stock and calculate total price
         const validatedCartData = cartItems.map((cartItem) => {
           const product = products.find(
             (product) => product.productid === cartItem.productid
@@ -65,7 +62,6 @@ export default function Cart() {
           if (product) {
             const remainingStock = product.quantity - cartItem.quantity;
             if (remainingStock < 0) {
-              // Handle insufficient stock here (e.g., display an error)
               return null;
             }
             return {
@@ -92,7 +88,6 @@ export default function Cart() {
       } catch (error) {
         console.error("Error fetching cart data:", error);
         setIsLoading(false);
-        // Handle the error appropriately (e.g., show an error message)
       }
     };
 
@@ -104,7 +99,7 @@ export default function Cart() {
   }, []);
 
   const handleQtyChange = async (cartid, productid, newQty) => {
-    setIsUpdating(true); // Show the progress indicator
+    setIsUpdating(true);
     try {
       const response = await axiosInstance.put(
         `/shopcart/cart/update/${cartid}/${productid}`,
@@ -120,16 +115,15 @@ export default function Cart() {
       setCartData(
         cartData.map((item) =>
           item.cartid === cartid && item.productid === productid
-            ? { ...item, quantity: parseInt(newQty, 10) } // Convert to integer
+            ? { ...item, quantity: parseInt(newQty, 10) }
             : item
         )
       );
     } catch (error) {
       console.error("Error updating cart item:", error);
-      // Handle the error appropriately (e.g., show an error message)
     } finally {
       setTimeout(() => {
-        setIsUpdating(false); // Hide the progress indicator after 1 second
+        setIsUpdating(false);
       }, 1000);
     }
   };
@@ -141,7 +135,7 @@ export default function Cart() {
           (item) => item.cartid === cartid && item.productid === productid
         ).quantity,
         10
-      ) + 1; // Convert to integer
+      ) + 1;
 
     await handleQtyChange(cartid, productid, newQty);
   };
@@ -174,12 +168,10 @@ export default function Cart() {
       );
     } catch (error) {
       console.error("Error deleting cart item:", error);
-      // Handle the error appropriately (e.g., show an error message)
     }
   };
 
   const handleAddToCart = async () => {
-    // 1. Show confirmation dialog
     setIsCartPopupVisible(true);
   };
 
@@ -188,14 +180,13 @@ export default function Cart() {
       navigate("/signin");
       return;
     }
-    // 2. Send data to the backend API
     try {
       const response = await axiosInstance.post(
         "/shopcart/cart",
         {
           productid: productID,
           quantity: quantity,
-          userid: localStorage.getItem("userid"), // Replace with actual user ID
+          userid: localStorage.getItem("userid"),
         },
         {
           headers: {
@@ -205,21 +196,18 @@ export default function Cart() {
       );
       console.log(response);
 
-      // 3. Show success popup if successful
       setIsCartAdded(true);
-      setErrorMessage(null); // Clear any previous error message
-      setShowStockError(false); // Clear any previous stock error
+      setErrorMessage(null);
+      setShowStockError(false);
       setTimeout(() => {
         setIsCartAdded(false);
       }, 3000);
 
-      // 4. Hide the confirmation dialog
       setIsCartPopupVisible(false);
     } catch (error) {
       console.error("Error adding cart item to database:", error);
-      setIsCartPopupVisible(false); // Hide the dialog on error
+      setIsCartPopupVisible(false);
 
-      // Handle stock errors specifically
       if (error.response.status === 400 && error.response.data.message) {
         setShowStockError(true);
         setStockErrorMessage(error.response.data.message);
@@ -233,7 +221,6 @@ export default function Cart() {
   };
 
   const cancelAddToCart = () => {
-    // 5. Hide the confirmation dialog without adding to cart
     setIsCartPopupVisible(false);
   };
 
@@ -242,7 +229,6 @@ export default function Cart() {
   };
 
   if (isLoading) {
-    // Show a loading indicator while data is being fetched
     return (
       <div
         className="mb-3 d-flex align-items-start"
@@ -278,7 +264,7 @@ export default function Cart() {
           cursor: pointer;
           border-radius: 5px;
           text-align: left;
-          font-size: 24px; /* Increased font size */
+          font-size: 24px; 
           font-weight: bold;
           display: inline-block;
           position: absolute;
@@ -293,7 +279,7 @@ export default function Cart() {
         .shopping-continue-btn::before {
           content: '←';
           margin-right: 10px;
-          font-size: 28px; /* Increased font size */
+          font-size: 28px; 
           background: #000;
           color: white;
           border-radius: 50%;
@@ -303,14 +289,14 @@ export default function Cart() {
 
         .cart-header {
           text-align: center;
-          margin-top: 80px; /* Added margin to account for the button */
+          margin-top: 80px; 
           margin-bottom: 20px;
         }
 
         .cart-header h1 {
           margin: 0;
           font-size: 24px;
-          text-decoration: none; /* Removed underline */
+          text-decoration: none; 
         }
 
         .cart-header p {
@@ -453,7 +439,7 @@ export default function Cart() {
               >
                 Delete
               </button>
-              {parseInt(item.stock, 10) < parseInt(item.quantity, 10) && ( // Show a warning if stock is insufficient
+              {parseInt(item.stock, 10) < parseInt(item.quantity, 10) && (
                 <div className="stock-warning">
                   Insufficient Stock: Only {item.stock} units available
                 </div>
@@ -466,9 +452,11 @@ export default function Cart() {
           ))}
         </div>
         <div className="checkout-container">
-          <button className="checkout-btn">
-            Check Out (Total: Rs.{totalPrice.toFixed(2)})
-          </button>
+          <Link to="/checkout">
+            <button className="checkout-btn">
+              Check Out (Total: Rs.{totalPrice.toFixed(2)})
+            </button>
+          </Link>
         </div>
       </div>
       <Footer />
