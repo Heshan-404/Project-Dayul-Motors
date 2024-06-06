@@ -391,7 +391,10 @@ export default function Cart() {
         >
           Shopping Cart
         </button>
-        <div className="cart-header">
+        <div
+          className="cart-header"
+          style={{ paddingTop: "40px", paddingBottom: "0px" }}
+        >
           <h1>Shopping Cart</h1>
           <p>You have {cartData.length} items in your cart</p>
         </div>
@@ -451,13 +454,15 @@ export default function Cart() {
             </div>
           ))}
         </div>
-        <div className="checkout-container">
-          <Link to="/checkout">
-            <button className="checkout-btn">
-              Check Out (Total: Rs.{totalPrice.toFixed(2)})
-            </button>
-          </Link>
-        </div>
+        {cartData.length !== 0 && (
+          <div className="checkout-container">
+            <Link to="/checkout">
+              <button className="checkout-btn">
+                Check Out (Total: Rs.{totalPrice.toFixed(2)})
+              </button>
+            </Link>
+          </div>
+        )}
       </div>
       <Footer />
     </div>

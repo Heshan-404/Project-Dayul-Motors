@@ -1,299 +1,403 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
-  TextField,
   Button,
-  Grid,
-  Typography,
-  Box,
-  InputAdornment,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  TableContainer,
-  Paper,
-  Container,
+  Typography,
+  Box,
 } from "@mui/material";
-import { Search, Delete, AddCircle } from "@mui/icons-material";
+import axiosInstance from "../../../axiosConfig";
 
-const Billing = () => {
-  const [orderDate, setOrderDate] = useState("2024.05.05");
-  const [orderTime, setOrderTime] = useState("14.12");
+const BillingSystem = () => {
   const [searchMobile, setSearchMobile] = useState("");
-  const [searchItem, setSearchItem] = useState("");
+  const [customerData, setCustomerData] = useState(null);
+  const [showRegisterDialog, setShowRegisterDialog] = useState(false);
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [productResults, setProductResults] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [items, setItems] = useState([]);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [showAddItemDialog, setShowAddItemDialog] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [quantity, setQuantity] = useState(1);
 
-  // Customer and item details fetched from the database
-  const [customerId, setCustomerId] = useState("12345");
-  const [customerName, setCustomerName] = useState("John Doe");
-  const [customerEmail, setCustomerEmail] = useState("johndoe@example.com");
-  const [customerPhone, setCustomerPhone] = useState("1234567890");
-  const [customerAddress, setCustomerAddress] = useState("123 Main St, City, Country");
-  const [totalAmount, setTotalAmount] = useState("Rs. 4,000.00");
-  const [discount, setDiscount] = useState("");
-  const [discountError, setDiscountError] = useState(false);
-  const [netValue, setNetValue] = useState("Rs. 3,800.00");
+  useEffect(() => {
+    // Fetch all products initially
+    const fetchAllProducts = async () => {
+      try {
+        const response = await axiosInstance.get("/local_billing/all_products");
+        setAllProducts(response.data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
 
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      itemCode: "#123584",
-      itemName: "Set of 2 Pieces Black Color Handle Grip Pro Taper Motorcycle",
-      itemBrand: "Densok - OTM150",
-      itemUnitprice: "Rs. 1,000.00",
-      itemQuantity: 2,
-      itemAmount: "Rs. 2,000.00",
-    },
-    {
-      id: 2,
-      itemCode: "#123584",
-      itemName: "Set of 2 Pieces Black Color Handle Grip Pro Taper Motorcycle",
-      itemBrand: "Densok - OTM150",
-      itemUnitprice: "Rs. 1,000.00",
-      itemQuantity: 2,
-      itemAmount: "Rs. 2,000.00",
-    },
-  ]);
+    fetchAllProducts();
+  }, []);
 
-  const [mobileError, setMobileError] = useState(false);
+  useEffect(() => {
+    // Filter products based on search term
+    const filteredProducts = allProducts.filter(
+      (product) =>
+        product.productid.includes(searchTerm) ||
+        product.productname.includes(searchTerm)
+    );
+    setProductResults(filteredProducts);
+  }, [searchTerm, allProducts]);
 
-  const handleDeleteItem = (itemId) => {
-    setItems(items.filter((item) => item.id !== itemId));
-  };
-
-  const handleDiscountChange = (e) => {
-    const discountValue = e.target.value;
-    if (isNaN(discountValue) || discountValue < 0) {
-      setDiscountError(true);
-    } else {
-      setDiscountError(false);
-      setDiscount(discountValue);
-      // Calculate the net value based on the discount
-      const netAmount = parseFloat(totalAmount.replace("Rs. ", "").replace(",", "")) - parseFloat(discountValue);
-      setNetValue(`Rs. ${netAmount.toFixed(2)}`);
+  const handleSearchCustomer = async () => {
+    try {
+      const response = await axiosInstance.post(
+        "/local_billing/search_user_by_phone",
+        {
+          phone: searchMobile,
+        }
+      );
+      if (response.data.length > 0) {
+        setCustomerData(response.data[0]);
+      } else {
+        setShowRegisterDialog(true);
+      }
+    } catch (error) {
+      console.error("Error searching customer:", error);
     }
   };
 
-  const handleMobileChange = (e) => {
-    const mobileValue = e.target.value;
-    // Allow only numbers and a maximum of 10 digits
-    const cleanedMobile = mobileValue.replace(/[^0-9]/g, ''); // Remove non-numeric characters
-    if (cleanedMobile.length > 10) {
-      setMobileError(true);
-    } else {
-      setMobileError(false);
-      setSearchMobile(cleanedMobile);
+  const handleRegisterUser = async () => {
+    try {
+      const userDetails = {
+        userid: `USER${Date.now()}`,
+        fullname: customerName,
+        email: customerEmail,
+        phoneno: searchMobile,
+        address: customerAddress,
+        password: "defaultpassword", // You may want to generate a secure password
+      };
+      const response = await axiosInstance.post(
+        "/local_billing/register_user",
+        userDetails
+      );
+      setCustomerData(response.data);
+      setShowRegisterDialog(false);
+    } catch (error) {
+      console.error("Error registering user:", error);
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form submitted");
+  const handleAddProduct = (product) => {
+    setSelectedProduct(product);
+    setShowAddItemDialog(true);
+  };
+
+  const handleQuantityChange = (index, newQuantity) => {
+    const updatedItems = [...items];
+    updatedItems[index].itemQuantity = newQuantity;
+    updateTotalAmount(updatedItems);
+    setItems(updatedItems);
+  };
+
+  const handleDeleteItem = (index, itemCode) => {
+    const updatedItems = items.filter((_, i) => i !== index);
+    updateTotalAmount(updatedItems);
+    setItems(updatedItems);
+  };
+
+  const updateTotalAmount = (updatedItems) => {
+    const total = updatedItems.reduce((sum, item) => {
+      const itemPrice = parseFloat(
+        item.itemUnitprice.replace("Rs. ", "").replace(",", "")
+      );
+      return sum + itemPrice * item.itemQuantity;
+    }, 0);
+    setTotalAmount(total);
+  };
+
+  const handleAddItemToCart = () => {
+    const newItem = {
+      id: selectedProduct.productid,
+      itemCode: selectedProduct.productid,
+      itemName: selectedProduct.productname,
+      itemUnitprice: selectedProduct.price,
+      itemQuantity: quantity,
+      itemAmount: selectedProduct.price * quantity,
+      imageUrl: selectedProduct.imageurl,
+      availableQuantity: selectedProduct.quantity,
+    };
+    setItems((prevItems) => [...prevItems, newItem]);
+    updateTotalAmount([...items, newItem]);
+    setShowAddItemDialog(false);
+  };
+
+  const handleSubmitOrder = async () => {
+    // Check if all required fields are filled
+    if (!customerData) {
+      alert("Please search for or register a customer first.");
+      return;
+    }
+
+    if (items.length === 0) {
+      alert("Please add items to the order before submitting.");
+      return;
+    }
+
+    try {
+      const orderResponse = await axiosInstance.post(
+        "/local_billing/create_order",
+        {
+          orderid: `ORD${Date.now()}`,
+          userid: customerData.userid,
+          paymentmethod: "Cash", // Example payment method
+          totalamount: totalAmount,
+        }
+      );
+
+      const orderid = orderResponse.data.orderid;
+
+      await axiosInstance.post("/local_billing/add_order_items", {
+        orderid,
+        items: items.map((item) => ({
+          orderitemid: `ORDITEM${Date.now() + item.id}`,
+          productid: item.itemCode,
+          price: item.itemUnitprice,
+          quantity: item.itemQuantity,
+        })),
+      });
+
+      alert("Order successfully created!");
+      // Reset state after successful order
+      setCustomerData(null);
+      setItems([]);
+      setTotalAmount(0);
+    } catch (error) {
+      console.error("Error submitting order:", error);
+    }
   };
 
   return (
-    <Container maxWidth="md" sx={{ bgcolor: "#f0f0f0", p: 4, borderRadius: 4 }}>
-      <form onSubmit={handleSubmit}>
-        <Grid container spacing={2}>
-          {/* Order Details */}
-          <Grid item xs={12} md={6}>
-            <Typography variant="body1">Order Date: {orderDate}</Typography>
-            <Typography variant="body1">Order Time: {orderTime}</Typography>
-          </Grid>
-          {/* Customer Search and Details */}
-          <Grid item xs={12} md={6} container justifyContent="flex-end" alignItems="center">
-            <Box sx={{ width: "70%" }}>
-              <TextField
-                label="Mobile Number"
-                value={searchMobile}
-                onChange={handleMobileChange}
-                error={mobileError}
-                helperText={mobileError ? "Invalid mobile number" : ""}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Search />
-                    </InputAdornment>
-                  ),
-                }}
-                fullWidth
-                size="small"
-              />
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="h6">Customer Details:</Typography>
-                <TextField
-                  label="Customer ID"
-                  value={customerId}
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                  fullWidth
-                  size="small"
-                  sx={{ mt: 2 }}
-                />
-                <TextField
-                  label="Name"
-                  value={customerName}
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                  fullWidth
-                  size="small"
-                  sx={{ mt: 2 }}
-                />
-                <TextField
-                  label="Email"
-                  value={customerEmail}
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                  fullWidth
-                  size="small"
-                  sx={{ mt: 2 }}
-                />
-                <TextField
-                  label="Phone"
-                  value={customerPhone}
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                  fullWidth
-                  size="small"
-                  sx={{ mt: 2 }}
-                />
-                <TextField
-                  label="Address"
-                  value={customerAddress}
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                  fullWidth
-                  size="small"
-                  sx={{ mt: 2 }}
-                />
-              </Box>
-            </Box>
-            <Button variant="contained" sx={{ ml: 2 }}>
-              Add New <AddCircle />
-            </Button>
-          </Grid>
-          {/* Item Search and Table */}
-          <Grid item xs={12}>
-            <Box sx={{ mb: 2 }}>
-              <TextField
-                label="Enter Code or Name"
-                value={searchItem}
-                onChange={(e) => setSearchItem(e.target.value)}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Search />
-                    </InputAdornment>
-                  ),
-                }}
-                fullWidth
-                size="small"
-                sx={{ width: "35%" }} // Adjust width as needed
-              />
-            </Box>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Sr.No.</TableCell>
-                    <TableCell>Item Code</TableCell>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Brand</TableCell>
-                    <TableCell>Unit Price</TableCell>
-                    <TableCell>Quantity</TableCell>
-                    <TableCell>Amount</TableCell>
-                    <TableCell></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {items.map((item, index) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>{item.itemCode}</TableCell>
-                      <TableCell>{item.itemName}</TableCell>
-                      <TableCell>{item.itemBrand}</TableCell>
-                      <TableCell>{item.itemUnitprice}</TableCell>
-                      <TableCell>{item.itemQuantity}</TableCell>
-                      <TableCell>{item.itemAmount}</TableCell>
-                      <TableCell>
-                        <Button
-                          variant="outlined"
-                          color="secondary"
-                          onClick={() => handleDeleteItem(item.id)}
-                        >
-                          <Delete />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Grid>
-          {/* Summary */}
-          <Grid item xs={12}>
-            <Box sx={{ mt: 4 }}>
-              <Typography variant="h6">Summary</Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Total Amount"
-                    value={totalAmount}
-                    InputProps={{
-                      readOnly: true,
-                    }}
-                    fullWidth
-                    size="small"
-                    sx={{ width: "30%", mt: 2 }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Add Discount"
-                    value={discount}
-                    onChange={handleDiscountChange}
-                    error={discountError}
-                    helperText={discountError ? "Invalid discount value" : ""}
-                    fullWidth
-                    size="small"
-                    sx={{ width: "30%", mt: 2 }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Net Total"
-                    value={netValue}
-                    InputProps={{
-                      readOnly: true,
-                    }}
-                    fullWidth
-                    size="small"
-                    sx={{ width: "30%", mt: 2 }}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-          </Grid>
-          {/* Buttons */}
-          <Grid item xs={12}>
-            <Box sx={{ mt: 4 }}>
-              <Button variant="contained" color="error" sx={{ mr: 1 }}>
-                Cancel
-              </Button>
-              <Button variant="contained" color="success" type="submit">
-                Pay Now
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
-      </form>
-    </Container>
+    <Box padding={3}>
+      <Typography variant="h4" gutterBottom>
+        Billing System
+      </Typography>
+      <Box marginBottom={3}>
+        <TextField
+          label="Search Customer by Mobile"
+          value={searchMobile}
+          onChange={(e) => setSearchMobile(e.target.value)}
+          fullWidth
+        />
+        <Button
+          onClick={handleSearchCustomer}
+          variant="contained"
+          color="primary"
+        >
+          Search
+        </Button>
+      </Box>
+
+      {customerData && (
+        <Box marginBottom={3}>
+          <Typography variant="h6">Customer Details</Typography>
+          <Typography>Name: {customerData.fullname}</Typography>
+          <Typography>Email: {customerData.email}</Typography>
+          <Typography>Phone: {customerData.phoneno}</Typography>
+          <Typography>Address: {customerData.address}</Typography>
+        </Box>
+      )}
+
+      <Box marginBottom={3}>
+        <TextField
+          label="Search Products"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          fullWidth
+        />
+      </Box>
+
+      {productResults.length > 0 && (
+        <Box marginBottom={3}>
+          <Typography variant="h6">Search Results</Typography>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Product Code</TableCell>
+                <TableCell>Product Name</TableCell> <TableCell>Price</TableCell>
+                <TableCell>Available Quantity</TableCell>
+                <TableCell>Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {productResults.map((product) => (
+                <TableRow key={product.productid}>
+                  <TableCell>{product.productid}</TableCell>
+                  <TableCell>{product.productname}</TableCell>
+                  <TableCell>Rs. {product.price}</TableCell>
+                  <TableCell>{product.quantity}</TableCell>
+                  <TableCell>
+                    <Button
+                      onClick={() => handleAddProduct(product)}
+                      variant="contained"
+                      color="secondary"
+                    >
+                      Add to Order
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Box>
+      )}
+
+      {items.length > 0 && (
+        <Box marginBottom={3}>
+          <Typography variant="h6">Order Items</Typography>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Product Code</TableCell>
+                <TableCell>Product Name</TableCell>
+                <TableCell>Unit Price</TableCell>
+                <TableCell>Quantity</TableCell>
+                <TableCell>Amount</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {items.map((item, index) => (
+                <TableRow key={index}>
+                  <TableCell>{item.itemCode}</TableCell>
+                  <TableCell>{item.itemName}</TableCell>
+                  <TableCell>Rs. {item.itemUnitprice}</TableCell>
+                  <TableCell>
+                    <TextField
+                      type="number"
+                      value={item.itemQuantity}
+                      onChange={(e) =>
+                        handleQuantityChange(index, e.target.value)
+                      }
+                      inputProps={{
+                        min: 1,
+                        max: item.availableQuantity,
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell>Rs. {item.itemAmount}</TableCell>
+                  <TableCell>
+                    <Button
+                      onClick={() => handleDeleteItem(index, item.itemCode)}
+                      variant="contained"
+                      color="error"
+                    >
+                      Delete
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Box>
+      )}
+
+      <Box marginBottom={3}>
+        <Typography variant="h6">
+          Total Amount: Rs. {totalAmount.toFixed(2)}
+        </Typography>
+      </Box>
+
+      <Button onClick={handleSubmitOrder} variant="contained" color="primary">
+        Submit Order
+      </Button>
+
+      <Dialog
+        open={showRegisterDialog}
+        onClose={() => setShowRegisterDialog(false)}
+      >
+        <DialogTitle>Customer Not Found</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This customer is not registered. Please provide their details to
+            register.
+          </DialogContentText>
+          <TextField
+            label="Full Name"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
+            fullWidth
+          />
+          <TextField
+            label="Email"
+            value={customerEmail}
+            onChange={(e) => setCustomerEmail(e.target.value)}
+            fullWidth
+          />
+          <TextField label="Phone" value={searchMobile} fullWidth disabled />
+          <TextField
+            label="Address"
+            value={customerAddress}
+            onChange={(e) => setCustomerAddress(e.target.value)}
+            fullWidth
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setShowRegisterDialog(false)}
+            color="secondary"
+          >
+            Cancel
+          </Button>
+          <Button onClick={handleRegisterUser} color="primary">
+            Register
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={showAddItemDialog}
+        onClose={() => setShowAddItemDialog(false)}
+      >
+        <DialogTitle>Add Item</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {/* Add more details of the product here */}
+            Product Code: {selectedProduct?.productid} <br />
+            Product Name: {selectedProduct?.productname} <br />
+            Price: Rs. {selectedProduct?.price} <br />
+            Quantity:
+            <TextField
+              type="number"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              inputProps={{
+                min: 1,
+                max: selectedProduct?.quantity,
+              }}
+            />
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowAddItemDialog(false)} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleAddItemToCart} color="primary">
+            Add Item
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 
-export default Billing;
+export default BillingSystem;

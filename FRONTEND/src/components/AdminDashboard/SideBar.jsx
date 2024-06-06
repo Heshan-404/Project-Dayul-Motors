@@ -20,6 +20,7 @@ import HomeIcon from "../../assets/Project Images/Dayul Motors/AdminSideBar/Home
 import AdminHomePage from "../../pages/AdminDashboard/AdminHome/AdminHomePage";
 import ProductMNGPage from "../../pages/AdminDashboard/ProductMNG/ProductMNGPage";
 import OrderMNGPage from "../../pages/AdminDashboard/OrderMNGPage/OrderMNGPage";
+import Billing from "./Billing/Billing";
 
 const drawerWidth = 250;
 
@@ -76,6 +77,12 @@ const SideBar = ({ window }) => {
             icon: <img src={OrderIcon} width={"30px"} alt="Mail Icon" />,
             component: <OrderMNGPage />,
             id: "orders",
+          },
+          {
+            text: "Billing",
+            icon: <img src={OrderIcon} width={"30px"} alt="Mail Icon" />,
+            component: <Billing />,
+            id: "billing",
           },
         ].map((item, index) => (
           <ListItem

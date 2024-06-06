@@ -115,7 +115,8 @@ const Checkout = () => {
       console.log("Order placed successfully:", response.data);
       setCartItems([]);
       setShowInvoice(true); // Show the Invoice after order placement
-      navigate("/success");
+      localStorage.setItem("orderSuccess", true);
+      navigate("/order-success");
     } catch (error) {
       console.error("Error processing order:", error);
     }
