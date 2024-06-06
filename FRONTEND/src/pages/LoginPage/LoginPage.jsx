@@ -1,9 +1,16 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axiosInstance from "../../axiosConfig"; // Adjust the import path as needed
+import axiosInstance from "../../axiosConfig";
 import NavigationBar from "../../components/Homepage/NavigationBar";
 import Footer from "../../components/Homepage/Footer";
-import { Button, Stack, styled, TextField, Alert } from "@mui/material";
+import {
+  Button,
+  Stack,
+  styled,
+  TextField,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
 import LoginIcon from "@mui/icons-material/Login";
 import { yellow } from "@mui/material/colors";
 
@@ -14,17 +21,21 @@ export default function LoginPage() {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [formError, setFormError] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // State for loader
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      navigate("/home"); // Redirect to a protected route
+      navigate("/home");
     }
   }, [navigate]);
 
   useEffect(() => {
-    if (email && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)) {
+    if (
+      email &&
+      !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/i.test(email)
+    ) {
       setEmailError("Invalid email address");
     } else {
       setEmailError("");
@@ -50,6 +61,7 @@ export default function LoginPage() {
       setFormError("Please fix the errors before submitting");
       return;
     }
+    setIsLoading(true); // Show loader
     try {
       const response = await axiosInstance.post("/auth/user/login", {
         email,
@@ -58,6 +70,7 @@ export default function LoginPage() {
 
       if (response.status === 200) {
         localStorage.setItem("token", response.data.token);
+        localStorage.setItem("userid", response.data.token.userid);
         localStorage.setItem("username", response.data.user.name);
         navigate("/home");
       } else {
@@ -67,6 +80,8 @@ export default function LoginPage() {
       setFormError(
         error.response?.data?.message || "Server error. Please try again later."
       );
+    } finally {
+      setIsLoading(false); // Hide loader after login attempt
     }
   };
 
@@ -88,6 +103,15 @@ export default function LoginPage() {
       color: "black",
     },
   }));
+
+  // Function to handle input in email field
+  const handleEmailInputChange = (e) => {
+    const inputValue = e.target.value;
+    const allowedCharacters = /^[A-Za-z0-9.@]*$/;
+    if (allowedCharacters.test(inputValue)) {
+      setEmail(inputValue);
+    }
+  };
 
   return (
     <div>
@@ -223,7 +247,7 @@ export default function LoginPage() {
                   variant="outlined"
                   type="text"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={handleEmailInputChange}
                   error={!!emailError}
                   helperText={emailError}
                 />
@@ -247,15 +271,24 @@ export default function LoginPage() {
                   </Alert>
                 )}
                 <Stack spacing={2} direction="row">
-                  <ColorButton
-                    startIcon={<LoginIcon style={{ fill: "black" }} />}
-                    size="large"
-                    variant="contained"
-                    type="submit"
-                    className="mt-3"
-                  >
-                    Login Now
-                  </ColorButton>
+                  {isLoading ? (
+                    // Show loader when isLoading is true
+                    <CircularProgress
+                      size={24}
+                      color="secondary"
+                      style={{ marginTop: "15px" }}
+                    />
+                  ) : (
+                    <ColorButton
+                      startIcon={<LoginIcon style={{ fill: "black" }} />}
+                      size="large"
+                      variant="contained"
+                      type="submit"
+                      className="mt-3"
+                    >
+                      Login Now
+                    </ColorButton>
+                  )}
                 </Stack>
                 <div className="d-flex">
                   <Link to="/signup" style={{ textDecoration: "none" }}>

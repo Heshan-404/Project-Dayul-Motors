@@ -2,7 +2,7 @@
 import Background from "../../Shopping/Background/Background";
 import CustomizedBreadcrumbs from "../Breadcrimb/Breadcrumb";
 import MainItem from "./MainItem";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Footer from "../../Homepage/Footer";
 import NavigationBar from "../../Homepage/NavigationBar";
 import { styled } from "@mui/material/styles";
@@ -21,18 +21,21 @@ const StyledMainContainer = styled(Box)(({ theme }) => ({
 
 export default function MainPage() {
   const params = useParams();
-  const itemId = params.itemId;
+  const itemId = params.productID;
   const [itemDetails, setItemDetails] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Loading state
   const [sameCategoryProducts, setSameCategoryProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [categoryName, setCategoryName] = useState(null); // State for category name
-  const [categoryID, setCategoryID] = useState(null); // State for category name
+  const [categoryID, setCategoryID] = useState(null); // State for category ID
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    const fetchProductDetails = async () => {
-      setIsLoading(true);
+    // Fetch data when itemId changes
+    const fetchData = async () => {
+      setIsLoading(true); // Set isLoading to true before fetching
+
       try {
         const response = await axiosInstance.get(`/shop/products/${itemId}`);
         setItemDetails(response.data);
@@ -49,7 +52,6 @@ export default function MainPage() {
         setAllProducts(allProductsResponse.data);
 
         // Fetch category name
-        console.log(category);
         const categoryNameResponse = await axiosInstance.get(
           `/shop/categories/${category}`
         );
@@ -57,38 +59,31 @@ export default function MainPage() {
         setCategoryID(category);
         setCategoryName(categoryname);
 
-        setIsLoading(false);
+        setIsLoading(false); // Update isLoading when done
       } catch (error) {
         console.error("Error fetching data:", error);
         setIsLoading(false);
       }
     };
 
-    fetchProductDetails();
-  }, [itemId]);
+    fetchData();
+  }, [itemId]); // Run when itemId changes
 
   if (!itemDetails) {
     return (
-      <div>
-        {isLoading ? (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "200px",
-            }}
-          >
-            <CircularProgress />
-          </div>
-        ) : (
-          <div>Item not found!</div>
-        )}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "200px",
+        }}
+      >
+        {isLoading ? <CircularProgress /> : <div>Item not found!</div>}
       </div>
     );
   }
 
-  // Filter out the selected item from the same category products
   const filteredSameCategoryProducts = sameCategoryProducts.filter(
     (product) => product.productid !== itemId
   );
@@ -97,9 +92,10 @@ export default function MainPage() {
     <div>
       <NavigationBar />
       <StyledMainContainer>
-        <CustomizedBreadcrumbs cat={categoryName} catid={categoryID} />{" "}
+        <CustomizedBreadcrumbs cat={categoryName} catid={categoryID} />
         {/* Pass categoryName to Breadcrumb */}
         <MainItem
+          id={itemId}
           brand={itemDetails.brandname}
           name={itemDetails.productname}
           price={itemDetails.price}
@@ -116,11 +112,18 @@ export default function MainPage() {
             cat={itemDetails.categoryid}
             products={filteredSameCategoryProducts}
             id={itemId}
+            isLoading={isLoading} // Pass isLoading to Background
+            setIsLoading={setIsLoading} // Pass setIsLoading to Background
           />
 
           {/* Section for all other products */}
           <h2 style={{ marginLeft: "130px" }}>All Other Products</h2>
-          <Background products={allProducts} id={itemId} />
+          <Background
+            products={allProducts}
+            id={itemId}
+            isLoading={isLoading}
+            setIsLoading={setIsLoading}
+          />
         </div>
       </StyledMainContainer>
       <Footer />

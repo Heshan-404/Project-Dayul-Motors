@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { useState, useEffect, useRef } from "react";
 import ItemCard from "../ItemCard/ItemCard";
@@ -10,7 +11,8 @@ export default function Background({
   cat,
   brand,
   searchInput,
-  onLoadingComplete,
+  isLoading, // Receive isLoading
+  setIsLoading, // Receive setIsLoading
   products,
   id,
 }) {
@@ -21,7 +23,7 @@ export default function Background({
   const navigate = useNavigate();
   const cardRef = useRef(null);
   const params = useParams();
-  // If 'products' prop is provided, use that; otherwise, fetch all products
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -43,17 +45,17 @@ export default function Background({
         // Fetch data based on the provided products or from the API
         if (products) {
           setItemData(products);
+          setIsLoading(false); // Update loading state
         } else {
           const response = await axiosInstance.get(`/shop${endpoint}`);
           setItemData(response.data);
+          setIsLoading(false); // Update loading state
         }
 
         setTotalPages(Math.ceil(itemData.length / itemsPerPage));
-
-        onLoadingComplete();
       } catch (error) {
         console.error("Error fetching data:", error);
-        onLoadingComplete();
+        setIsLoading(false); // Update loading state
       }
     };
 

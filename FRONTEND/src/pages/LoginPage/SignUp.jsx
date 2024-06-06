@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../axiosConfig"; // Adjust the import path as needed
 import NavigationBar from "../../components/Homepage/NavigationBar";
 import Footer from "../../components/Homepage/Footer";
-import { Button, styled, TextField } from "@mui/material";
+import { Button, styled, TextField, CircularProgress } from "@mui/material";
 import { yellow } from "@mui/material/colors";
 import LoginIcon from "@mui/icons-material/Login";
 
@@ -20,6 +20,7 @@ export default function Signup() {
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // State for loader
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,12 +30,14 @@ export default function Signup() {
     }
   }, [navigate]);
 
+  // Function to handle input changes and validation
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
     setErrors({ ...errors, [name]: validateField(name, value) });
   };
 
+  // Function to validate individual fields
   const validateField = (name, value) => {
     let message = "";
     switch (name) {
@@ -45,14 +48,14 @@ export default function Signup() {
         if (!value) {
           message = "Email Address is required";
         } else if (!/\S+@\S+\.\S+/.test(value)) {
-          message = "Email Address is invalid";
+          message = "Invalid Email Address ";
         }
         break;
       case "phoneNo":
         if (!value) {
           message = "Phone Number is required";
         } else if (!/^0\d{9}$/.test(value)) {
-          message = "Phone Number must be 10 digits and start with 0";
+          message = "Invalid Phone Number";
         }
         break;
       case "address":
@@ -79,6 +82,7 @@ export default function Signup() {
     return message;
   };
 
+  // Function to validate all fields in the form
   const validateForm = () => {
     const newErrors = {};
     for (const field in formData) {
@@ -90,6 +94,7 @@ export default function Signup() {
     return newErrors;
   };
 
+  // Function to handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -97,6 +102,7 @@ export default function Signup() {
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
+      setIsLoading(true); // Show loader
       try {
         const response = await axiosInstance.post("/auth/user/register", {
           fullName: formData.fullName,
@@ -126,10 +132,13 @@ export default function Signup() {
         } else {
           setServerError("An error occurred. Please try again later.");
         }
+      } finally {
+        setIsLoading(false); // Hide loader
       }
     }
   };
 
+  // Effect to clear server error and success message after 5 seconds
   useEffect(() => {
     if (serverError || successMessage) {
       const timer = setTimeout(() => {
@@ -147,6 +156,29 @@ export default function Signup() {
       backgroundColor: yellow[700],
     },
   }));
+
+  // Function to handle input in email field
+  const handleEmailInputChange = (e) => {
+    const inputValue = e.target.value;
+    const allowedCharacters = /^[A-Za-z0-9.@]*$/;
+    if (allowedCharacters.test(inputValue)) {
+      setFormData({ ...formData, email: inputValue });
+    }
+  };
+
+  // Function to handle input in phone number field
+  const handlePhoneNoInputChange = (e) => {
+    const inputValue = e.target.value;
+    const allowedCharacters = /^[0-9]*$/;
+    if (allowedCharacters.test(inputValue) && inputValue.length <= 10) {
+      if (inputValue.length === 1 && inputValue !== "0") {
+        // Force the first digit to be '0'
+        setFormData({ ...formData, phoneNo: "0" });
+      } else {
+        setFormData({ ...formData, phoneNo: inputValue });
+      }
+    }
+  };
 
   return (
     <div>
@@ -275,17 +307,19 @@ export default function Signup() {
             onChange={handleChange}
             error={!!errors.fullName}
             helperText={errors.fullName}
+            onKeyUp={handleChange} // Validate on key release
           />
           <TextField
             label="Email Address"
             variant="outlined"
-            type="email"
+            type="text"
             name="email"
             id="email"
             value={formData.email}
-            onChange={handleChange}
+            onChange={handleEmailInputChange}
             error={!!errors.email}
             helperText={errors.email}
+            onKeyUp={handleChange} // Validate on key release
           />
           <TextField
             label="Phone Number"
@@ -294,9 +328,10 @@ export default function Signup() {
             name="phoneNo"
             id="phoneNo"
             value={formData.phoneNo}
-            onChange={handleChange}
+            onChange={handlePhoneNoInputChange}
             error={!!errors.phoneNo}
             helperText={errors.phoneNo}
+            onKeyUp={handleChange} // Validate on key release
           />
           <TextField
             label="Address"
@@ -308,6 +343,7 @@ export default function Signup() {
             onChange={handleChange}
             error={!!errors.address}
             helperText={errors.address}
+            onKeyUp={handleChange} // Validate on key release
           />
           <TextField
             label="Password"
@@ -319,6 +355,7 @@ export default function Signup() {
             onChange={handleChange}
             error={!!errors.password}
             helperText={errors.password}
+            onKeyUp={handleChange} // Validate on key release
           />
           <TextField
             label="Confirm Password"
@@ -330,15 +367,25 @@ export default function Signup() {
             onChange={handleChange}
             error={!!errors.confirmPassword}
             helperText={errors.confirmPassword}
+            onKeyUp={handleChange} // Validate on key release
           />
-          <ColorButton
-            className="button"
-            type="submit"
-            variant="contained"
-            endIcon={<LoginIcon />}
-          >
-            Sign Up
-          </ColorButton>
+          {isLoading ? (
+            // Show loader when isLoading is true
+            <CircularProgress
+              size={24}
+              color="secondary"
+              style={{ marginTop: "40px" }}
+            />
+          ) : (
+            <ColorButton
+              className="button"
+              type="submit"
+              variant="contained"
+              endIcon={<LoginIcon />}
+            >
+              Sign Up
+            </ColorButton>
+          )}
           {serverError && (
             <div className="server-error fade" style={{ color: "red" }}>
               {serverError}
