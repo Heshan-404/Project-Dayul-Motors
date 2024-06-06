@@ -1,317 +1,292 @@
-import { useState } from "react";
-import { useLocation, Link } from "react-router-dom";
-import oipImage from "../../assets/Project Images/Dayul Motors/Brands/Bajaj.jpg"; // Assuming you have this image in your assets
+import { useState, useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import { Checkbox, IconButton } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import Invoice from "./Invoice"; // Import Invoice component
+import NavigationBar from "../../components/Homepage/NavigationBar";
+import axiosInstance from "../../axiosConfig";
 
 const Checkout = () => {
+  // eslint-disable-next-line no-unused-vars
   const location = useLocation();
+  const navigate = useNavigate();
+  const invoiceRef = useRef(); // Ref for the Invoice component
 
-  const sampleItems = [
-    { id: 1, name: "Sample Item 1", price: 100.0, qty: 2, img: oipImage },
-    { id: 2, name: "Sample Item 2", price: 150.0, qty: 1, img: oipImage },
-    { id: 3, name: "Sample Item 3", price: 200.0, qty: 1, img: oipImage },
-  ];
+  const [cartItems, setCartItems] = useState([]);
+  const [userData, setUserData] = useState({});
+  const [paymentType, setPaymentType] = useState("cash");
+  const [paymentDetails, setPaymentDetails] = useState({
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+    cardName: "",
+  });
 
-  const items = location.state?.items || sampleItems;
-  const [paymentType, setPaymentType] = useState("credit");
+  const [checkoutDisabled, setCheckoutDisabled] = useState(true);
+  const [acceptCashTerms, setAcceptCashTerms] = useState(false);
+  const [showInvoice, setShowInvoice] = useState(false);
+
+  useEffect(() => {
+    const fetchCartItems = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axiosInstance.get("/checkout/cart-items", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setCartItems(response.data);
+      } catch (error) {
+        console.error("Error fetching cart items:", error);
+      }
+    };
+
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axiosInstance.get("/checkout/user-data", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setUserData(response.data);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchCartItems();
+    fetchUserData();
+  }, []);
 
   const calculateTotal = () => {
-    return items
-      .reduce((total, item) => total + item.price * item.qty, 0)
-      .toFixed(2);
+    return cartItems.reduce(
+      (total, item) => total + parseFloat(item.price) * item.quantity,
+      0
+    );
   };
 
   const handlePaymentTypeChange = (e) => {
     setPaymentType(e.target.value);
+    setCheckoutDisabled(e.target.value === "credit" ? true : false);
+    setAcceptCashTerms(false);
   };
 
-  const handleSubmit = (e) => {
+  const handlePaymentDetailsChange = (e) => {
+    setPaymentDetails({
+      ...paymentDetails,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert(`Payment submitted via ${paymentType}!`);
+
+    try {
+      const token = localStorage.getItem("token");
+      const orderData = {
+        userId: userData.userid,
+        paymentMethod: paymentType,
+        totalAmount: calculateTotal(),
+        orderItems: cartItems.map((item) => ({
+          productid: item.productid,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+      };
+      downloadInvoice();
+      console.log(orderData);
+      const response = await axiosInstance.post("/checkout", orderData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Order placed successfully:", response.data);
+      setCartItems([]);
+      setShowInvoice(true); // Show the Invoice after order placement
+      navigate("/success");
+    } catch (error) {
+      console.error("Error processing order:", error);
+    }
+  };
+
+  const downloadInvoice = async () => {
+    const invoiceElement = invoiceRef.current; // Get the Invoice component element
+    if (!invoiceElement) {
+      console.error("Error: Invoice element not found.");
+      return;
+    }
+
+    try {
+      const canvas = await html2canvas(invoiceElement);
+      const imgData = canvas.toDataURL("image/png");
+
+      const pdf = new jsPDF();
+      const imgWidth = 200;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 5, 5, imgWidth, imgHeight);
+      pdf.save("invoice.pdf");
+    } catch (error) {
+      console.error("Error generating invoice PDF:", error);
+    }
+  };
+
+  const handleAcceptCashTerms = (e) => {
+    setAcceptCashTerms(e.target.checked);
+    setCheckoutDisabled(!e.target.checked);
+  };
+
+  const handleRemoveFromCart = async (productId) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axiosInstance.delete(`/checkout/cart-items/${productId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setCartItems(cartItems.filter((item) => item.productid !== productId));
+    } catch (error) {
+      console.error("Error removing item from cart:", error);
+    }
+  };
+
+  const renderCartItems = () => {
+    return cartItems.map((item) => (
+      <Card key={item.productid} sx={{ mb: 2 }}>
+        <CardContent>
+          <Typography variant="h6">{item.name}</Typography>
+          <Typography>Price: Rs.{item.price}</Typography>
+          <Typography>Quantity: {item.quantity}</Typography>
+          <IconButton
+            edge="end"
+            aria-label="delete"
+            onClick={() => handleRemoveFromCart(item.productid)}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </CardContent>
+      </Card>
+    ));
+  };
+
+  const renderPaymentFields = () => {
+    if (paymentType === "credit") {
+      return (
+        <>
+          <TextField
+            label="Card Number"
+            name="cardNumber"
+            value={paymentDetails.cardNumber}
+            onChange={handlePaymentDetailsChange}
+            fullWidth
+            required
+            margin="normal"
+          />
+          <TextField
+            label="Expiry Date"
+            name="expiryDate"
+            value={paymentDetails.expiryDate}
+            onChange={handlePaymentDetailsChange}
+            fullWidth
+            required
+            margin="normal"
+          />
+          <TextField
+            label="CVV"
+            name="cvv"
+            value={paymentDetails.cvv}
+            onChange={handlePaymentDetailsChange}
+            fullWidth
+            required
+            margin="normal"
+          />
+          <TextField
+            label="Name on Card"
+            name="cardName"
+            value={paymentDetails.cardName}
+            onChange={handlePaymentDetailsChange}
+            fullWidth
+            required
+            margin="normal"
+          />
+        </>
+      );
+    } else if (paymentType === "cash") {
+      return (
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={acceptCashTerms}
+              onChange={handleAcceptCashTerms}
+            />
+          }
+          label="I accept the terms and conditions for cash on delivery."
+        />
+      );
+    }
   };
 
   return (
-    <div className="outer-container">
+    <>
+      <NavigationBar />
       <div className="checkout-container">
-        <style>{`
-          .outer-container {
-            background-color: rgba(0, 0, 0, 0.1); /* Light black background */
-            padding: 20px;
-          }
+        <Typography variant="h4" component="h1" gutterBottom>
+          Checkout
+        </Typography>
+        {renderCartItems()}
+        <Typography variant="h6" gutterBottom>
+          Total Amount: Rs.{calculateTotal()}
+        </Typography>
+        <form onSubmit={handleSubmit}>
+          <Typography variant="h6" gutterBottom>
+            Payment Method
+          </Typography>
+          <RadioGroup
+            name="paymentType"
+            value={paymentType}
+            onChange={handlePaymentTypeChange}
+          >
+            <FormControlLabel
+              value="credit"
+              control={<Radio />}
+              label="Credit Card"
+            />
+            <FormControlLabel value="cash" control={<Radio />} label="Cash" />
+          </RadioGroup>
+          {renderPaymentFields()}
+          <Button
+            variant="contained"
+            color="primary"
+            type="submit"
+            disabled={checkoutDisabled}
+          >
+            Place Order
+          </Button>
+        </form>
 
-          .checkout-container {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            background-color: #fff; /* White background for the content */
-            border-radius: 8px;
-          }
-
-          @media (min-width: 768px) {
-            .checkout-container {
-              flex-direction: row;
-              justify-content: space-between;
-            }
-          }
-
-          .continue-shopping {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            display: flex;
-            align-items: center;
-            color: #007bff;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 24px; /* Larger font size */
-            text-underline-offset: 5px;
-            text-decoration-thickness: 2px;
-            margin-bottom: 20px; /* Added margin */
-          }
-
-          .continue-shopping:hover {
-            text-decoration: underline;
-          }
-
-          .continue-shopping svg {
-            margin-right: 10px;
-            width: 32px; /* Larger icon size */
-            height: 32px; /* Larger icon size */
-          }
-
-          .circle-arrow {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px; /* Circle size */
-            height: 40px; /* Circle size */
-            border-radius: 50%;
-            background-color: #007bff; /* Circle background color */
-            color: white; /* Arrow color */
-          }
-
-          .items-container {
-            width: 100%;
-            margin-bottom: 20px;
-          }
-
-          @media (min-width: 768px) {
-            .items-container {
-              width: 60%;
-            }
-          }
-
-          .payment-container {
-            width: 100%;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #e7f3ff; /* Light blue background */
-          }
-
-          @media (min-width: 768px) {
-            .payment-container {
-              width: 35%;
-            }
-          }
-
-          .item {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            background-color: #000;
-            color: white;
-          }
-
-          .item + .item {
-            margin-top: 10px; /* Gap between items */
-          }
-
-          .item-image {
-            width: 100px;
-            height: 100px;
-            border-radius: 5px;
-          }
-
-          .item-details {
-            flex-grow: 1;
-            display: flex;
-            justify-content: space-between;
-            margin-left: 20px;
-          }
-
-          .item-details p {
-            margin: 0 10px;
-          }
-
-          .total-amount {
-            font-size: 20px;
-            font-weight: bold;
-            margin-top: 20px;
-            text-align: right;
-          }
-
-          form {
-            display: flex;
-            flex-direction: column;
-          }
-
-          form div {
-            margin-bottom: 10px;
-          }
-
-          label {
-            display: block;
-            margin-bottom: 5px;
-          }
-
-          input[type="text"] {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-          }
-
-          .payment-options {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-          }
-
-          .payment-options input[type="radio"] {
-            margin-right: 5px;
-          }
-
-          .expiration-cvv {
-            display: flex;
-            justify-content: space-between;
-          }
-
-          .expiration-cvv div {
-            width: 48%;
-          }
-
-          button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-          }
-
-          button:hover {
-            background-color: #0056b3;
-          }
-
-          h2 {
-            color: #007bff; /* Blue color for headings */
-            margin-top: 20px; /* Added margin */
-          }
-        `}</style>
-
-        <Link to="/" className="continue-shopping">
-          <div className="circle-arrow">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M15 19L8 12L15 5"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+        {showInvoice && (
+          <div id="invoice-container">
+            <Invoice
+              ref={invoiceRef}
+              cartItems={cartItems}
+              userData={userData}
+              totalAmount={calculateTotal()}
+            />
           </div>
-          Continue Shopping
-        </Link>
-
-        <div className="items-container">
-          <h2>Order Summary</h2>
-          {items.map((item) => (
-            <div className="item" key={item.id}>
-              <img src={item.img} alt={item.name} className="item-image" />
-              <div className="item-details">
-                <p>{item.name}</p>
-                <p>Price: Rs.{item.price.toFixed(2)}</p>
-                <p>Quantity: {item.qty}</p>
-                <p>Subtotal: Rs.{(item.price * item.qty).toFixed(2)}</p>
-              </div>
-            </div>
-          ))}
-          <div className="total-amount">Total: Rs.{calculateTotal()}</div>
-        </div>
-
-        <div className="payment-container">
-          <h2>Payment Details</h2>
-          <p>
-            Please select your payment type and enter your payment details
-            below:
-          </p>
-          <div className="payment-options">
-            <label>
-              <input
-                type="radio"
-                name="paymentType"
-                value="credit"
-                checked={paymentType === "credit"}
-                onChange={handlePaymentTypeChange}
-              />
-              Credit
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="paymentType"
-                value="cash"
-                checked={paymentType === "cash"}
-                onChange={handlePaymentTypeChange}
-              />
-              Cash
-            </label>
-          </div>
-          {paymentType === "credit" && (
-            <form onSubmit={handleSubmit}>
-              <div>
-                <label htmlFor="cardNumber">Card Number:</label>
-                <input type="text" id="cardNumber" name="cardNumber" required />
-              </div>
-              <div className="expiration-cvv">
-                <div>
-                  <label htmlFor="expiryDate">Expiry Date:</label>
-                  <input
-                    type="text"
-                    id="expiryDate"
-                    name="expiryDate"
-                    placeholder="MM/YY"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="cvv">CVV:</label>
-                  <input type="text" id="cvv" name="cvv" required />
-                </div>
-              </div>
-              <div>
-                <label htmlFor="cardName">Name on Card:</label>
-                <input type="text" id="cardName" name="cardName" required />
-              </div>
-              <button type="submit">Checkout</button>
-            </form>
-          )}
-          {paymentType === "cash" && (
-            <button onClick={handleSubmit}>Checkout</button>
-          )}
-        </div>
+        )}
       </div>
-    </div>
+    </>
   );
 };
 

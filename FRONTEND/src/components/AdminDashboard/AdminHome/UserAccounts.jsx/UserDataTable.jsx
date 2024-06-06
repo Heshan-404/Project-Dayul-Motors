@@ -14,6 +14,7 @@ import AcUnitIcon from "@mui/icons-material/AcUnit";
 import ConfirmDialog from "./ConfirmDialog";
 import SnackbarAlert from "./SnackbarAlert";
 import axiosInstance from "../../../../axiosConfig";
+import CircularProgress from '@mui/material/CircularProgress'; // Import CircularProgress
 
 export default function UserDataTable(props) {
   const [dataSet, setDataSet] = useState([]);
@@ -24,12 +25,14 @@ export default function UserDataTable(props) {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [dialogAction, setDialogAction] = useState(""); // 'activate' or 'freeze'
   const [editingRow, setEditingRow] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     fetchUserData();
   }, []);
 
   const fetchUserData = async () => {
+    setIsLoading(true); // Set loading to true before fetching data
     try {
       const response = await axiosInstance.get(
         "/auth/admin/protected/fetch_all_users",
@@ -40,9 +43,11 @@ export default function UserDataTable(props) {
         }
       );
       setDataSet(response.data.users);
+      setIsLoading(false); // Set loading to false after fetching data
     } catch (error) {
       console.error("Error fetching user data:", error);
       showSnackbar("Failed to fetch user data.", "error");
+      setIsLoading(false); // Set loading to false even on error
     }
   };
 
@@ -161,193 +166,203 @@ export default function UserDataTable(props) {
 
   return (
     <div className="table-container">
-      <TableContainer component={Paper}>
-        <Table className="table" aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell style={{ textAlign: "center", width: "200px" }}>
-                User ID
-              </TableCell>
-              <TableCell style={{ textAlign: "center" }}>Full Name</TableCell>
-              <TableCell style={{ textAlign: "center", width: "100px" }}>
-                Email
-              </TableCell>
+      {/* Display loading indicator if isLoading is true */}
+      {isLoading && (
+        <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+          <CircularProgress />
+        </div>
+      )}
 
-              <TableCell style={{ textAlign: "center" }}>
-                Phone Number
-              </TableCell>
-              <TableCell style={{ textAlign: "center" }}>Address</TableCell>
-              <TableCell style={{ textAlign: "center" }}>Status</TableCell>
+      {/* Show the table if isLoading is false */}
+      {!isLoading && (
+        <TableContainer component={Paper}>
+          <Table className="table" aria-label="simple table">
+            <TableHead>
+              <TableRow>
+                <TableCell style={{ textAlign: "center", width: "200px" }}>
+                  User ID
+                </TableCell>
+                <TableCell style={{ textAlign: "center" }}>Full Name</TableCell>
+                <TableCell style={{ textAlign: "center", width: "100px" }}>
+                  Email
+                </TableCell>
 
-              <TableCell style={{ textAlign: "center", width: "240px" }}>
-                Actions
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredDataSet.map((row) => (
-              <TableRow
-                key={row.userid}
-                sx={{ "&:last-child td, &:last-child th": { borderTop: 1 } }}
-              >
-                {/* Render row data normally if not editing */}
-                {editingRow?.userid !== row.userid ? (
-                  <>
-                    <TableCell
-                      component="th"
-                      scope="row"
-                      style={{ textAlign: "center" }}
-                    >
-                      {row.userid}
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      {row.fullname}
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      {row.email}
-                    </TableCell>
+                <TableCell style={{ textAlign: "center" }}>
+                  Phone Number
+                </TableCell>
+                <TableCell style={{ textAlign: "center" }}>Address</TableCell>
+                <TableCell style={{ textAlign: "center" }}>Status</TableCell>
 
-                    <TableCell style={{ textAlign: "center" }}>
-                      {row.phoneno}
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      {row.address}
-                    </TableCell>
-                    <TableCell
-                      style={{
-                        textAlign: "center",
-                        color: row.status === "active" ? "green" : "red",
-                      }}
-                    >
-                      {row.status}
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      <div className="d-flex">
-                        <Button
-                          variant="contained"
-                          color="warning"
-                          sx={{ marginRight: "10px", width: "100%" }}
-                          startIcon={<EditIcon />}
-                          onClick={() => handleEdit(row)}
-                        >
-                          Edit
-                        </Button>
-                        {row.status === "active" ? (
+                <TableCell style={{ textAlign: "center", width: "240px" }}>
+                  Actions
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredDataSet.map((row) => (
+                <TableRow
+                  key={row.userid}
+                  sx={{ "&:last-child td, &:last-child th": { borderTop: 1 } }}
+                >
+                  {/* Render row data normally if not editing */}
+                  {editingRow?.userid !== row.userid ? (
+                    <>
+                      <TableCell
+                        component="th"
+                        scope="row"
+                        style={{ textAlign: "center" }}
+                      >
+                        {row.userid}
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        {row.fullname}
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        {row.email}
+                      </TableCell>
+
+                      <TableCell style={{ textAlign: "center" }}>
+                        {row.phoneno}
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        {row.address}
+                      </TableCell>
+                      <TableCell
+                        style={{
+                          textAlign: "center",
+                          color: row.status === "active" ? "green" : "red",
+                        }}
+                      >
+                        {row.status}
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        <div className="d-flex">
+                          <Button
+                            variant="contained"
+                            color="warning"
+                            sx={{ marginRight: "10px", width: "100%" }}
+                            startIcon={<EditIcon />}
+                            onClick={() => handleEdit(row)}
+                          >
+                            Edit
+                          </Button>
+                          {row.status === "active" ? (
+                            <Button
+                              variant="contained"
+                              color="error"
+                              sx={{ width: "100%" }}
+                              startIcon={<AcUnitIcon />}
+                              onClick={() =>
+                                handleClickOpen(row.userid, "freeze")
+                              }
+                            >
+                              Freeze
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="contained"
+                              sx={{ width: "100%" }}
+                              startIcon={<AcUnitIcon />}
+                              onClick={() =>
+                                handleClickOpen(row.userid, "activate")
+                              }
+                            >
+                              Unfreeze
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </>
+                  ) : (
+                    // Render editable fields if editing
+                    <>
+                      <TableCell
+                        component="th"
+                        scope="row"
+                        style={{ textAlign: "center" }}
+                      >
+                        {row.userid}
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        <TextField
+                          fullWidth
+                          defaultValue={row.fullname}
+                          onChange={(e) =>
+                            setEditingRow({
+                              ...editingRow,
+                              fullname: e.target.value,
+                            })
+                          }
+                        />
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        <TextField
+                          fullWidth
+                          defaultValue={row.email}
+                          onChange={(e) =>
+                            setEditingRow({
+                              ...editingRow,
+                              email: e.target.value,
+                            })
+                          }
+                        />
+                      </TableCell>
+
+                      <TableCell style={{ textAlign: "center" }}>
+                        <TextField
+                          fullWidth
+                          defaultValue={row.phoneno}
+                          onChange={(e) =>
+                            setEditingRow({
+                              ...editingRow,
+                              phoneno: e.target.value,
+                            })
+                          }
+                        />
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        <TextField
+                          fullWidth
+                          defaultValue={row.address}
+                          onChange={(e) =>
+                            setEditingRow({
+                              ...editingRow,
+                              address: e.target.value,
+                            })
+                          }
+                        />
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        {editingRow.status}
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        <div className="d-flex">
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            sx={{ marginRight: "10px", width: "100%" }}
+                            onClick={handleSave}
+                          >
+                            Save
+                          </Button>
                           <Button
                             variant="contained"
                             color="error"
                             sx={{ width: "100%" }}
-                            startIcon={<AcUnitIcon />}
-                            onClick={() =>
-                              handleClickOpen(row.userid, "freeze")
-                            }
+                            onClick={() => setEditingRow(null)}
                           >
-                            Freeze
+                            Cancel
                           </Button>
-                        ) : (
-                          <Button
-                            variant="contained"
-                            sx={{ width: "100%" }}
-                            startIcon={<AcUnitIcon />}
-                            onClick={() =>
-                              handleClickOpen(row.userid, "activate")
-                            }
-                          >
-                            Unfreeze
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </>
-                ) : (
-                  // Render editable fields if editing
-                  <>
-                    <TableCell
-                      component="th"
-                      scope="row"
-                      style={{ textAlign: "center" }}
-                    >
-                      {row.userid}
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      <TextField
-                        fullWidth
-                        defaultValue={row.fullname}
-                        onChange={(e) =>
-                          setEditingRow({
-                            ...editingRow,
-                            fullname: e.target.value,
-                          })
-                        }
-                      />
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      <TextField
-                        fullWidth
-                        defaultValue={row.email}
-                        onChange={(e) =>
-                          setEditingRow({
-                            ...editingRow,
-                            email: e.target.value,
-                          })
-                        }
-                      />
-                    </TableCell>
-
-                    <TableCell style={{ textAlign: "center" }}>
-                      <TextField
-                        fullWidth
-                        defaultValue={row.phoneno}
-                        onChange={(e) =>
-                          setEditingRow({
-                            ...editingRow,
-                            phoneno: e.target.value,
-                          })
-                        }
-                      />
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      <TextField
-                        fullWidth
-                        defaultValue={row.address}
-                        onChange={(e) =>
-                          setEditingRow({
-                            ...editingRow,
-                            address: e.target.value,
-                          })
-                        }
-                      />
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      {editingRow.status}
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      <div className="d-flex">
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          sx={{ marginRight: "10px", width: "100%" }}
-                          onClick={handleSave}
-                        >
-                          Save
-                        </Button>
-                        <Button
-                          variant="contained"
-                          color="error"
-                          sx={{ width: "100%" }}
-                          onClick={() => setEditingRow(null)}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </>
-                )}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                        </div>
+                      </TableCell>
+                    </>
+                  )}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
       <ConfirmDialog
         open={openConfirmDialog}
