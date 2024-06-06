@@ -12,19 +12,14 @@ import {
   DialogActions,
   Button,
   CircularProgress,
-<<<<<<< HEAD
   Skeleton,
 } from "@mui/material";
- // Import MUI components
-=======
-} from "@mui/material"; // Import MUI components
->>>>>>> d75885bff4c0a86a699eb5d2e6e43d316ea27392
+// Import MUI components
 
 function MainItem() {
   const [quantity, setQuantity] = useState(1);
   const [productData, setProductData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-<<<<<<< HEAD
   const [isCartPopupVisible, setIsCartPopupVisible] = useState(false);
   const [isCartAdded, setIsCartAdded] = useState(false);
   const [isCartAdding, setIsCartAdding] = useState(false); // State for loading indicator
@@ -35,14 +30,6 @@ function MainItem() {
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
   const mainImageRef = useRef(null);
   const sideImageRef = useRef(null);
-=======
-  const [isCartPopupVisible, setIsCartPopupVisible] = useState(false); // State for confirmation popup
-  const [isCartAdding, setIsCartAdding] = useState(false); // State for loading indicator
-  const [isCartAdded, setIsCartAdded] = useState(false); // State for success popup
-  const [errorMessage, setErrorMessage] = useState(null); // State for error messages
-  const [showStockError, setShowStockError] = useState(false); // State for stock error popup
-  const [stockErrorMessage, setStockErrorMessage] = useState(null); // State for stock error message
->>>>>>> d75885bff4c0a86a699eb5d2e6e43d316ea27392
   const { productID } = useParams();
   const navigate = useNavigate();
 
@@ -82,11 +69,6 @@ function MainItem() {
     }
     // 2. Show loading indicator
     setIsCartAdding(true);
-<<<<<<< HEAD
-=======
-
-    // 3. Send data to the backend API
->>>>>>> d75885bff4c0a86a699eb5d2e6e43d316ea27392
     try {
       const response = await axiosInstance.post(
         "/shop/cart",
@@ -102,10 +84,6 @@ function MainItem() {
         }
       );
       console.log(response);
-<<<<<<< HEAD
-=======
-
->>>>>>> d75885bff4c0a86a699eb5d2e6e43d316ea27392
       // 4. Hide loading indicator and show success popup
       setIsCartAdding(false);
       setIsCartAdded(true);
@@ -114,10 +92,6 @@ function MainItem() {
       setTimeout(() => {
         setIsCartAdded(false);
       }, 3000);
-<<<<<<< HEAD
-=======
-
->>>>>>> d75885bff4c0a86a699eb5d2e6e43d316ea27392
       // 5. Hide the confirmation dialog
       setIsCartPopupVisible(false);
     } catch (error) {

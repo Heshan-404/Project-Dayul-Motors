@@ -5,10 +5,7 @@ import { useState, useEffect } from "react";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../../axiosConfig";
-import {
-  CircularProgress,
-  Button,
-} from "@mui/material";
+import { CircularProgress, Button } from "@mui/material";
 import NavigationBar from "../../components/Homepage/NavigationBar";
 import Footer from "../../components/Homepage/Footer";
 
@@ -110,7 +107,11 @@ export default function Cart() {
       );
       const updatedCartData = cartData.map((item) =>
         item.cartid === cartid && item.productid === productid
-          ? { ...item, quantity: parseInt(newQty, 10), totalItemPrice: item.price * parseInt(newQty, 10) }
+          ? {
+              ...item,
+              quantity: parseInt(newQty, 10),
+              totalItemPrice: item.price * parseInt(newQty, 10),
+            }
           : item
       );
       setCartData(updatedCartData);
@@ -175,7 +176,7 @@ export default function Cart() {
     return (
       <div
         className="d-flex justify-content-center align-items-center"
-        style={{ minHeight: "50vh", backgroundColor: "#f2f2f2" }} 
+        style={{ minHeight: "50vh", backgroundColor: "#f2f2f2" }}
       >
         <CircularProgress size={60} /> {/* Increased size for visibility */}
       </div>
@@ -341,11 +342,7 @@ export default function Cart() {
             top: 20,
           }}
         >
-<<<<<<< HEAD
-          Shopping Cart
-=======
           Continue Shopping
->>>>>>> d75885bff4c0a86a699eb5d2e6e43d316ea27392
         </Button>
         <div className="cart-header">
           <h1 onClick={handleNavigateToShop} style={{ cursor: "pointer" }}>
