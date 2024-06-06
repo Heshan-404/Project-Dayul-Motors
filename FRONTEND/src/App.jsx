@@ -22,7 +22,7 @@ import ResponsiveDrawer from "./pages/Test2";
 import Checkout from "./pages/ShoppingCart/Checkout";
 import Cart from "./pages/ShoppingCart/ShoppingCart";
 import Profile from "./pages/Profile/Profile";
-import Invoice from "./pages/ShoppingCart/Invoice";
+import OrderSuccessPage from "./pages/OrderSucces/OrderSuccess";
 
 function App() {
   useEffect(() => {
@@ -54,7 +54,7 @@ function App() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/test" element={<ResponsiveDrawer />}></Route>
         <Route path="/profile" element={<Profile />}></Route>
-        <Route path="/test2" element={<Invoice />}></Route>
+        <Route path="/order-success" element={<OrderSuccessPage />}></Route>
       </Routes>
     </BrowserRouter>
   );

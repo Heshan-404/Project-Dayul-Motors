@@ -10,6 +10,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Button, TextField } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete"; // Import DeleteIcon
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -19,7 +20,7 @@ import AcUnitIcon from "@mui/icons-material/AcUnit"; // Snow icon
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import axiosInstance from "../../../../axiosConfig";
-import CircularProgress from '@mui/material/CircularProgress'; // Import CircularProgress
+import CircularProgress from "@mui/material/CircularProgress"; // Import CircularProgress
 
 // Separate component for Confirmation Dialog
 const ConfirmDialog = ({ open, onClose, onConfirm, title, message }) => {
@@ -181,17 +182,13 @@ export default function UserDataTable(props) {
         }
       );
 
-      // Update the local state with the new data
       setDataSet((prevDataSet) =>
         prevDataSet.map((row) =>
           row.adminid === editingRow.adminid ? editingRow : row
         )
       );
-      // Exit editing mode
       setEditingRow(null);
-      // Refresh the data from the backend
       fetchUserData();
-      // Show a success message to the user
       showSnackbar("Changes saved successfully!", "success");
     } catch (error) {
       console.error("Error saving changes:", error);
@@ -199,7 +196,27 @@ export default function UserDataTable(props) {
     }
   };
 
-  // Filter data based on search term
+  const handleDelete = async (adminid) => {
+    try {
+      const response = await axiosInstance.delete(
+        `/auth/admin/protected/admin_delete/${adminid}`,
+        {
+          headers: {
+            Authorization: `${localStorage.getItem("adminToken")}`,
+          },
+        }
+      );
+      console.log(response.data);
+      setDataSet((prevDataSet) =>
+        prevDataSet.filter((row) => row.adminid !== adminid)
+      );
+      showSnackbar("Admin deleted successfully!", "success");
+    } catch (error) {
+      console.error("Error deleting admin:", error);
+      showSnackbar("Failed to delete admin.", "error");
+    }
+  };
+
   const filteredDataSet = dataSet.filter((row) => {
     if (props.searchTerm === "") {
       return true;
@@ -246,7 +263,13 @@ export default function UserDataTable(props) {
 
       {/* Show loading animation if isLoading is true */}
       {isLoading && (
-        <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "20px",
+          }}
+        >
           <CircularProgress />
         </div>
       )}
@@ -327,26 +350,23 @@ export default function UserDataTable(props) {
                             >
                               Edit
                             </Button>
-                            {row.status === "active" ? (
-                              <Button
-                                variant="contained"
-                                color="error"
-                                sx={{ width: "100%" }}
-                                startIcon={<AcUnitIcon />}
-                                onClick={() => handleClickOpen(row.adminid)}
-                              >
-                                Freeze
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="contained"
-                                sx={{ width: "100%" }}
-                                startIcon={<AcUnitIcon />}
-                                onClick={() => handleClickOpen(row.adminid)}
-                              >
-                                Unfreeze
-                              </Button>
-                            )}
+                            <Button
+                              variant="contained"
+                              color="error"
+                              sx={{ width: "100%" }}
+                              startIcon={<AcUnitIcon />}
+                              onClick={() => handleClickOpen(row.adminid)}
+                            >
+                              Freeze
+                            </Button>
+                            <Button
+                              variant="contained"
+                              sx={{ width: "100%" }}
+                              startIcon={<DeleteIcon />}
+                              onClick={() => handleDelete(row.adminid)} // Add onClick for delete
+                            >
+                              Delete
+                            </Button>
                           </div>
                         </TableCell>
                       )}
@@ -447,20 +467,16 @@ export default function UserDataTable(props) {
         open={openFreezeDialog}
         onClose={handleCloseFreezeDialog}
         onConfirm={
-          selectedadminid &&
-          dataSet.find((row) => row.adminid === selectedadminid).status ===
-            "active"
+          selectedadminid && selectedadminid.status === "active"
             ? handleFreeze
             : handleUnfreeze
         }
-        title="Confirm Action"
-        message={
-          selectedadminid &&
-          dataSet.find((row) => row.adminid === selectedadminid).status ===
-            "active"
-            ? "Are you sure you want to freeze this user?"
-            : "Are you sure you want to unfreeze this user?"
-        }
+        title={`Are you sure you want to ${
+          selectedadminid && selectedadminid.status === "active"
+            ? "freeze"
+            : "unfreeze"
+        } this admin?`}
+        message={`Admin ID: ${selectedadminid}`}
       />
 
       {/* Snackbar Alert */}
