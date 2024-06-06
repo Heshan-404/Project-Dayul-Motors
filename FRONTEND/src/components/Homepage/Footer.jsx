@@ -55,28 +55,28 @@ export default function Footer() {
             <h5 className="fw-bold fs-3 text-white">Brands</h5>
             <ul className="nav flex-column">
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  Home
+                <a href="/shop" className="nav-link p-0 text-white">
+                  BAJAJ
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  Features
+                <a href="/shop" className="nav-link p-0 text-white">
+                  SUZUKI
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  Pricing
+                <a href="/shop" className="nav-link p-0 text-white">
+                  YAMAHA
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  FAQs
+                <a href="/shop" className="nav-link p-0 text-white">
+                  DEMAK
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  About
+                <a href="/shop" className="nav-link p-0 text-white">
+                  TVS
                 </a>
               </li>
             </ul>
@@ -88,28 +88,28 @@ export default function Footer() {
             <h5 className="fw-bold fs-3 text-white">Categories</h5>
             <ul className="nav flex-column">
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  Home
+                <a href="/shop" className="nav-link p-0 text-white">
+                  Bearing
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  Features
+                <a href="/shop" className="nav-link p-0 text-white">
+                  Engine Prats
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  Pricing
+                <a href="/shop" className="nav-link p-0 text-white">
+                  Oil and Lubricants
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  FAQs
+                <a href="/shop" className="nav-link p-0 text-white">
+                  Brake Discs
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  About
+                <a href="/shop" className="nav-link p-0 text-white">
+                  Chain Sprocket Kit
                 </a>
               </li>
             </ul>
@@ -124,12 +124,12 @@ export default function Footer() {
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="/Sign-in" className="nav-link p-0 text-white">
+                <a href="/Signin" className="nav-link p-0 text-white">
                   Sign-in
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="/Sign-up" className="nav-link p-0 text-white">
+                <a href="/Signup" className="nav-link p-0 text-white">
                   Sign-up
                 </a>
               </li>
@@ -139,8 +139,8 @@ export default function Footer() {
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="/Contact-Us" className="nav-link p-0 text-white">
-                  Contact US
+                <a href="/about-us" className="nav-link p-0 text-white">
+                  About US
                 </a>
               </li>
               <li className="nav-item mb-2">
