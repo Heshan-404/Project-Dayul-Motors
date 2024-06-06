@@ -3,18 +3,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import NavigationBar from "../../Homepage/NavigationBar";
 import Footer from "../../Homepage/Footer";
-import image from "../../../assets/Project Images/Dayul Motors/Categories/Bearing.jpg";
 import all from "../../../assets/Project Images/Dayul Motors/ShopSideBar/select-all.png";
 import list from "../../../assets/Project Images/Dayul Motors/ShopSideBar/list.webp";
 import search from "../../../assets/Project Images/Dayul Motors/HomePage/searchIcon.png";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 
 import CircularProgress from "@mui/material/CircularProgress";
-import Pagination from "@mui/material/Pagination";
-import Stack from "@mui/material/Stack";
 import Background from "../Background/Background";
 import axiosInstance from "../../../axiosConfig";
-import axios from "axios";
 
 // BrandImagesBar Component
 const BrandImagesBar = ({ onBrandClick, selectedBrand }) => {
@@ -381,7 +377,7 @@ function ShopSideBar() {
         setIsLoading(false); // Set isLoading to false even if there's an error
       }
     };
-    fetchData(); 
+    fetchData();
   }, []);
 
   return (

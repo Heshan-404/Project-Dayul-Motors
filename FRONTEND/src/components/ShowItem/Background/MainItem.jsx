@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Link } from "react-router-dom";
 import "../../../index.css";
@@ -7,8 +7,10 @@ import "../../../index.css";
 function MainItem(props) {
   const [quantity, setQuantity] = useState(1);
   const availableQuantity = props.quantity;
-  const [isHovered, setIsHovered] = useState(false);
-  const [isHoveredCart, setIsHoveredCart] = useState(false);
+  const [isHoveredImage, setIsHoveredImage] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+  const mainImageRef = useRef(null);
+  const sideImageRef = useRef(null);
 
   const handleQuantityChange = (change) => {
     setQuantity((prevQuantity) => {
@@ -23,21 +25,38 @@ function MainItem(props) {
     });
   };
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
+  const handleMouseEnterImage = () => {
+    setIsHoveredImage(true);
   };
 
-  const handleMouseLeave = () => {
-    setIsHovered(false);
+  const handleMouseLeaveImage = () => {
+    setIsHoveredImage(false);
   };
 
-  const handleMouseEnterCart = () => {
-    setIsHoveredCart(true);
+  const handleMouseMove = (e) => {
+    const rect = mainImageRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setZoomPosition({ x, y });
   };
 
-  const handleMouseLeaveCart = () => {
-    setIsHoveredCart(false);
-  };
+  useEffect(() => {
+    if (sideImageRef.current && isHoveredImage) {
+      const sideImageRect = sideImageRef.current.getBoundingClientRect();
+      const xPercent = zoomPosition.x / mainImageRef.current.width;
+      const yPercent = zoomPosition.y / mainImageRef.current.height;
+
+      // Calculate zoom scale based on mouse position
+      const zoomScale = 2; // Fixed max zoom 2
+
+      // Calculate translation for the zoomed area
+      const zoomX = (sideImageRect.width * xPercent) / zoomScale;
+      const zoomY = (sideImageRect.height * yPercent) / zoomScale;
+
+      // Apply zoom and translation to the side image itself
+      sideImageRef.current.style.transform = `translate(-${zoomX}px, -${zoomY}px) scale(${zoomScale})`;
+    }
+  }, [zoomPosition, isHoveredImage]);
 
   return (
     <div
@@ -45,15 +64,36 @@ function MainItem(props) {
       style={{ maxWidth: "700px", marginLeft: "130px" }}
     >
       {/* Image */}
-      <div style={{ border: "1px solid black" }}>
+      <div
+        className="image-container"
+        onMouseEnter={handleMouseEnterImage}
+        onMouseLeave={handleMouseLeaveImage}
+        onMouseMove={handleMouseMove}
+      >
         <Link to={`/Shop/product/${encodeURIComponent(props.id)}`}>
           <img
             src={props.image}
-            className="img-fluid"
+            className="img-fluid main-image"
             alt="..."
-            style={{ cursor: "pointer", width: "350px" }}
+            style={{ cursor: "zoom-in", width: "350px" }}
+            ref={mainImageRef}
           />
         </Link>
+        {/* Display side image on hover */}
+        {isHoveredImage && (
+          <div className="side-image-card">
+            <img
+              src={props.image}
+              alt="Side image"
+              className="side-image"
+              ref={sideImageRef}
+              style={{
+                opacity: 1,
+                transition: "opacity 0.3s ease, transform 0.3s ease",
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Content (right side) */}
@@ -94,23 +134,14 @@ function MainItem(props) {
           </span>
         </div>
         <div className="mt-4 d-flex align-items-center">
-          {/* Using buttons with more prominent styling */}
           <button
-            className={`btn btn-lg mt-2 ${
-              isHovered ? "btn-success" : "btn-primary"
-            } custom-button`}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            className="btn btn-lg mt-2 custom-button"
             style={{ width: "150px", backgroundColor: "red" }}
           >
-            {isHovered ? "BUY NOW" : "Buy Now"}
+            Buy Now
           </button>
           <button
-            className={`btn btn-lg mt-2 ${
-              isHoveredCart ? "btn-success" : "btn-primary"
-            } custom-button`}
-            onMouseEnter={handleMouseEnterCart}
-            onMouseLeave={handleMouseLeaveCart}
+            className="btn btn-lg mt-2 custom-button add-to-cart-button"
             style={{
               marginLeft: "20px",
               width: "250px",
@@ -120,7 +151,7 @@ function MainItem(props) {
             <ShoppingCartIcon
               style={{ fontSize: "1.2em", marginRight: "5px" }}
             />
-            {isHoveredCart ? "ADD TO CART" : "Add to cart"}
+            Add to cart
           </button>
         </div>
         {/* Inline CSS within the component */}
@@ -137,14 +168,6 @@ function MainItem(props) {
             background-color: #e0e0e0; /* Slightly darker gray on hover */
           }
 
-          .btn-lg.btn-success {
-            color: white; 
-          }
-
-          .btn-lg.btn-primary {
-            color: black; 
-          }
-
           .quantity-section { 
             border: 1px solid #ccc; 
             padding: 0px; 
@@ -159,6 +182,42 @@ function MainItem(props) {
           .available-quantity {
             font-style: italic;
             color: #888;
+          }
+
+          .image-container {
+            position: relative; /* To position the side image */
+            width: 350px; /* Match image width */
+          }
+
+          .main-image {
+            border: 2px solid #ccc; /* Add border to main image */
+            cursor: zoom-in; /* Change cursor to zoom-in */
+          }
+
+          .main-image:hover {
+            cursor: pointer; /* Change cursor to pointer on hover */
+          }
+          .side-image-card {
+            position: absolute;
+            top: 0;
+            left: 270px; /* Adjust this value to position the card correctly */
+            width: 280px; /* Match the width of the main image */
+            height: 260px; /* Match the height of the main image */
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: white;
+            overflow: hidden;
+
+          .side-image {
+            width: 100%;
+            height: 100%;
+            opacity: 1;
+            transition: opacity 0.3s ease, transform 0.3s ease; 
+            will-change: transform; /* Improves performance for transform transitions */
+          }
+
+          .add-to-cart-button {
+            border: 2px solid #ccc; /* Add border to "Add to cart" button */
           }
         `}</style>
       </div>
