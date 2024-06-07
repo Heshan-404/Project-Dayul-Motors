@@ -9,6 +9,7 @@ import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import { useEffect, useState } from "react";
 import { CircularProgress } from "@mui/material";
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 
 import axiosInstance from "../../../axiosConfig";
 
@@ -19,6 +20,24 @@ const StyledMainContainer = styled(Box)(({ theme }) => ({
   marginTop: "64px",
 }));
 
+const ScrollToTopButton = styled("button")(({ theme }) => ({
+  position: "fixed",
+  bottom: "20px",
+  right: "20px",
+  backgroundColor: "#007bff", // Blue background
+  color: "#fff",
+  borderRadius: "50%",
+  padding: "10px",
+  border: "none",
+  cursor: "pointer",
+  display: "none", // Hide initially
+
+  // Show the button when the user scrolls down
+  "&[data-visible='true']": {
+    display: "block"
+  }
+}));
+
 export default function MainPage() {
   const params = useParams();
   const itemId = params.itemId;
@@ -27,8 +46,36 @@ export default function MainPage() {
   const [sameCategoryProducts, setSameCategoryProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [categoryName, setCategoryName] = useState(null); // State for category name
-  const [categoryID, setCategoryID] = useState(null); // State for category name
+  const [categoryID, setCategoryID] = useState(null); // State for category ID
   const navigate = useNavigate();
+
+  // Function to scroll to the top
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth' // Smooth scrolling
+    });
+  };
+
+  // Function to handle scroll event
+  const handleScroll = () => {
+    const scrollTop = window.pageYOffset;
+    // Show the button when the user scrolls down 100px
+    const scrollToTopButton = document.querySelector('.scroll-to-top'); 
+    if (scrollTop > 100) {
+      scrollToTopButton.setAttribute('data-visible', 'true'); 
+    } else {
+      scrollToTopButton.setAttribute('data-visible', 'false');
+    }
+  };
+
+  useEffect(() => {
+    // Add event listener for scroll
+    window.addEventListener('scroll', handleScroll);
+
+    // Clean up the event listener
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -49,7 +96,6 @@ export default function MainPage() {
         setAllProducts(allProductsResponse.data);
 
         // Fetch category name
-        console.log(category);
         const categoryNameResponse = await axiosInstance.get(
           `/shop/categories/${category}`
         );
@@ -122,6 +168,10 @@ export default function MainPage() {
           <h2 style={{ marginLeft: "130px" }}>All Other Products</h2>
           <Background products={allProducts} id={itemId} />
         </div>
+        {/* Add the scroll to top button */}
+        <ScrollToTopButton className="scroll-to-top" onClick={scrollToTop}>
+          <ArrowUpwardIcon />
+        </ScrollToTopButton>
       </StyledMainContainer>
       <Footer />
     </div>
