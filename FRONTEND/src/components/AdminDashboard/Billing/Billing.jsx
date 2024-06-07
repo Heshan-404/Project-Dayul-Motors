@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import axiosInstance from "../../../axiosConfig";
 
-const BillingSystem = () => {
+export default function BillingSystem() {
   const [searchMobile, setSearchMobile] = useState("");
   const [customerData, setCustomerData] = useState(null);
   const [showRegisterDialog, setShowRegisterDialog] = useState(false);
@@ -33,6 +33,7 @@ const BillingSystem = () => {
   const [showAddItemDialog, setShowAddItemDialog] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [nextOrderID, setNextOrderID] = useState("");
 
   useEffect(() => {
     // Fetch all products initially
@@ -79,7 +80,6 @@ const BillingSystem = () => {
   const handleRegisterUser = async () => {
     try {
       const userDetails = {
-        userid: `USER${Date.now()}`,
         fullname: customerName,
         email: customerEmail,
         phoneno: searchMobile,
@@ -152,39 +152,55 @@ const BillingSystem = () => {
       alert("Please add items to the order before submitting.");
       return;
     }
+    console.log("====================================");
+    console.log(customerData.userid);
+    console.log("====================================");
+    console.log("====================================");
+    console.log(items);
+    console.log("====================================");
 
     try {
       const orderResponse = await axiosInstance.post(
         "/local_billing/create_order",
         {
-          orderid: `ORD${Date.now()}`,
           userid: customerData.userid,
           paymentmethod: "Cash", // Example payment method
           totalamount: totalAmount,
+          items: items.map((item) => ({
+            productid: item.itemCode,
+            price: item.itemUnitprice,
+            quantity: item.itemQuantity,
+          })),
         }
       );
 
       const orderid = orderResponse.data.orderid;
-
-      await axiosInstance.post("/local_billing/add_order_items", {
-        orderid,
-        items: items.map((item) => ({
-          orderitemid: `ORDITEM${Date.now() + item.id}`,
-          productid: item.itemCode,
-          price: item.itemUnitprice,
-          quantity: item.itemQuantity,
-        })),
-      });
-
       alert("Order successfully created!");
       // Reset state after successful order
       setCustomerData(null);
       setItems([]);
       setTotalAmount(0);
+      setNextOrderID(""); // Reset next order ID
     } catch (error) {
       console.error("Error submitting order:", error);
     }
   };
+
+  useEffect(() => {
+    // Fetch next order ID
+    const fetchNextOrderID = async () => {
+      try {
+        const response = await axiosInstance.get(
+          "/local_billing/next_order_id"
+        );
+        setNextOrderID(response.data.nextOrderID);
+      } catch (error) {
+        console.error("Error fetching next order ID:", error);
+      }
+    };
+
+    fetchNextOrderID();
+  }, []);
 
   return (
     <Box padding={3}>
@@ -233,7 +249,8 @@ const BillingSystem = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Product Code</TableCell>
-                <TableCell>Product Name</TableCell> <TableCell>Price</TableCell>
+                <TableCell>Product Name</TableCell>
+                <TableCell>Price</TableCell>
                 <TableCell>Available Quantity</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
@@ -396,8 +413,10 @@ const BillingSystem = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Box marginTop={3}>
+        <Typography variant="h6">Next Order ID: {nextOrderID}</Typography>
+      </Box>
     </Box>
   );
-};
-
-export default BillingSystem;
+}

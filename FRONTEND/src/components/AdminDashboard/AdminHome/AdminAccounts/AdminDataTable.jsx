@@ -10,17 +10,17 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Button, TextField } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete"; // Import DeleteIcon
+import DeleteIcon from "@mui/icons-material/Delete";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import AcUnitIcon from "@mui/icons-material/AcUnit"; // Snow icon
+import AcUnitIcon from "@mui/icons-material/AcUnit";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import axiosInstance from "../../../../axiosConfig";
-import CircularProgress from "@mui/material/CircularProgress"; // Import CircularProgress
+import CircularProgress from "@mui/material/CircularProgress";
 
 // Separate component for Confirmation Dialog
 const ConfirmDialog = ({ open, onClose, onConfirm, title, message }) => {
@@ -71,17 +71,17 @@ export default function UserDataTable(props) {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const [selectedadminid, setSelectedadminid] = useState(null);
+  const [selectedAdmin, setSelectedAdmin] = useState(null);
   const [editingRow, setEditingRow] = useState(null);
   const [adminLevel, setAdminLevel] = useState(1);
-  const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchUserData();
   }, []);
 
   const fetchUserData = async () => {
-    setIsLoading(true); // Set loading to true before fetching data
+    setIsLoading(true);
     try {
       const response = await axiosInstance.get(
         "/auth/admin/protected/details",
@@ -93,16 +93,16 @@ export default function UserDataTable(props) {
       );
       setDataSet(response.data.adminDetails);
       setAdminLevel(localStorage.getItem("adminLevel"));
-      setIsLoading(false); // Set loading to false after fetching data
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching admin data:", error);
       showSnackbar("Failed to fetch admin data.", "error");
-      setIsLoading(false); // Set loading to false even on error
+      setIsLoading(false);
     }
   };
 
-  const handleClickOpen = (adminid) => {
-    setSelectedadminid(adminid);
+  const handleClickOpen = (admin) => {
+    setSelectedAdmin(admin);
     setOpenFreezeDialog(true);
   };
 
@@ -111,11 +111,12 @@ export default function UserDataTable(props) {
     setEditingRow(null);
   };
 
-  const handleFreeze = async () => {
+  const handleFreezeUnfreeze = async () => {
+    const newStatus = selectedAdmin.status === "active" ? "freeze" : "active";
     try {
       const response = await axiosInstance.put(
-        `/auth/admin/protected/admin_freeze/${selectedadminid}`,
-        { status: "freeze" },
+        `/auth/admin/protected/admin_${newStatus}/${selectedAdmin.adminid}`,
+        { status: newStatus },
         {
           headers: {
             Authorization: `${localStorage.getItem("adminToken")}`,
@@ -125,39 +126,16 @@ export default function UserDataTable(props) {
       console.log(response.data);
       setDataSet((prevDataSet) =>
         prevDataSet.map((row) =>
-          row.adminid === selectedadminid ? { ...row, status: "freeze" } : row
+          row.adminid === selectedAdmin.adminid
+            ? { ...row, status: newStatus }
+            : row
         )
       );
       setOpenFreezeDialog(false);
-      showSnackbar("User frozen successfully!", "success");
+      showSnackbar(`User ${newStatus}d successfully!`, "success");
     } catch (error) {
-      console.error("Error freezing user:", error);
-      showSnackbar("Failed to freeze user.", "error");
-    }
-  };
-
-  const handleUnfreeze = async () => {
-    try {
-      const response = await axiosInstance.put(
-        `/auth/admin/protected/admin_unfreeze/${selectedadminid}`,
-        { status: "active" },
-        {
-          headers: {
-            Authorization: `${localStorage.getItem("adminToken")}`,
-          },
-        }
-      );
-      console.log(response.data);
-      setDataSet((prevDataSet) =>
-        prevDataSet.map((row) =>
-          row.adminid === selectedadminid ? { ...row, status: "active" } : row
-        )
-      );
-      setOpenFreezeDialog(false);
-      showSnackbar("User unfrozen successfully!", "success");
-    } catch (error) {
-      console.error("Error unfreezing user:", error);
-      showSnackbar("Failed to unfreeze user.", "error");
+      console.error(`Error ${newStatus}ing user:`, error);
+      showSnackbar(`Failed to ${newStatus} user.`, "error");
     }
   };
 
@@ -249,19 +227,16 @@ export default function UserDataTable(props) {
     <div className="table-container mt-3">
       <style>
         {`  
-          /* Optional: Prevent text wrapping for smaller screens */
           @media (max-width: 768px) {
             .table th, 
             .table td {
               white-space: nowrap;
-              font-size: 14px; /* Reduce font size for smaller screens */
+              font-size: 14px;
             }
           }
-
-  `}
+        `}
       </style>
 
-      {/* Show loading animation if isLoading is true */}
       {isLoading && (
         <div
           style={{
@@ -274,7 +249,6 @@ export default function UserDataTable(props) {
         </div>
       )}
 
-      {/* Show table data if isLoading is false */}
       {!isLoading && (
         <TableContainer style={{ width: "100%" }} component={Paper}>
           <Table className="table" aria-label="simple table">
@@ -287,7 +261,6 @@ export default function UserDataTable(props) {
                 <TableCell style={{ textAlign: "center", width: "100px" }}>
                   Email
                 </TableCell>
-
                 <TableCell style={{ textAlign: "center" }}>
                   Phone Number
                 </TableCell>
@@ -306,7 +279,6 @@ export default function UserDataTable(props) {
                   key={row.adminid}
                   sx={{ "&:last-child td, &:last-child th": { borderTop: 1 } }}
                 >
-                  {/* Render row data normally if not editing */}
                   {editingRow?.adminid !== row.adminid ? (
                     <>
                       {console.log(row)}
@@ -323,7 +295,6 @@ export default function UserDataTable(props) {
                       <TableCell style={{ textAlign: "center" }}>
                         {row.email}
                       </TableCell>
-
                       <TableCell style={{ textAlign: "center" }}>
                         {row.phoneno}
                       </TableCell>
@@ -355,15 +326,15 @@ export default function UserDataTable(props) {
                               color="error"
                               sx={{ width: "100%" }}
                               startIcon={<AcUnitIcon />}
-                              onClick={() => handleClickOpen(row.adminid)}
+                              onClick={() => handleClickOpen(row)}
                             >
-                              Freeze
+                              {row.status === "active" ? "Freeze" : "Unfreeze"}
                             </Button>
                             <Button
                               variant="contained"
-                              sx={{ width: "100%" }}
+                              sx={{ width: "100%", marginLeft: "10px" }}
                               startIcon={<DeleteIcon />}
-                              onClick={() => handleDelete(row.adminid)} // Add onClick for delete
+                              onClick={() => handleDelete(row.adminid)}
                             >
                               Delete
                             </Button>
@@ -372,7 +343,6 @@ export default function UserDataTable(props) {
                       )}
                     </>
                   ) : (
-                    // Render editable fields if editing
                     <>
                       <TableCell
                         component="th"
@@ -405,7 +375,6 @@ export default function UserDataTable(props) {
                           }
                         />
                       </TableCell>
-
                       <TableCell style={{ textAlign: "center" }}>
                         <TextField
                           fullWidth
@@ -462,24 +431,16 @@ export default function UserDataTable(props) {
         </TableContainer>
       )}
 
-      {/* Freeze/Unfreeze Confirmation Dialog  */}
       <ConfirmDialog
         open={openFreezeDialog}
         onClose={handleCloseFreezeDialog}
-        onConfirm={
-          selectedadminid && selectedadminid.status === "active"
-            ? handleFreeze
-            : handleUnfreeze
-        }
+        onConfirm={handleFreezeUnfreeze}
         title={`Are you sure you want to ${
-          selectedadminid && selectedadminid.status === "active"
-            ? "freeze"
-            : "unfreeze"
+          selectedAdmin?.status === "active" ? "freeze" : "unfreeze"
         } this admin?`}
-        message={`Admin ID: ${selectedadminid}`}
+        message={`Admin ID: ${selectedAdmin?.adminid}`}
       />
 
-      {/* Snackbar Alert */}
       <SnackbarAlert
         open={openSnackbar}
         onClose={handleSnackbarClose}
