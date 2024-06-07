@@ -8,6 +8,7 @@ import Aboutus from "../../../pages/AboutUsPage/AboutUs";
 import AdminAccountsPage from "../../../pages/AdminDashboard/AdminHome/AdminAccounts/AdminAccountsPage";
 import UserAccountsPage from "../../../pages/AdminDashboard/AdminHome/AdminAccounts/UserAccountsPage";
 import Dashboard from "./Dashboard/Dashboard";
+import Settings from "./Settings/Settings";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -96,7 +97,7 @@ export default function BasicTabs() {
         <Dashboard />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
-        <Aboutus />
+        <Settings />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
         <AdminAccountsPage />
