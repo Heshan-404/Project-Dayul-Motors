@@ -7,7 +7,6 @@ import all from "../../../assets/Project Images/Dayul Motors/ShopSideBar/select-
 import list from "../../../assets/Project Images/Dayul Motors/ShopSideBar/list.webp";
 import search from "../../../assets/Project Images/Dayul Motors/HomePage/searchIcon.png";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-
 import CircularProgress from "@mui/material/CircularProgress";
 import Background from "../Background/Background";
 import axiosInstance from "../../../axiosConfig";
