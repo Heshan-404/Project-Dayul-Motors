@@ -32,7 +32,7 @@ for your ride.`}
         <div className="col-2 pt-4"></div>
         <div className="col-4 pt-4 pe-5">
           <a
-            href="/brands"
+            href="/shop"
             style={{
               color: "black",
               fontWeight: "bold",
