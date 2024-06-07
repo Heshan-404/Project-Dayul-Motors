@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../../axiosConfig";
-import { 
-  Button, 
-  Radio, 
-  RadioGroup, 
-  FormControlLabel, 
-  FormControl, 
-  TextField, 
-  Typography, 
-  Checkbox, 
-  FormGroup, 
-  FormControlLabel as CheckboxFormControlLabel 
-} from '@mui/material';
+import {
+  Button,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  TextField,
+  Typography,
+  Checkbox,
+  FormGroup,
+  FormControlLabel as CheckboxFormControlLabel,
+} from "@mui/material";
 
 const Checkout = () => {
   const location = useLocation();
@@ -43,7 +43,7 @@ const Checkout = () => {
           setCartItems(response.data);
           console.log(cartItems);
           // Update totalAmount when cartItems changes
-          setTotalAmount(calculateTotal(response.data)); 
+          setTotalAmount(calculateTotal(response.data));
         } else {
           console.error(
             "Error fetching cart items: Empty response or invalid format."
@@ -104,11 +104,15 @@ const Checkout = () => {
         })),
       };
 
-      const response = await axiosInstance.post("/checkout", orderData);
+      const response = await axiosInstance.post("/checkout", orderData, {
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      });
       console.log("Order placed successfully:", response.data);
 
       // Redirect to success page or display a confirmation message
-      navigate("/success", { state: { orderId: response.data.orderId } });
+      navigate("/order-success", { state: { orderId: response.data.orderId } });
 
       setProcessing(false);
     } catch (error) {
@@ -131,7 +135,7 @@ const Checkout = () => {
       setCartItems(cartItems.filter((item) => item.productid !== itemId));
 
       // Update totalAmount after deleting an item
-      setTotalAmount(calculateTotal(cartItems)); 
+      setTotalAmount(calculateTotal(cartItems));
 
       // Show alert after successful deletion
       alert("Item deleted successfully!");
@@ -493,10 +497,10 @@ const Checkout = () => {
                   label="I understand that I need to visit locally to collect my order items."
                 />
               </FormGroup>
-              <Button 
-                variant="contained" 
+              <Button
+                variant="contained"
                 color="primary"
-                onClick={handleSubmit} 
+                onClick={handleSubmit}
                 disabled={!(acceptFiveDays && acceptLocalPickup)} // Enable if both are checked
               >
                 {processing ? "Processing..." : "Checkout"}
