@@ -16,7 +16,6 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import AdminDataTable from "./AdminDataTable";
 import AdminRegister from "./AdminRegister";
-import axios from "axios"; // Import Axios library
 import axiosInstance from "../../../../axiosConfig";
 
 function SearchBar() {

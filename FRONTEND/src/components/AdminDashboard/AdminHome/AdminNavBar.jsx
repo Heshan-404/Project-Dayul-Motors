@@ -4,7 +4,6 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import Aboutus from "../../../pages/AboutUsPage/AboutUs";
 import AdminAccountsPage from "../../../pages/AdminDashboard/AdminHome/AdminAccounts/AdminAccountsPage";
 import UserAccountsPage from "../../../pages/AdminDashboard/AdminHome/AdminAccounts/UserAccountsPage";
 import Dashboard from "./Dashboard/Dashboard";
