@@ -25,6 +25,9 @@ const OrderSuccessPage = () => {
       <h2 style={styles.paragraph}>
         Thank you for your order. Your order has been successfully placed.
       </h2>
+      <h2 style={styles.paragraph} className="pt-4">
+        We have sent you an email about the order.
+      </h2>
       <Link to="/shop" style={styles.button}>
         Back to Shop
       </Link>{" "}
