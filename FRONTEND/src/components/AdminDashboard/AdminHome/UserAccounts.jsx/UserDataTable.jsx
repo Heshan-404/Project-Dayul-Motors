@@ -71,7 +71,7 @@ export default function UserDataTable(props) {
         { status },
         {
           headers: {
-            Authorization: `${localStorage.getItem("adminToken")}`,
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
           },
         }
       );
