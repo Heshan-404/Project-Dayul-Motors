@@ -3,7 +3,9 @@ import callIcon from "../../assets/Project Images/Dayul Motors/HomePage/phone-ca
 import emailIcon from "../../assets/Project Images/Dayul Motors/HomePage/email.png";
 import faceBookIcon from "../../assets/Project Images/Dayul Motors/HomePage/facebook.png";
 
-export default function Footer() {
+export default function Footer(props) {
+  const phoneNo = props.phoneNo.toString();
+  const email = props.email.toString();
   return (
     <footer className="footer" style={{ backgroundColor: "#141313" }}>
       <div className="container">
@@ -22,7 +24,9 @@ export default function Footer() {
             <ul className="list-unstyled">
               <li className="mb-2">
                 <img src={callIcon} width={"20px"} alt="" />
-                <span className="ms-2 text-white">077-777-7777</span>
+                <span className="ms-2 text-white">
+                  {phoneNo.slice(0, 3)}-{phoneNo.slice(3, 6)}-{phoneNo.slice(6)}
+                </span>
               </li>
               <li className="mb-2">
                 <img src={emailIcon} width={"20px"} alt="" />
@@ -30,7 +34,7 @@ export default function Footer() {
                   className="ms-2 text-white"
                   href="mailto:dayul.motors@gmail.com"
                 >
-                  dayul.motors@gmail.com
+                  {email}
                 </a>
               </li>
               <li className="mb-2">

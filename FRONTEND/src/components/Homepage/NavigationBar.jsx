@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../../assets/Project Images/Dayul Motors/Dayul Motors logo/Artboard 1.png";
@@ -9,13 +11,16 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Typography from "@mui/material/Typography";
 import { Button } from "@mui/material";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
 
-export default function NavigationBar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+export default function NavigationBar(props) {
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
   const [userName, setUserName] = useState(localStorage.getItem("username"));
   const navigate = useNavigate();
-  const [cartItemCount, setcartItemCount] = useState("0");
+  const [cartItemCount, setCartItemCount] = useState("0");
   const [showSessionExpiredModal, setShowSessionExpiredModal] = useState(false);
+  const phoneNo = props.phoneNo.toString();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -39,26 +44,22 @@ export default function NavigationBar() {
       );
       setIsLoggedIn(true);
       setUserName(localStorage.getItem("username"));
-      setcartItemCount(response.data.cart);
+      setCartItemCount(response.data.cart);
     } catch (error) {
       if (error.response && error.response.status === 401) {
         setShowSessionExpiredModal(true);
         localStorage.removeItem("token");
         localStorage.removeItem("username");
+        setIsLoggedIn(false);
       }
-      setIsLoggedIn(false);
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
-    navigate("/signin");
-  };
   const handleClick = () => {
     navigate("/signin");
     setShowSessionExpiredModal(false);
   };
+
   return (
     <div style={{ width: "100vw" }}>
       <nav
@@ -88,7 +89,9 @@ export default function NavigationBar() {
               height="34"
               className="rounded-5"
             />
-            <span className="text-danger ps-3">077-777-7777</span>
+            <span className="text-danger ps-3">
+              {phoneNo.slice(0, 3)}-{phoneNo.slice(3, 6)}-{phoneNo.slice(6)}
+            </span>
           </a>
           {/* Navbar Toggle Button */}
           <button
@@ -160,21 +163,28 @@ export default function NavigationBar() {
               {/* Logged In Links */}
               {isLoggedIn && (
                 <>
-                  {/* Welcome Message */}
+                  {/* User Icon */}
                   <li className="nav-item ms-lg-3 my-2 my-lg-0">
-                    <span className="nav-link active fw-bold">
-                      Welcome, {userName}
-                    </span>
-                  </li>
-                  {/* Logout Button */}
-                  <li className="nav-item ms-lg-3 my-2 my-lg-0">
-                    <button
-                      className="btn btn-outline-light hover-blow-effect login-btn"
-                      onClick={handleLogout}
-                      style={{ transform: "translateY(3px)" }}
-                    >
-                      Logout
-                    </button>
+                    <Link to="/profile">
+                      <button
+                        style={{
+                          transform: "translateY(3px)",
+                          color: "white",
+                          border: "none",
+                          backgroundColor: "black",
+                          padding: "10px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        <FontAwesomeIcon
+                          icon={faUser}
+                          style={{ marginRight: "8px" }}
+                        />
+                      </button>
+                    </Link>
                   </li>
                 </>
               )}
@@ -258,7 +268,7 @@ export default function NavigationBar() {
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
             width: 300px;
-            height: 200px;	
+            height: 200px;  
             text-align: center;
           }
           

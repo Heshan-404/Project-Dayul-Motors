@@ -9,8 +9,6 @@ import {
 import { Fingerprint } from "@mui/icons-material";
 import { Navigate } from "react-router-dom";
 import axiosInstance from "../../axiosConfig";
-import NavigationBar from "../../components/Homepage/NavigationBar";
-import Footer from "../../components/Homepage/Footer";
 import KeyIcon from "@mui/icons-material/Key";
 
 export default function ForgetPassword() {
@@ -171,7 +169,6 @@ export default function ForgetPassword() {
 
   return (
     <div>
-      <NavigationBar />
       <div
         className="LoginPage"
         style={{ marginTop: "150px", marginBottom: "100px" }}
@@ -379,7 +376,6 @@ export default function ForgetPassword() {
           </Snackbar>
         </form>
       </div>
-      <Footer />
     </div>
   );
 }

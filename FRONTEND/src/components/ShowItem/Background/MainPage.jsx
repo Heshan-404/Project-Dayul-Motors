@@ -137,7 +137,6 @@ export default function MainPage() {
 
   return (
     <div>
-      <NavigationBar />
       <StyledMainContainer>
         <CustomizedBreadcrumbs cat={categoryName} catid={categoryID} />
         {/* Pass categoryName to Breadcrumb */}
@@ -177,7 +176,6 @@ export default function MainPage() {
           <ArrowUpwardIcon />
         </ScrollToTopButton>
       </StyledMainContainer>
-      <Footer />
     </div>
   );
 }

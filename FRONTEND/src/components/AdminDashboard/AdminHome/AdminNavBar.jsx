@@ -4,7 +4,6 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import Aboutus from "../../../pages/AboutUsPage/AboutUs";
 import AdminAccountsPage from "../../../pages/AdminDashboard/AdminHome/AdminAccounts/AdminAccountsPage";
 import UserAccountsPage from "../../../pages/AdminDashboard/AdminHome/AdminAccounts/UserAccountsPage";
 import Dashboard from "./Dashboard/Dashboard";
@@ -51,7 +50,7 @@ export default function BasicTabs() {
   };
 
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box sx={{ width: "100vw" }}>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs
           value={value}
@@ -94,17 +93,37 @@ export default function BasicTabs() {
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
-        <Dashboard />
+        <div className="cus-width">
+          <Dashboard />
+        </div>
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
-        <Settings />
+        <div className="cus-width">
+          <Settings />
+        </div>
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
-        <AdminAccountsPage />
+        <div className="cus-width">
+          <AdminAccountsPage />
+        </div>
       </CustomTabPanel>
       <CustomTabPanel value={value} index={3}>
-        <UserAccountsPage />
+        <div className="cus-width">
+          <UserAccountsPage />
+        </div>
       </CustomTabPanel>
+      <style>
+        {`
+        @media (min-width: 768px) {
+  .cus-width {
+    width:83%;
+  }
+        @media (max-width: 768px) {
+  .cus-width {
+    width:100%;
+  }
+        `}
+      </style>
     </Box>
   );
 }

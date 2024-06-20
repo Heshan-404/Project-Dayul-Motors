@@ -1,10 +1,10 @@
 /* eslint-disable react/prop-types */
 import { Navigate, Outlet } from "react-router-dom";
 
-const ProtectedRouteToSignin = ({ redirectPath = "/home" }) => {
+const ProtectedRouteToSignin = ({ redirectPath = "/signin" }) => {
   const token = localStorage.getItem("token");
 
-  if (token) {
+  if (!token) {
     return <Navigate to={redirectPath} replace />;
   }
 

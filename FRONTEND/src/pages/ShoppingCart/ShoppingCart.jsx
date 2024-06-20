@@ -185,8 +185,6 @@ export default function Cart() {
 
   return (
     <div>
-      <NavigationBar />
-
       <div className="Shopping mt-5">
         <style>{`
         .Shopping {
@@ -416,7 +414,6 @@ export default function Cart() {
           </div>
         )}
       </div>
-      <Footer />
     </div>
   );
 }
