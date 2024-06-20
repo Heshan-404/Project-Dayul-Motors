@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "../../axiosConfig"; // Adjust the import path as needed
-import NavigationBar from "../../components/Homepage/NavigationBar";
-import Footer from "../../components/Homepage/Footer";
+import axiosInstance from "../../axiosConfig";
 import { Button, styled, TextField, CircularProgress } from "@mui/material";
 import { yellow } from "@mui/material/colors";
 import LoginIcon from "@mui/icons-material/Login";
@@ -182,7 +180,6 @@ export default function Signup() {
 
   return (
     <div>
-      <NavigationBar />
       <div
         className="LoginPage"
         style={{ marginTop: "150px", marginBottom: "100px" }}
@@ -398,7 +395,6 @@ export default function Signup() {
           )}
         </form>
       </div>
-      <Footer />
     </div>
   );
 }

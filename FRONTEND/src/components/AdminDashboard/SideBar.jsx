@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -14,13 +14,20 @@ import Typography from "@mui/material/Typography";
 import MenuIcon from "@mui/icons-material/Menu";
 import Toolbar from "@mui/material/Toolbar";
 import logo from "../../assets/Project Images/Dayul Motors/Dayul Motors logo/Artboard 1.png";
-import OrderIcon from "../../assets/Project Images/Dayul Motors/AdminSideBar/OrderMNG.png";
-import ProductIcon from "../../assets/Project Images/Dayul Motors/AdminSideBar/Products.png";
-import HomeIcon from "../../assets/Project Images/Dayul Motors/AdminSideBar/Home.png";
 import AdminHomePage from "../../pages/AdminDashboard/AdminHome/AdminHomePage";
 import ProductMNGPage from "../../pages/AdminDashboard/ProductMNG/ProductMNGPage";
 import OrderMNGPage from "../../pages/AdminDashboard/OrderMNGPage/OrderMNGPage";
 import Billing from "./Billing/Billing";
+import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faHome,
+  faBoxOpen,
+  faClipboardList,
+  faFileInvoice,
+  faSignOutAlt,
+} from "@fortawesome/free-solid-svg-icons";
+import axiosInstance from "../../axiosConfig";
 
 const drawerWidth = 250;
 
@@ -28,6 +35,31 @@ const SideBar = ({ window }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedComponent, setSelectedComponent] = useState(<AdminHomePage />);
   const [activeItem, setActiveItem] = useState(null);
+  const navigate = useNavigate();
+
+  const verifyToken = async (token) => {
+    try {
+      const response = await axiosInstance.post(
+        "/auth/admin/protected/token_verify",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {
+      handleLogout();
+    }
+  };
+  useEffect(() => {
+    const adminToken = localStorage.getItem("adminToken");
+    if (!adminToken) {
+      navigate("/adminSign"); // Redirect to admin signin if token is missing
+    } else {
+      verifyToken(adminToken);
+    }
+  }, []);
 
   const handleDrawerClose = () => {
     setMobileOpen(false);
@@ -38,10 +70,21 @@ const SideBar = ({ window }) => {
   };
 
   const handleListItemClick = (component, text, itemId) => {
+    const adminToken = localStorage.getItem("adminToken");
+    if (!adminToken) {
+      navigate("/adminSign"); // Redirect to admin signin if token is missing
+    } else {
+      verifyToken(adminToken);
+    }
     setSelectedComponent(component);
     setTittleText(text);
     setActiveItem(itemId); // Update active item
     setMobileOpen(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("adminToken"); // Clear the admin token
+    navigate("/adminSign"); // Redirect to admin signin
   };
 
   const drawer = (
@@ -49,7 +92,13 @@ const SideBar = ({ window }) => {
       <div>
         <div className="row align-items-center">
           <div className="col-6 w-25">
-            <img src={logo} height={"63px"} width={"63px"} className=""></img>
+            <img
+              src={logo}
+              height={"63px"}
+              width={"63px"}
+              className=""
+              alt="Dayul Motors Logo"
+            />
           </div>
           <div className="col-6">
             <span className="fw-bolder text-black fs-6">Dayul Motors</span>
@@ -62,25 +111,25 @@ const SideBar = ({ window }) => {
         {[
           {
             text: "Home",
-            icon: <img src={HomeIcon} width={"30px"} alt="Home Icon" />,
+            icon: <FontAwesomeIcon icon={faHome} size="lg" />,
             component: <AdminHomePage />,
             id: "home",
           },
           {
             text: "Product Management",
-            icon: <img src={ProductIcon} width={"30px"} alt="Inbox Icon" />,
+            icon: <FontAwesomeIcon icon={faBoxOpen} size="lg" />,
             component: <ProductMNGPage />,
             id: "products",
           },
           {
             text: "Order Management",
-            icon: <img src={OrderIcon} width={"30px"} alt="Mail Icon" />,
+            icon: <FontAwesomeIcon icon={faClipboardList} size="lg" />,
             component: <OrderMNGPage />,
             id: "orders",
           },
           {
             text: "Billing",
-            icon: <img src={OrderIcon} width={"30px"} alt="Mail Icon" />,
+            icon: <FontAwesomeIcon icon={faFileInvoice} size="lg" />,
             component: <Billing />,
             id: "billing",
           },
@@ -91,7 +140,7 @@ const SideBar = ({ window }) => {
             onClick={() =>
               handleListItemClick(item.component, item.text, item.id)
             }
-            className={activeItem === item.id ? "active" : ""} // Add active class
+            className={activeItem === item.id ? "active" : ""}
           >
             <ListItemIcon>{item.icon}</ListItemIcon>
             <Typography variant="body1">{item.text}</Typography>
@@ -110,8 +159,8 @@ const SideBar = ({ window }) => {
       <div>
         <style>{`
           .active {
-            background-color: #f0f0f0; /* Example */
-            color: #000; /* Example */
+            background-color: #f0f0f0; 
+            color: #000; 
           }
         `}</style>
       </div>
@@ -121,6 +170,7 @@ const SideBar = ({ window }) => {
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
+          backgroundColor: "black",
         }}
       >
         <Toolbar>
@@ -137,10 +187,16 @@ const SideBar = ({ window }) => {
             variant="h6"
             noWrap
             component="div"
-            className="text-black"
+            className="text-white"
           >
             {titleText}
           </Typography>
+          <IconButton
+            onClick={handleLogout}
+            sx={{ ml: "auto", color: "white" }}
+          >
+            <FontAwesomeIcon icon={faSignOutAlt} size="lg" />
+          </IconButton>
         </Toolbar>
       </AppBar>
       <Box
@@ -153,18 +209,19 @@ const SideBar = ({ window }) => {
           variant="temporary"
           open={mobileOpen}
           onClose={handleDrawerClose}
-          ModalProps={{
-            keepMounted: true,
-          }}
-          sx={{
-            display: { xs: "block", sm: "none" },
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: drawerWidth,
-            },
-          }}
+          ModalProps={{ keepMounted: true }}
         >
-          {drawer}
+          <Box
+            sx={{
+              display: { xs: "block", sm: "none" },
+              "& .MuiDrawer-paper": {
+                boxSizing: "border-box",
+                width: drawerWidth,
+              },
+            }}
+          >
+            {drawer}
+          </Box>
         </Drawer>
         <Drawer
           variant="permanent"
@@ -177,15 +234,12 @@ const SideBar = ({ window }) => {
           }}
           open
         >
-          {drawer}
+          <Box sx={{ display: "flex", flexDirection: "column" }}>{drawer}</Box>
         </Drawer>
       </Box>
       <Box
         component="main"
-        sx={{
-          flexGrow: 1,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-        }}
+        sx={{ flexGrow: 1, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
       >
         <Toolbar />
         {selectedComponent}

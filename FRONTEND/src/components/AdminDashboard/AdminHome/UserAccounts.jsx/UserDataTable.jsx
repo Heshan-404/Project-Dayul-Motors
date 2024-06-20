@@ -14,7 +14,7 @@ import AcUnitIcon from "@mui/icons-material/AcUnit";
 import ConfirmDialog from "./ConfirmDialog";
 import SnackbarAlert from "./SnackbarAlert";
 import axiosInstance from "../../../../axiosConfig";
-import CircularProgress from '@mui/material/CircularProgress'; // Import CircularProgress
+import CircularProgress from "@mui/material/CircularProgress"; // Import CircularProgress
 
 export default function UserDataTable(props) {
   const [dataSet, setDataSet] = useState([]);
@@ -38,7 +38,7 @@ export default function UserDataTable(props) {
         "/auth/admin/protected/fetch_all_users",
         {
           headers: {
-            Authorization: `${localStorage.getItem("adminToken")}`,
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
           },
         }
       );
@@ -168,7 +168,13 @@ export default function UserDataTable(props) {
     <div className="table-container">
       {/* Display loading indicator if isLoading is true */}
       {isLoading && (
-        <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "20px",
+          }}
+        >
           <CircularProgress />
         </div>
       )}

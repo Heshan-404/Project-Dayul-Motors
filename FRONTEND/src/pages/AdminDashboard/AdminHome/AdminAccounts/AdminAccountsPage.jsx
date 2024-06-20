@@ -3,7 +3,9 @@ import SearchBar from "../../../../components/AdminDashboard/AdminHome/AdminAcco
 export default function AdminAccountsPage() {
   return (
     <div>
-      <SearchBar />
+      <div className="col-12">
+        <SearchBar />
+      </div>
     </div>
   );
 }

@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../../axiosConfig";
-import NavigationBar from "../../components/Homepage/NavigationBar";
-import Footer from "../../components/Homepage/Footer";
 import {
   Button,
   Stack,
@@ -70,7 +68,7 @@ export default function LoginPage() {
 
       if (response.status === 200) {
         localStorage.setItem("token", response.data.token);
-        localStorage.setItem("userid", response.data.token.userid);
+        localStorage.setItem("userid", response.data.user.userid);
         localStorage.setItem("username", response.data.user.name);
         navigate("/home");
       } else {
@@ -115,7 +113,6 @@ export default function LoginPage() {
 
   return (
     <div>
-      <NavigationBar />
       <div style={{ width: "100vw" }}>
         <div
           className="LoginPage"
@@ -306,7 +303,6 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
-        <Footer />
       </div>
     </div>
   );

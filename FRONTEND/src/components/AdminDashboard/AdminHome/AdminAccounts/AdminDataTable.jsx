@@ -87,7 +87,7 @@ export default function UserDataTable(props) {
         "/auth/admin/protected/details",
         {
           headers: {
-            Authorization: `${localStorage.getItem("adminToken")}`,
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
           },
         }
       );
@@ -119,7 +119,7 @@ export default function UserDataTable(props) {
         { status: newStatus },
         {
           headers: {
-            Authorization: `${localStorage.getItem("adminToken")}`,
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
           },
         }
       );
@@ -155,7 +155,7 @@ export default function UserDataTable(props) {
         },
         {
           headers: {
-            Authorization: `${localStorage.getItem("adminToken")}`,
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
           },
         }
       );
@@ -180,7 +180,7 @@ export default function UserDataTable(props) {
         `/auth/admin/protected/admin_delete/${adminid}`,
         {
           headers: {
-            Authorization: `${localStorage.getItem("adminToken")}`,
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
           },
         }
       );
