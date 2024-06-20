@@ -1,9 +1,7 @@
 import KeyIcon from "@mui/icons-material/Key";
 import { Button, TextField, CircularProgress } from "@mui/material";
-import Footer from "../../components/Homepage/Footer";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import NavigationBar from "../../components/Homepage/NavigationBar";
 import axiosInstance from "../../axiosConfig";
 
 export default function ChangePassword() {
@@ -76,7 +74,6 @@ export default function ChangePassword() {
 
   return (
     <div>
-      <NavigationBar />
       {isOTP && (
         <div>
           <div
@@ -235,7 +232,6 @@ export default function ChangePassword() {
               </form>
             </div>
           </div>
-          <Footer />
         </div>
       )}
     </div>

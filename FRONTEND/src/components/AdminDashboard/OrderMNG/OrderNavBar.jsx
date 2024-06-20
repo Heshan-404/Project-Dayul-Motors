@@ -1,5 +1,13 @@
 import { useState, useEffect } from "react";
-import { Tabs, Tab, Box, TextField, InputAdornment } from "@mui/material";
+import {
+  Tabs,
+  Tab,
+  Box,
+  TextField,
+  InputAdornment,
+  useMediaQuery,
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
 import AllOrders from "./AllOrder";
 import ActiveOrders from "./ActiveOrders";
@@ -20,15 +28,16 @@ const OrderNavBar = () => {
     { id: 4, label: "Completed", count: 0 },
   ]);
 
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
   const fetchOrders = async () => {
     try {
-      const token = localStorage.getItem("adminToken");
-      console.log(token);
       const response = await axiosInstance.get(
         "/auth/admin/protected/fetch_all_orders",
         {
           headers: {
-            Authorization: `${token}`,
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
           },
         }
       );
@@ -132,7 +141,12 @@ const OrderNavBar = () => {
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Tabs value={selectedTab} onChange={handleTabChange}>
+      <Tabs
+        value={selectedTab}
+        onChange={handleTabChange}
+        variant={isSmallScreen ? "scrollable" : "fullWidth"}
+        scrollButtons={isSmallScreen ? "auto" : "off"}
+      >
         {orderCounts.map((column) => (
           <Tab
             key={column.id}
@@ -164,14 +178,15 @@ const OrderNavBar = () => {
       <Box
         sx={{
           display: "flex",
+          flexDirection: isSmallScreen ? "column" : "row",
           justifyContent: "space-between",
           alignItems: "center",
           padding: 2,
         }}
       >
-        <div>
+        <Box mb={isSmallScreen ? 2 : 0}>
           <strong>{orderCounts[selectedTab]?.label}</strong>
-        </div>
+        </Box>
         <TextField
           label="Search"
           variant="outlined"
@@ -185,10 +200,23 @@ const OrderNavBar = () => {
               </InputAdornment>
             ),
           }}
+          sx={{ width: isSmallScreen ? "100%" : "auto" }}
         />
       </Box>
 
       <Box sx={{ p: 3 }}>{renderTabContent()}</Box>
+      <style>
+        {`
+        @media (min-width: 768px) {
+  .cus-width {
+    width:83%;
+  }
+        @media (max-width: 768px) {
+  .cus-width {
+    width:100%;
+  }
+        `}
+      </style>
     </Box>
   );
 };

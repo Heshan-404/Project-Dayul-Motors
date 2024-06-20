@@ -17,8 +17,6 @@ export default function LandingUI() {
         overflowX: "hidden",
       }}
     >
-      <NavigationBar />
-
       {/* Hero Section (without background image) */}
       <section
         className="jumbotron jumbotron-fluid text-center pt-5 pb-5"

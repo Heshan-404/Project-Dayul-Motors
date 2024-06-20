@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import {
   TextField,
@@ -20,7 +22,6 @@ const validationMessages = {
   level: "Level is required",
 };
 
-// eslint-disable-next-line react/prop-types
 function AdminRegister({ onRegister }) {
   const [values, setValues] = useState({
     fullName: "",
@@ -29,7 +30,7 @@ function AdminRegister({ onRegister }) {
     address: "",
     password: "",
     confirmPassword: "",
-    level: 1, // Default preselected level
+    level: 1,
   });
 
   const [errors, setErrors] = useState({});
@@ -78,10 +79,8 @@ function AdminRegister({ onRegister }) {
 
     try {
       const response = await axiosInstance.post("/auth/admin/register", values);
-      console.log("Admin registered:", response.data);
-      onRegister(); // Call the onRegister callback to show the data table again
+      onRegister();
     } catch (err) {
-      console.error("Error registering admin:", err);
       setErrors({
         apiError: err.response ? err.response.data.message : err.message,
       });
@@ -89,7 +88,7 @@ function AdminRegister({ onRegister }) {
   };
 
   return (
-    <Grid>
+    <Grid container spacing={2} sx={{ padding: "1rem" }}>
       <Grid item xs={12}>
         <Typography variant="h5">Register Admin</Typography>
       </Grid>
@@ -177,12 +176,12 @@ function AdminRegister({ onRegister }) {
             id="level"
             name="level"
             label="Level"
-            style={{ width: "300px" }}
             select
             value={values.level}
             onChange={handleChange}
             error={Boolean(errors.level)}
             helperText={errors.level}
+            sx={{ width: { xs: "100%", md: "300px" } }}
           >
             <MenuItem value={1}>Order Manager</MenuItem>
             <MenuItem value={2}>Product Manager</MenuItem>

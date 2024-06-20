@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable react/prop-types */
 import React, { useState, useEffect, useRef } from "react";
 import NavigationBar from "../../Homepage/NavigationBar";
 import Footer from "../../Homepage/Footer";
@@ -277,6 +275,7 @@ const Content = ({
           }}
         />
       </div>
+
       {/* Loading Indicator (only for search) */}
       {isSearching && (
         <div
@@ -287,7 +286,6 @@ const Content = ({
             height: "200px",
           }}
         >
-          {" "}
           <CircularProgress />
         </div>
       )}
@@ -313,23 +311,19 @@ function ShopSideBar() {
   const [showClearButton, setShowClearButton] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Initial isLoading to true
   const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); // State for opening/closing sidebar on small screens
+
   const contentRef = useRef(null);
 
   const handleItemClick = (itemId) => {
     setSelectedItem(itemId);
     setShowClearButton(true);
     setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
   };
-
   const handleBrandClick = (brandId) => {
     setSelectedBrand(brandId);
     setShowClearButton(true);
     setIsLoading(true);
-
     setTimeout(() => {
       setIsLoading(false);
     }, 2000);
@@ -376,16 +370,18 @@ function ShopSideBar() {
         setIsLoading(false); // Set isLoading to false even if there's an error
       }
     };
+
     fetchData();
   }, []);
 
   return (
     <div>
-      <NavigationBar />
+      {/* NavigationBar and other components as needed */}
       <BrandImagesBar
         onBrandClick={handleBrandClick}
         selectedBrand={selectedBrand}
       />
+
       <div
         style={{
           display: "flex",
@@ -394,69 +390,78 @@ function ShopSideBar() {
           marginLeft: "40px",
         }}
       >
-        {isLoading ? (
-          // Display loading indicator before all data is fetched and rendered
+        {/* Responsive handling: show/hide sidebar based on screen size */}
+        {!isOpen && (
           <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100vh",
-              width: "100%", // Take up full width
-            }}
-          >
-            <CircularProgress size={100} />
-          </div>
-        ) : (
-          <React.Fragment>
-            <Sidebar
-              onItemClick={handleItemClick}
-              selectedItem={selectedItem}
-              searchInput={searchInput}
-              onSearchChange={setSearchInput}
-              handleClearFilters={handleClearFilters}
-              showClearButton={showClearButton}
-            />
-            <div
-              style={{
-                padding: "20px",
-                width: "calc(100% - 220px)",
-                marginTop: "10px",
-              }}
-              ref={contentRef}
-            >
-              <Content
-                selectedItem={selectedItem}
-                selectedBrand={selectedBrand}
-                searchInput={itemSearchInput}
-                onSearchChange={setItemSearchInput}
-                onLoadingComplete={() => setIsLoading(false)}
-              />
-            </div>
-          </React.Fragment>
-        )}
-
-        {/* Scroll to Top Button (conditionally shown) */}
-        {showScrollToTop && (
-          <button
-            onClick={handleScrollToTop}
+            className="sidebar-toggle"
+            onClick={() => setIsOpen(true)}
             style={{
               position: "fixed",
-              bottom: "20px",
-              right: "20px",
-              backgroundColor: "blue",
-              color: "white",
-              padding: "10px",
-              borderRadius: "50%",
-              border: "none",
+              left: 0,
+              top: 0,
+              height: "100vh",
+              width: "50px", // Adjust width as needed
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              zIndex: 1000,
+              display: "none", // Initially hidden
               cursor: "pointer",
             }}
           >
-            <ArrowUpwardIcon />
-          </button>
+            {/* Optionally add an icon or text for the toggle */}
+            <div style={{ padding: "10px" }}>☰</div>
+          </div>
         )}
+
+        {/* Sidebar Component */}
+        <Sidebar
+          onItemClick={handleItemClick}
+          selectedItem={selectedItem}
+          searchInput={searchInput}
+          onSearchChange={setSearchInput}
+          handleClearFilters={handleClearFilters}
+          showClearButton={showClearButton}
+          isOpen={isOpen}
+        />
+
+        <div
+          style={{
+            padding: "20px",
+            width: "calc(100% - 220px)",
+            marginTop: "10px",
+          }}
+          ref={contentRef}
+        >
+          {/* Content Component */}
+          <Content
+            selectedItem={selectedItem}
+            selectedBrand={selectedBrand}
+            searchInput={itemSearchInput}
+            onSearchChange={setItemSearchInput}
+            onLoadingComplete={() => setIsLoading(false)}
+          />
+        </div>
       </div>
-      <Footer />
+
+      {/* Scroll to Top Button (conditionally shown) */}
+      {showScrollToTop && (
+        <button
+          onClick={handleScrollToTop}
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            right: "20px",
+            backgroundColor: "blue",
+            color: "white",
+            padding: "10px",
+            borderRadius: "50%",
+            border: "none",
+            cursor: "pointer",
+            zIndex: 1000,
+          }}
+        >
+          <ArrowUpwardIcon />
+        </button>
+      )}
     </div>
   );
 }

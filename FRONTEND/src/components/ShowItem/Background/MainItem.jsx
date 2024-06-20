@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState, useRef, useEffect } from "react";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -61,14 +62,15 @@ function MainItem() {
   const handleAddToCart = async () => {
     setIsCartPopupVisible(true);
   };
-
   const confirmAddToCart = async () => {
     if (!localStorage.getItem("token") || !localStorage.getItem("userid")) {
       navigate("/signin");
       return;
     }
+
     // 2. Show loading indicator
     setIsCartAdding(true);
+
     try {
       const response = await axiosInstance.post(
         "/shop/cart",
@@ -84,21 +86,33 @@ function MainItem() {
         }
       );
       console.log(response);
+
       // 4. Hide loading indicator and show success popup
       setIsCartAdding(false);
       setIsCartAdded(true);
       setErrorMessage(null);
       setShowStockError(false);
+
       setTimeout(() => {
         setIsCartAdded(false);
       }, 3000);
+
       // 5. Hide the confirmation dialog
       setIsCartPopupVisible(false);
+
+      // Refresh the current page
+      window.location.reload();
     } catch (error) {
       console.error("Error adding cart item to database:", error);
+
       setIsCartAdding(false); // Hide the loading indicator on error
       setIsCartPopupVisible(false); // Hide the dialog on error
-      if (error.response.status === 400 && error.response.data.message) {
+
+      if (
+        error.response &&
+        error.response.status === 400 &&
+        error.response.data.message
+      ) {
         setShowStockError(true);
         setStockErrorMessage(error.response.data.message);
       } else {
