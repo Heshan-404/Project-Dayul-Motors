@@ -327,7 +327,14 @@ export default function Cart() {
           color: red;
           margin-top: 5px;
           font-size: 14px;
-        }
+        }/* ... your existing styles ... */
+
+@media screen and (min-width: 768px) { 
+  .Shopping {
+    margin: 50px; /* Add 50px margin on mobile */
+    padding-bottom:130px;
+  }
+}
       `}</style>
         <Button
           onClick={handleNavigateToShop}
@@ -338,6 +345,7 @@ export default function Cart() {
             position: "absolute",
             left: 20,
             top: 20,
+            marginTop:"30px"
           }}
         >
           Continue Shopping
@@ -405,7 +413,7 @@ export default function Cart() {
           ))}
         </div>
         {cartData.length !== 0 && (
-          <div className="checkout-container">
+          <div className="checkout-container mt-5">
             <Link to="/checkout">
               <button className="checkout-btn">
                 Check Out (Total: Rs.{totalPrice.toFixed(2)})

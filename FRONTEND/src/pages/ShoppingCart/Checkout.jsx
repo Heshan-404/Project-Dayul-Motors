@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../../axiosConfig";
-import {
-  Button,
+import DeleteIcon from '@mui/icons-material/Delete';
+import Button from '@mui/material/Button'; 
+import { 
   Radio,
   RadioGroup,
   FormControlLabel,
@@ -155,13 +156,13 @@ const Checkout = () => {
   };
 
   return (
-    <div className="outer-container">
+    <div className="outer-container mt-5">
       <div className="checkout-container">
         <style>{`
-          .outer-container {
-            background-color: rgba(0, 0, 0, 0.1);
+          .outer-container { 
             padding: 20px;
             display: flex;
+            margin:10px;
             justify-content: center;
           }
 
@@ -347,19 +348,8 @@ const Checkout = () => {
             text-align: center;
           }
 
-          .delete-button {
-            background-color: #dc3545; 
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-left: 10px; 
-          }
-
-          .delete-button:hover {
-            background-color: #c82333;
-          }
+          
+ 
         `}</style>
 
         <Link to="/" className="continue-shopping">
@@ -399,12 +389,15 @@ const Checkout = () => {
                   <p>Quantity: {item.quantity}</p>
                   <p>Subtotal: Rs.{item.price * item.quantity}</p>
                 </div>
-                <button
-                  className="delete-button"
+
+
+                <Button
+                  variant="text"
+                  color="error" 
                   onClick={() => handleDeleteItem(item.productid)}
-                >
-                  Delete
-                </button>
+                  startIcon={<DeleteIcon />}
+                > 
+                </Button>
               </div>
             ))
           ) : (
