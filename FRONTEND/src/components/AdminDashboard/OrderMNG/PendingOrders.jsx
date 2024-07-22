@@ -88,7 +88,10 @@ export default function PendingOrders({ orders = [], searchValue }) {
                     {"LKR. " + row.amount + ".00"}
                   </TableCell>
                   <TableCell align="center">
-                    <Link to={`/admin/PendingOrders/${row.orderId}`}>
+                    <Link
+                      to={`/admin/orderDetail/${row.orderId}`}
+                      target="_blank"
+                    >
                       <Button color="primary" variant="contained">
                         View
                       </Button>

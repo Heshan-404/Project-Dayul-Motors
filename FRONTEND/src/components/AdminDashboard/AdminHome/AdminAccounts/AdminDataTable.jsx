@@ -10,15 +10,17 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Button, TextField } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import AcUnitIcon from "@mui/icons-material/AcUnit"; // Snow icon
+import AcUnitIcon from "@mui/icons-material/AcUnit";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import axiosInstance from "../../../../axiosConfig";
+import CircularProgress from "@mui/material/CircularProgress";
 
 // Separate component for Confirmation Dialog
 const ConfirmDialog = ({ open, onClose, onConfirm, title, message }) => {
@@ -69,15 +71,17 @@ export default function UserDataTable(props) {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const [selectedadminid, setSelectedadminid] = useState(null);
+  const [selectedAdmin, setSelectedAdmin] = useState(null);
   const [editingRow, setEditingRow] = useState(null);
-  const [adminLevel, setAdminLevel] = useState(1);
+  const [adminLevel, setAdminLevel] = useState(props.adminLevel);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchUserData();
   }, []);
 
   const fetchUserData = async () => {
+    setIsLoading(true);
     try {
       const response = await axiosInstance.get(
         "/auth/admin/protected/details",
@@ -88,15 +92,17 @@ export default function UserDataTable(props) {
         }
       );
       setDataSet(response.data.adminDetails);
-      setAdminLevel(response.data.adminLevel);
+      setAdminLevel(props.adminLevel); 
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching admin data:", error);
       showSnackbar("Failed to fetch admin data.", "error");
+      setIsLoading(false);
     }
   };
 
-  const handleClickOpen = (adminid) => {
-    setSelectedadminid(adminid);
+  const handleClickOpen = (admin) => {
+    setSelectedAdmin(admin);
     setOpenFreezeDialog(true);
   };
 
@@ -105,11 +111,12 @@ export default function UserDataTable(props) {
     setEditingRow(null);
   };
 
-  const handleFreeze = async () => {
+  const handleFreezeUnfreeze = async () => {
+    const newStatus = selectedAdmin.status === "active" ? "freeze" : "active";
     try {
       const response = await axiosInstance.put(
-        `/auth/admin/protected/admin_freeze/${selectedadminid}`,
-        { status: "freeze" },
+        `/auth/admin/protected/admin_${newStatus}/${selectedAdmin.adminid}`,
+        { status: newStatus },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
@@ -119,39 +126,16 @@ export default function UserDataTable(props) {
       console.log(response.data);
       setDataSet((prevDataSet) =>
         prevDataSet.map((row) =>
-          row.adminid === selectedadminid ? { ...row, status: "freeze" } : row
+          row.adminid === selectedAdmin.adminid
+            ? { ...row, status: newStatus }
+            : row
         )
       );
       setOpenFreezeDialog(false);
-      showSnackbar("User frozen successfully!", "success");
+      showSnackbar(`User ${newStatus}d successfully!`, "success");
     } catch (error) {
-      console.error("Error freezing user:", error);
-      showSnackbar("Failed to freeze user.", "error");
-    }
-  };
-
-  const handleUnfreeze = async () => {
-    try {
-      const response = await axiosInstance.put(
-        `/auth/admin/protected/admin_unfreeze/${selectedadminid}`,
-        { status: "active" },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-          },
-        }
-      );
-      console.log(response.data);
-      setDataSet((prevDataSet) =>
-        prevDataSet.map((row) =>
-          row.adminid === selectedadminid ? { ...row, status: "active" } : row
-        )
-      );
-      setOpenFreezeDialog(false);
-      showSnackbar("User unfrozen successfully!", "success");
-    } catch (error) {
-      console.error("Error unfreezing user:", error);
-      showSnackbar("Failed to unfreeze user.", "error");
+      console.error(`Error ${newStatus}ing user:`, error);
+      showSnackbar(`Failed to ${newStatus} user.`, "error");
     }
   };
 
@@ -176,17 +160,13 @@ export default function UserDataTable(props) {
         }
       );
 
-      // Update the local state with the new data
       setDataSet((prevDataSet) =>
         prevDataSet.map((row) =>
           row.adminid === editingRow.adminid ? editingRow : row
         )
       );
-      // Exit editing mode
       setEditingRow(null);
-      // Refresh the data from the backend
       fetchUserData();
-      // Show a success message to the user
       showSnackbar("Changes saved successfully!", "success");
     } catch (error) {
       console.error("Error saving changes:", error);
@@ -194,19 +174,39 @@ export default function UserDataTable(props) {
     }
   };
 
-  // Filter data based on search term
-  const filteredDataSet = dataSet.filter((row) => {
-    if (props.searchTerm === "") {
-      return true;
-    } else {
-      return (
-        row.adminid.includes(props.searchTerm) ||
-        row.email.toLowerCase().includes(props.searchTerm.toLowerCase()) ||
-        row.fullname.toLowerCase().includes(props.searchTerm.toLowerCase()) ||
-        row.phoneno.includes(props.searchTerm) ||
-        row.level.toLowerCase().includes(props.searchTerm.toLowerCase())
+  const handleDelete = async (adminid) => {
+    try {
+      const response = await axiosInstance.delete(
+        `/auth/admin/protected/admin_delete/${adminid}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          },
+        }
       );
+      console.log(response.data);
+      setDataSet((prevDataSet) =>
+        prevDataSet.filter((row) => row.adminid !== adminid)
+      );
+      showSnackbar("Admin deleted successfully!", "success");
+    } catch (error) {
+      console.error("Error deleting admin:", error);
+      showSnackbar("Failed to delete admin.", "error");
     }
+  };
+
+  const filteredDataSet = dataSet.filter((row) => {
+    const matchesSearchTerm =
+      props.searchTerm === "" ||
+      row.adminid.includes(props.searchTerm) ||
+      row.email.toLowerCase().includes(props.searchTerm.toLowerCase()) ||
+      row.fullname.toLowerCase().includes(props.searchTerm.toLowerCase()) ||
+      row.phoneno.includes(props.searchTerm) ||
+      row.level.toLowerCase().includes(props.searchTerm.toLowerCase());
+
+    const matchesLevel = row.level <= adminLevel;
+
+    return matchesSearchTerm && matchesLevel;
   });
 
   const handleSnackbarClose = (event, reason) => {
@@ -227,225 +227,220 @@ export default function UserDataTable(props) {
     <div className="table-container mt-3">
       <style>
         {`  
-          /* Optional: Prevent text wrapping for smaller screens */
           @media (max-width: 768px) {
             .table th, 
             .table td {
               white-space: nowrap;
-              font-size: 14px; /* Reduce font size for smaller screens */
+              font-size: 14px;
             }
           }
-
-  `}
+        `}
       </style>
 
-      <TableContainer style={{ width: "100%" }} component={Paper}>
-        <Table className="table" aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell style={{ textAlign: "center", width: "200px" }}>
-                Admin ID
-              </TableCell>
-              <TableCell style={{ textAlign: "center" }}>Full Name</TableCell>
-              <TableCell style={{ textAlign: "center", width: "100px" }}>
-                Email
-              </TableCell>
+      {isLoading && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "20px",
+          }}
+        >
+          <CircularProgress />
+        </div>
+      )}
 
-              <TableCell style={{ textAlign: "center" }}>
-                Phone Number
-              </TableCell>
-              <TableCell style={{ textAlign: "center" }}>Level</TableCell>
-              <TableCell style={{ textAlign: "center" }}>Status</TableCell>
-              {adminLevel == 3 && (
-                <TableCell style={{ textAlign: "center", width: "240px" }}>
-                  Actions
+      {!isLoading && (
+        <TableContainer style={{ width: "100%" }} component={Paper}>
+          <Table className="table" aria-label="simple table">
+            <TableHead>
+              <TableRow>
+                <TableCell style={{ textAlign: "center", width: "200px" }}>
+                  Admin ID
                 </TableCell>
-              )}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredDataSet.map((row) => (
-              <TableRow
-                key={row.adminid}
-                sx={{ "&:last-child td, &:last-child th": { borderTop: 1 } }}
-              >
-                {/* Render row data normally if not editing */}
-                {editingRow?.adminid !== row.adminid ? (
-                  <>
-                    <TableCell
-                      component="th"
-                      scope="row"
-                      style={{ textAlign: "center" }}
-                    >
-                      {row.adminid}
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      {row.fullname}
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      {row.email}
-                    </TableCell>
-
-                    <TableCell style={{ textAlign: "center" }}>
-                      {row.phoneno}
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      {row.level}
-                    </TableCell>
-                    <TableCell
-                      style={{
-                        textAlign: "center",
-                        color: row.status === "active" ? "green" : "red",
-                      }}
-                    >
-                      {row.status}
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      <div className="d-flex">
-                        <Button
-                          variant="contained"
-                          color="warning"
-                          sx={{ marginRight: "10px", width: "100%" }}
-                          startIcon={<EditIcon />}
-                          onClick={() => handleEdit(row)}
-                        >
-                          Edit
-                        </Button>
-                        {row.status === "active" ? (
+                <TableCell style={{ textAlign: "center" }}>Full Name</TableCell>
+                <TableCell style={{ textAlign: "center", width: "100px" }}>
+                  Email
+                </TableCell>
+                <TableCell style={{ textAlign: "center" }}>
+                  Phone Number
+                </TableCell>
+                <TableCell style={{ textAlign: "center" }}>Level</TableCell>
+                <TableCell style={{ textAlign: "center" }}>Status</TableCell>
+                {adminLevel >= 3 && (
+                  <TableCell style={{ textAlign: "center", width: "240px" }}>
+                    Actions
+                  </TableCell>
+                )}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredDataSet.map((row) => (
+                <TableRow
+                  key={row.adminid}
+                  sx={{ "&:last-child td, &:last-child th": { borderTop: 1 } }}
+                >
+                  {editingRow?.adminid !== row.adminid ? (
+                    <>
+                      {console.log(row)}
+                      <TableCell
+                        component="th"
+                        scope="row"
+                        style={{ textAlign: "center" }}
+                      >
+                        {row.adminid}
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        {row.fullname}
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        {row.email}
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        {row.phoneno}
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        {row.level}
+                      </TableCell>
+                      <TableCell
+                        style={{
+                          textAlign: "center",
+                          color: row.status === "active" ? "green" : "red",
+                        }}
+                      >
+                        {row.status}
+                      </TableCell>
+                      {adminLevel >= 3 && (
+                        <TableCell style={{ textAlign: "center" }}>
+                          <div className="d-flex">
+                            <Button
+                              variant="contained"
+                              color="warning"
+                              sx={{ marginRight: "10px", width: "100%" }}
+                              startIcon={<EditIcon />}
+                              onClick={() => handleEdit(row)}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="contained"
+                              color="error"
+                              sx={{ width: "100%" }}
+                              startIcon={<AcUnitIcon />}
+                              onClick={() => handleClickOpen(row)}
+                            >
+                              {row.status === "active" ? "Freeze" : "Unfreeze"}
+                            </Button>
+                            <Button
+                              variant="contained"
+                              sx={{ width: "100%", marginLeft: "10px" }}
+                              startIcon={<DeleteIcon />}
+                              onClick={() => handleDelete(row.adminid)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </TableCell>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <TableCell
+                        component="th"
+                        scope="row"
+                        style={{ textAlign: "center" }}
+                      >
+                        {row.adminid}
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        <TextField
+                          fullWidth
+                          defaultValue={row.fullname}
+                          onChange={(e) =>
+                            setEditingRow({
+                              ...editingRow,
+                              fullname: e.target.value,
+                            })
+                          }
+                        />
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        <TextField
+                          fullWidth
+                          defaultValue={row.email}
+                          onChange={(e) =>
+                            setEditingRow({
+                              ...editingRow,
+                              email: e.target.value,
+                            })
+                          }
+                        />
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        <TextField
+                          fullWidth
+                          defaultValue={row.phoneno}
+                          onChange={(e) =>
+                            setEditingRow({
+                              ...editingRow,
+                              phoneno: e.target.value,
+                            })
+                          }
+                        />
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        <TextField
+                          fullWidth
+                          defaultValue={row.level}
+                          onChange={(e) =>
+                            setEditingRow({
+                              ...editingRow,
+                              level: e.target.value,
+                            })
+                          }
+                        />
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        {editingRow.status}
+                      </TableCell>
+                      <TableCell style={{ textAlign: "center" }}>
+                        <div className="d-flex">
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            sx={{ marginRight: "10px", width: "100%" }}
+                            onClick={handleSave}
+                          >
+                            Save
+                          </Button>
                           <Button
                             variant="contained"
                             color="error"
                             sx={{ width: "100%" }}
-                            startIcon={<AcUnitIcon />}
-                            onClick={() => handleClickOpen(row.adminid)}
+                            onClick={() => setEditingRow(null)}
                           >
-                            Freeze
+                            Cancel
                           </Button>
-                        ) : (
-                          <Button
-                            variant="contained"
-                            sx={{ width: "100%" }}
-                            startIcon={<AcUnitIcon />}
-                            onClick={() => handleClickOpen(row.adminid)}
-                          >
-                            Unfreeze
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </>
-                ) : (
-                  // Render editable fields if editing
-                  <>
-                    <TableCell
-                      component="th"
-                      scope="row"
-                      style={{ textAlign: "center" }}
-                    >
-                      {row.adminid}
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      <TextField
-                        fullWidth
-                        defaultValue={row.fullname}
-                        onChange={(e) =>
-                          setEditingRow({
-                            ...editingRow,
-                            fullname: e.target.value,
-                          })
-                        }
-                      />
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      <TextField
-                        fullWidth
-                        defaultValue={row.email}
-                        onChange={(e) =>
-                          setEditingRow({
-                            ...editingRow,
-                            email: e.target.value,
-                          })
-                        }
-                      />
-                    </TableCell>
+                        </div>
+                      </TableCell>
+                    </>
+                  )}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
-                    <TableCell style={{ textAlign: "center" }}>
-                      <TextField
-                        fullWidth
-                        defaultValue={row.phoneno}
-                        onChange={(e) =>
-                          setEditingRow({
-                            ...editingRow,
-                            phoneno: e.target.value,
-                          })
-                        }
-                      />
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      <TextField
-                        fullWidth
-                        defaultValue={row.level}
-                        onChange={(e) =>
-                          setEditingRow({
-                            ...editingRow,
-                            level: e.target.value,
-                          })
-                        }
-                      />
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      {editingRow.status}
-                    </TableCell>
-                    <TableCell style={{ textAlign: "center" }}>
-                      <div className="d-flex">
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          sx={{ marginRight: "10px", width: "100%" }}
-                          onClick={handleSave}
-                        >
-                          Save
-                        </Button>
-                        <Button
-                          variant="contained"
-                          color="error"
-                          sx={{ width: "100%" }}
-                          onClick={() => setEditingRow(null)}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </>
-                )}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      {/* Freeze/Unfreeze Confirmation Dialog  */}
       <ConfirmDialog
         open={openFreezeDialog}
         onClose={handleCloseFreezeDialog}
-        onConfirm={
-          selectedadminid &&
-          dataSet.find((row) => row.adminid === selectedadminid).status ===
-            "active"
-            ? handleFreeze
-            : handleUnfreeze
-        }
-        title="Confirm Action"
-        message={
-          selectedadminid &&
-          dataSet.find((row) => row.adminid === selectedadminid).status ===
-            "active"
-            ? "Are you sure you want to freeze this user?"
-            : "Are you sure you want to unfreeze this user?"
-        }
+        onConfirm={handleFreezeUnfreeze}
+        title={`Are you sure you want to ${
+          selectedAdmin?.status === "active" ? "freeze" : "unfreeze"
+        } this admin?`}
+        message={`Admin ID: ${selectedAdmin?.adminid}`}
       />
 
-      {/* Snackbar Alert */}
       <SnackbarAlert
         open={openSnackbar}
         onClose={handleSnackbarClose}

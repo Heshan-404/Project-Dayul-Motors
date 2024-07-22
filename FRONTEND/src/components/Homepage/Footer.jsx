@@ -3,7 +3,9 @@ import callIcon from "../../assets/Project Images/Dayul Motors/HomePage/phone-ca
 import emailIcon from "../../assets/Project Images/Dayul Motors/HomePage/email.png";
 import faceBookIcon from "../../assets/Project Images/Dayul Motors/HomePage/facebook.png";
 
-export default function Footer() {
+export default function Footer(props) {
+  const phoneNo = props.phoneNo.toString();
+  const email = props.email.toString();
   return (
     <footer className="footer" style={{ backgroundColor: "#141313" }}>
       <div className="container">
@@ -22,7 +24,9 @@ export default function Footer() {
             <ul className="list-unstyled">
               <li className="mb-2">
                 <img src={callIcon} width={"20px"} alt="" />
-                <span className="ms-2 text-white">077-777-7777</span>
+                <span className="ms-2 text-white">
+                  {phoneNo.slice(0, 3)}-{phoneNo.slice(3, 6)}-{phoneNo.slice(6)}
+                </span>
               </li>
               <li className="mb-2">
                 <img src={emailIcon} width={"20px"} alt="" />
@@ -30,7 +34,7 @@ export default function Footer() {
                   className="ms-2 text-white"
                   href="mailto:dayul.motors@gmail.com"
                 >
-                  dayul.motors@gmail.com
+                  {email}
                 </a>
               </li>
               <li className="mb-2">
@@ -55,28 +59,28 @@ export default function Footer() {
             <h5 className="fw-bold fs-3 text-white">Brands</h5>
             <ul className="nav flex-column">
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  Home
+                <a href="/shop" className="nav-link p-0 text-white">
+                  BAJAJ
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  Features
+                <a href="/shop" className="nav-link p-0 text-white">
+                  SUZUKI
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  Pricing
+                <a href="/shop" className="nav-link p-0 text-white">
+                  YAMAHA
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  FAQs
+                <a href="/shop" className="nav-link p-0 text-white">
+                  DEMAK
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  About
+                <a href="/shop" className="nav-link p-0 text-white">
+                  TVS
                 </a>
               </li>
             </ul>
@@ -88,28 +92,28 @@ export default function Footer() {
             <h5 className="fw-bold fs-3 text-white">Categories</h5>
             <ul className="nav flex-column">
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  Home
+                <a href="/shop" className="nav-link p-0 text-white">
+                  Bearing
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  Features
+                <a href="/shop" className="nav-link p-0 text-white">
+                  Engine Prats
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  Pricing
+                <a href="/shop" className="nav-link p-0 text-white">
+                  Oil and Lubricants
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  FAQs
+                <a href="/shop" className="nav-link p-0 text-white">
+                  Brake Discs
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="#" className="nav-link p-0 text-white">
-                  About
+                <a href="/shop" className="nav-link p-0 text-white">
+                  Chain Sprocket Kit
                 </a>
               </li>
             </ul>
@@ -124,12 +128,12 @@ export default function Footer() {
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="/Sign-in" className="nav-link p-0 text-white">
+                <a href="/Signin" className="nav-link p-0 text-white">
                   Sign-in
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="/Sign-up" className="nav-link p-0 text-white">
+                <a href="/Signup" className="nav-link p-0 text-white">
                   Sign-up
                 </a>
               </li>
@@ -139,8 +143,8 @@ export default function Footer() {
                 </a>
               </li>
               <li className="nav-item mb-2">
-                <a href="/Contact-Us" className="nav-link p-0 text-white">
-                  Contact US
+                <a href="/about-us" className="nav-link p-0 text-white">
+                  About US
                 </a>
               </li>
               <li className="nav-item mb-2">

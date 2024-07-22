@@ -30,20 +30,7 @@ for your ride.`}
           </p>
         </div>
         <div className="col-2 pt-4"></div>
-        <div className="col-4 pt-4 pe-5">
-          <a
-            href="/brands"
-            style={{
-              color: "black",
-              fontWeight: "bold",
-              fontSize: "20px",
-              float: "right",
-            }}
-          >
-            {`View All Branches`}
-            <img src={newWindowIcon} className="ms-3" width={"25px"} alt="" />
-          </a>
-        </div>
+        
       </div>
       <div
         id="carouselExampleInterval"

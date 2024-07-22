@@ -1,9 +1,7 @@
 import KeyIcon from "@mui/icons-material/Key";
-import { Button } from "@mui/material";
-import Footer from "../../components/Homepage/Footer";
+import { Button, TextField, CircularProgress } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import NavigationBar from "../../components/Homepage/NavigationBar";
 import axiosInstance from "../../axiosConfig";
 
 export default function ChangePassword() {
@@ -14,9 +12,11 @@ export default function ChangePassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
-  const [isPasswordValid, setPasswordValid] = useState(false);
-  const [isConfirmValid, setConfirmValid] = useState(false);
+  const [isPasswordValid, setPasswordValid] = useState(true); // Initialize to true
+  const [isConfirmValid, setConfirmValid] = useState(true); // Initialize to true
   const [isOTP, setOTP] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // State for loader
+
   useEffect(() => {
     const OTP = localStorage.getItem("OTP");
     if (!OTP) {
@@ -25,22 +25,23 @@ export default function ChangePassword() {
     } else {
       // If OTP exists, setOTP to true
       setOTP(true);
-      localStorage.removeItem("OTP");
+      // localStorage.removeItem("OTP");
     }
-  }, [navigate]); // Include navigate in the dependency array to prevent stale closure
+  }, [navigate]);
 
   useEffect(() => {
     // Password validation
     setPasswordValid(password.length >= 8);
 
     // Confirm password validation
-    setConfirmValid(confirmPassword === password);
+    setConfirmValid(confirmPassword === password && password.length >= 8); // Add password length check here
   }, [password, confirmPassword]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Perform password reset action
+    setIsLoading(true); // Show loader
     try {
       const response = await axiosInstance.post("/auth/user/reset-password", {
         password,
@@ -58,6 +59,8 @@ export default function ChangePassword() {
       }
     } catch (error) {
       setMessage("An error occurred. Please try again later.");
+    } finally {
+      setIsLoading(false); // Hide loader
     }
   };
 
@@ -77,7 +80,6 @@ export default function ChangePassword() {
             className="LoginPage"
             style={{ marginTop: "150px", marginBottom: "100px" }}
           >
-            <NavigationBar />
             <style>{`
     *, *:before, *:after {
       padding: 0;
@@ -145,20 +147,9 @@ export default function ChangePassword() {
       font-weight: 500;
       align-self: flex-start;
     }
-    input {
-      display: block;
-      height: 40px;
-      width: 100%; 
-      border: 1px solid black;	
-      border-radius: 3px;
-      padding: 0 10px;
-      margin-top: 8px;
-      font-size: 14px;
-      font-weight: 300;
-      
-    }
-    ::placeholder {
-      color: "black";
+    .MuiTextField-root {
+      margin-top: 20px;
+      width: 100%;
     }
     .button {a
       margin-top: 50px;
@@ -191,51 +182,56 @@ export default function ChangePassword() {
               ></div>
               <form onSubmit={handleSubmit}>
                 <h3>Change Password</h3>
-                <label htmlFor="Password">Password :</label>
-                <input
+                <TextField
+                  label="Password"
+                  variant="outlined"
                   type="password"
-                  name="Password"
-                  id="Password"
-                  placeholder="Password"
+                  fullWidth
                   value={password}
                   onChange={handlePasswordChange}
-                  style={{
-                    border: isPasswordValid
-                      ? "1px solid black"
-                      : "1px solid red",
-                  }}
+                  onKeyUp={handlePasswordChange}
+                  error={!isPasswordValid}
+                  helperText={
+                    !isPasswordValid
+                      ? "Password must be at least 8 characters"
+                      : ""
+                  }
+                  required
+                  margin="normal" // Add space between fields
                 />
-                <label htmlFor="ConfirmPassword">Confirm Password :</label>
-                <input
+                <TextField
+                  label="Confirm Password"
+                  variant="outlined"
                   type="password"
-                  name="ConfirmPassword"
-                  id="ConfirmPassword"
-                  placeholder="Confirm Password"
+                  fullWidth
                   value={confirmPassword}
                   onChange={handleConfirmPasswordChange}
-                  style={{
-                    border: isConfirmValid
-                      ? "1px solid black"
-                      : "1px solid red",
-                  }}
+                  onKeyUp={handleConfirmPasswordChange}
+                  error={!isConfirmValid}
+                  helperText={!isConfirmValid ? "Passwords do not match" : ""}
+                  required
+                  margin="normal" // Add space between fields
                 />
                 {message && (
                   <p style={{ color: "red", fontSize: "12px" }}>{message}</p>
                 )}
-                <Button
-                  startIcon={<KeyIcon style={{ fill: "#ffffff" }} />}
-                  size="large"
-                  variant="contained"
-                  type="submit"
-                  className="mt-3"
-                  disabled={!isPasswordValid || !isConfirmValid}
-                >
-                  Change
-                </Button>
+                {isLoading ? (
+                  <CircularProgress size={24} color="secondary" />
+                ) : (
+                  <Button
+                    startIcon={<KeyIcon style={{ fill: "#ffffff" }} />}
+                    size="large"
+                    variant="contained"
+                    type="submit"
+                    className="mt-3"
+                    disabled={!isPasswordValid || !isConfirmValid}
+                  >
+                    Change
+                  </Button>
+                )}
               </form>
             </div>
           </div>
-          <Footer />
         </div>
       )}
     </div>

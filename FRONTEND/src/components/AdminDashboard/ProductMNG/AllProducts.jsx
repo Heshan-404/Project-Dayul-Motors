@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Box,
   Table,
@@ -23,12 +23,18 @@ import {
   TextField as MuiTextField,
   InputAdornment,
   InputLabel,
+  CircularProgress, // Import CircularProgress
 } from "@mui/material";
 
 import RefreshIcon from "@mui/icons-material/Refresh";
 import DeleteIcon from "@mui/icons-material/Delete";
 import axiosInstance from "../../../axiosConfig";
 import AddProductForm from "./AddProductForm";
+import DownloadIcon from "@mui/icons-material/Download";
+import EditIcon from "@mui/icons-material/Edit";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+
 
 function ProductTable() {
   const [selectedBrand, setSelectedBrand] = useState("all");
@@ -42,10 +48,25 @@ function ProductTable() {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false); // State for the confirm dialog
-  const [productToDelete, setProductToDelete] = useState(null); // State to store the product to be deleted
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // Loading state
+  const [hasPermission, setHasPermission] = useState(false);
+
+  const tableRef = useRef();
 
   useEffect(() => {
+    // Check permissions
+    const adminLevel = 1;
+    if (adminLevel && adminLevel >= 2) {
+      setHasPermission(true);
+    } else {
+      setHasPermission(false);
+      setIsLoading(false); // Stop loading as we don't need to fetch data
+
+      return;
+    }
+
     const fetchBrandsAndCategories = async () => {
       try {
         const brandsResponse = await axiosInstance.get(
@@ -66,29 +87,21 @@ function ProductTable() {
   }, []);
 
   const handleRefresh = async () => {
+    setIsLoading(true); // Set loading to true before refreshing
     try {
       const response = await axiosInstance.get(
         "/auth/admin/protected/products"
       );
       setTableData(response.data);
+      setIsLoading(false); // Set loading to false after refreshing
     } catch (error) {
       console.error("Error refreshing product data:", error);
+      setIsLoading(false); // Set loading to false even on error
     }
   };
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axiosInstance.get(
-          "/auth/admin/protected/products"
-        );
-        setTableData(response.data);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    };
-
-    fetchProducts();
+    handleRefresh(); // Fetch products on initial mount
   }, []);
 
   const handleBrandChange = (event) => {
@@ -108,11 +121,10 @@ function ProductTable() {
   };
 
   const handleViewDetails = (product) => {
-    // Set image preview to the current image
     setImagePreview(product.imageurl);
-    setSelectedImage(null); // Reset selected image when viewing
+    setSelectedImage(null);
     setSelectedProduct(product);
-    setIsEditing(false); // Reset editing state when viewing
+    setIsEditing(false);
   };
 
   const handleEditClick = () => {
@@ -124,16 +136,28 @@ function ProductTable() {
     setSelectedProduct(null);
   };
 
+  const handleDownloadPDF = async () => {
+    const tableElement = tableRef.current;
+    if (!tableElement) return;
+
+    const canvas = await html2canvas(tableElement);
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF();
+    const imgWidth = 210;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+    pdf.save("product_table.pdf");
+  };
   const handleSaveEdit = async () => {
     try {
-      // Validate all fields except description
       if (
         selectedProduct.productname.trim() === "" ||
         selectedProduct.price.trim() === "" ||
         selectedProduct.quantity.trim() === "" ||
         selectedProduct.minquantitylevel.trim() === ""
       ) {
-        return; // Don't proceed if fields are empty
+        return;
       }
 
       const formData = new FormData();
@@ -145,7 +169,7 @@ function ProductTable() {
       if (selectedImage) {
         formData.append("image", selectedImage);
       }
-      // Update the product in your backend (replace with your API call)
+
       await axiosInstance.put(
         `/auth/admin/protected/products/${selectedProduct.productid}`,
         formData,
@@ -155,35 +179,31 @@ function ProductTable() {
           },
         }
       );
-      // Update the table data
+
       handleRefresh();
       setIsEditing(false);
       setSelectedProduct(null);
-      console.log("Form Data:", formData); // Log the form data
+      console.log("Form Data:", formData);
     } catch (error) {
       console.error("Error updating product:", error);
     }
   };
 
   const handleDeleteProduct = async (productid) => {
-    setProductToDelete(productid); // Set the product to be deleted
-    setIsConfirmDialogOpen(true); // Open the confirm dialog
+    setProductToDelete(productid);
+    setIsConfirmDialogOpen(true);
   };
 
   const handleConfirmDelete = async () => {
     try {
-      // Delete the product from your backend (replace with your API call)
       await axiosInstance.delete(
         `/auth/admin/protected/products/${productToDelete}`
       );
-      // Update the table data
       const updatedData = tableData.filter(
         (item) => item.productid !== productToDelete
       );
       setTableData(updatedData);
-      // Close the confirm dialog
       setIsConfirmDialogOpen(false);
-      // Refresh the table data
       handleRefresh();
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -191,7 +211,6 @@ function ProductTable() {
   };
 
   const handleCancelDelete = () => {
-    // Close the confirm dialog
     setIsConfirmDialogOpen(false);
   };
 
@@ -273,187 +292,212 @@ function ProductTable() {
 
   return (
     <Box padding={2}>
-      {/* Align dropdowns and search bar on the same line */}
-      <Grid container spacing={2} alignItems="center" marginBottom={2}>
-        <Grid item xs={12} md={6}>
-          <Box display="flex" alignItems="center">
-            <Box marginRight={2}>
-              <InputLabel sx={{ color: "black" }}>Brand</InputLabel>
-              <Select
-                value={selectedBrand}
-                onChange={handleBrandChange}
-                fullWidth
-                variant="outlined"
-                size="small"
-                sx={{ width: 200 }}
-              >
-                <MenuItem key="all" value="all">
-                  All
-                </MenuItem>
-                {brands.map((brand) => (
-                  <MenuItem key={brand.brandid} value={brand.brandid}>
-                    <div className="d-flex">
-                      <img
-                        src={brand.imageurl}
-                        width={"35px"}
-                        height={"auto"}
-                        style={{ marginRight: "15px" }}
-                      />
-                      {brand.brandname}
-                    </div>
-                  </MenuItem>
-                ))}
-              </Select>
-            </Box>
-            <Box marginRight={2}>
-              <InputLabel sx={{ color: "black" }}>Category</InputLabel>
-              <Select
-                value={selectedCategory}
-                onChange={handleCategoryChange}
-                fullWidth
-                variant="outlined"
-                size="small"
-                sx={{ width: 200 }}
-              >
-                <MenuItem key="all" value="all">
-                  All
-                </MenuItem>
-                {categories.map((category) => (
-                  <MenuItem
-                    key={category.categoryid}
-                    value={category.categoryid}
+      {isLoading && (
+        <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+          <CircularProgress />
+        </div>
+      )}
+
+      {!isLoading && (
+        <>
+          {!hasPermission && (<><Box padding={2} textAlign="center">
+            <Typography variant="h5" color="error">
+              You do not have permission to access this data.
+            </Typography>
+          </Box></>)}
+          {hasPermission && (<>
+            {/* Align dropdowns and search bar on the same line */}
+            <Grid container spacing={2} alignItems="center" marginBottom={2}>
+              <Grid item xs={12} md={6}>
+                <Box display="flex" alignItems="center">
+                  <Box marginRight={2}>
+                    <InputLabel sx={{ color: "black" }}>Brand</InputLabel>
+                    <Select
+                      value={selectedBrand}
+                      onChange={handleBrandChange}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      sx={{ width: 200 }}
+                    >
+                      <MenuItem key="all" value="all">
+                        All
+                      </MenuItem>
+                      {brands.map((brand) => (
+                        <MenuItem key={brand.brandid} value={brand.brandid}>
+                          <div className="d-flex">
+                            <img
+                              src={brand.imageurl}
+                              width={"35px"}
+                              height={"auto"}
+                              style={{ marginRight: "15px" }}
+                            />
+                            {brand.brandname}
+                          </div>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </Box>
+                  <Box marginRight={2}>
+                    <InputLabel sx={{ color: "black" }}>Category</InputLabel>
+                    <Select
+                      value={selectedCategory}
+                      onChange={handleCategoryChange}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      sx={{ width: 200 }}
+                    >
+                      <MenuItem key="all" value="all">
+                        All
+                      </MenuItem>
+                      {categories.map((category) => (
+                        <MenuItem
+                          key={category.categoryid}
+                          value={category.categoryid}
+                        >
+                          <div className="d-flex">
+                            <img
+                              src={category.imageurl}
+                              width={"20px"}
+                              style={{ marginRight: "15px" }}
+                            />
+                            {category.categoryname}
+                          </div>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </Box>
+                  <TextField
+                    style={{ marginTop: "22px" }}
+                    label="Search"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    variant="outlined"
+                    size="small"
+                    fullWidth
+                  />
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Box display="flex" justifyContent="flex-end">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => setIsModalOpen(true)}
                   >
-                    <div className="d-flex">
-                      <img
-                        src={category.imageurl}
-                        width={"20px"}
-                        style={{ marginRight: "15px" }}
-                      />
-                      {category.categoryname}
-                    </div>
-                  </MenuItem>
-                ))}
-              </Select>
-            </Box>
-            <TextField
-              style={{ marginTop: "22px" }}
-              label="Search"
-              value={searchQuery}
-              onChange={handleSearchChange}
-              variant="outlined"
-              size="small"
-              fullWidth
-            />
-          </Box>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Box display="flex" justifyContent="flex-end">
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => setIsModalOpen(true)}
-            >
-              Add New Product
-            </Button>
-            {/* Refresh icon button */}
-            <IconButton onClick={handleRefresh} color="primary" marginLeft={2}>
-              <RefreshIcon />
-            </IconButton>
-          </Box>
-        </Grid>
-      </Grid>
+                    Add New Product
+                  </Button>
+                  {/* Refresh icon button */}
+                  <IconButton onClick={handleRefresh} color="primary" marginLeft={2}>
+                    <RefreshIcon />
+                  </IconButton>
+                </Box>
+                <Box display="flex" justifyContent="flex-end" marginBottom={2}>
+                  <IconButton onClick={handleDownloadPDF}>
+                    <DownloadIcon />
+                  </IconButton>
+                </Box>
+              </Grid>
+            </Grid>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow style={{ background: "black" }}>
-              <TableCell style={{ color: "white" }}>Image</TableCell>
-              <TableCell align="center" style={{ color: "white" }}>
-                ID
-              </TableCell>
-              <TableCell align="center" style={{ color: "white" }}>
-                Name
-              </TableCell>
-              <TableCell align="center" style={{ color: "white" }}>
-                Price
-              </TableCell>
+            <TableContainer component={Paper}>
+              <Table ref={tableRef}>
+                <TableHead>
+                  <TableRow style={{ background: "black" }}>
+                    <TableCell style={{ color: "white" }}>Image</TableCell>
+                    <TableCell align="center" style={{ color: "white" }}>
+                      ID
+                    </TableCell>
+                    <TableCell align="center" style={{ color: "white" }}>
+                      Name
+                    </TableCell>
+                    <TableCell align="center" style={{ color: "white" }}>
+                      Price
+                    </TableCell>
 
-              <TableCell align="center" style={{ color: "white" }}>
-                QTY
-              </TableCell>
-              <TableCell align="center" style={{ color: "white" }}>
-                Low Qty Level
-              </TableCell>
-              <TableCell style={{ color: "white" }} align="center">
-                Actions
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredTableData.map((item) => {
-              var rowBGColor;
-              const quantity = parseInt(item.quantity);
-              const minQuantityLevel = parseInt(item.minquantitylevel);
-              if (!isNaN(quantity) && !isNaN(minQuantityLevel)) {
-                if (quantity > minQuantityLevel) {
-                  rowBGColor = "white";
-                } else {
-                  rowBGColor = "#fdd";
-                }
-              } else {
-                rowBGColor = "grey"; // Default color
-              }
+                    <TableCell align="center" style={{ color: "white" }}>
+                      QTY
+                    </TableCell>
+                    <TableCell align="center" style={{ color: "white" }}>
+                      Low Qty Level
+                    </TableCell>
+                    <TableCell style={{ color: "white" }} align="center">
+                      Actions
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filteredTableData.map((item) => {
+                    var rowBGColor;
+                    const quantity = parseInt(item.quantity);
+                    const minQuantityLevel = parseInt(item.minquantitylevel);
+                    if (!isNaN(quantity) && !isNaN(minQuantityLevel)) {
+                      if (quantity > minQuantityLevel) {
+                        rowBGColor = "white";
+                      } else {
+                        rowBGColor = "#fdd";
+                      }
+                    } else {
+                      rowBGColor = "grey";
+                    }
 
-              return (
-                <TableRow
-                  key={item.productid}
-                  style={{
-                    backgroundColor: rowBGColor,
-                  }}
-                >
-                  <TableCell>
-                    <img
-                      src={item.imageurl}
-                      alt={`Product ${item.productid} Image`}
-                      style={{ width: "40px", height: "auto" }}
-                    />
-                  </TableCell>
-                  <TableCell align="center">{item.productid}</TableCell>
-                  <TableCell>
-                    <Typography align="center">{item.productname}</Typography>
-                  </TableCell>
-                  {/* Align price, stock, and low qty level on the same line */}
-                  <TableCell align="center">
-                    <Typography>{item.price}</Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography>{item.quantity}</Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography>{item.minquantitylevel}</Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleViewDetails(item)}
-                    >
-                      View Details
-                    </Button>
-                    {/* Add delete button */}
-                    <IconButton
-                      onClick={() => handleDeleteProduct(item.productid)}
-                      color="error"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                    return (
+                      <TableRow
+                        key={item.productid}
+                        style={{
+                          backgroundColor: rowBGColor,
+                        }}
+                      >
+                        <TableCell>
+                          <img
+                            src={item.imageurl}
+                            alt={`Product ${item.productid} Image`}
+                            style={{ width: "40px", height: "auto" }}
+                          />
+                        </TableCell>
+                        <TableCell align="center">
+                          {item.productid}
+                        </TableCell>
+                        <TableCell>
+                          <Typography align="center">
+                            {item.productname}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography>{item.price}</Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography>{item.quantity}</Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography>{item.minquantitylevel}</Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleViewDetails(item)}
+                          >
+                            View Details
+                          </Button>
+                          {/* Add delete button */}
+                          <IconButton
+                            onClick={() => handleDeleteProduct(item.productid)}
+                            color="error"
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </>)}
+        </>
+      )}
 
       <Dialog
         open={!!selectedProduct}
@@ -466,9 +510,6 @@ function ProductTable() {
           Product Details
         </DialogTitle>
         <DialogContent>
-          {/* Image should be at the top */}
-          <></>
-
           <DialogContentText>
             {selectedProduct && (
               <>
@@ -504,8 +545,8 @@ function ProductTable() {
                           alt="Preview"
                           style={{
                             width: "120px",
-                            maxWidth: "250px", // Adjust the max-width as needed
-                            maxHeight: "250px", // Adjust the max-height as needed
+                            maxWidth: "250px",
+                            maxHeight: "250px",
                             marginTop: "10px",
                             marginRight: "80px",
                           }}
@@ -550,7 +591,7 @@ function ProductTable() {
                       endAdornment: (
                         <InputAdornment position="end">$</InputAdornment>
                       ),
-                      inputProps: { min: 0 }, // Prevent negative numbers
+                      inputProps: { min: 0 },
                     }}
                   />
                   <Typography variant="h6">Quantity:</Typography>
@@ -562,7 +603,7 @@ function ProductTable() {
                     margin="dense"
                     type="number"
                     InputProps={{
-                      inputProps: { min: 0 }, // Prevent negative numbers
+                      inputProps: { min: 0 },
                     }}
                   />
                   <Typography variant="h6">Minimum Quantity Level:</Typography>
@@ -574,7 +615,7 @@ function ProductTable() {
                     margin="dense"
                     type="number"
                     InputProps={{
-                      inputProps: { min: 0 }, // Prevent negative numbers
+                      inputProps: { min: 0 },
                     }}
                   />
                 </Grid>
@@ -599,7 +640,6 @@ function ProductTable() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          {/* Show Edit button by default, Save button after editing */}
           {!isEditing ? (
             <Button onClick={handleEditClick} color="primary">
               Edit
@@ -629,7 +669,6 @@ function ProductTable() {
         </DialogActions>
       </Dialog>
 
-      {/* Confirm Dialog Component (you might need to create this) */}
       <Dialog
         open={isConfirmDialogOpen}
         onClose={handleCancelDelete}
@@ -660,6 +699,7 @@ function ProductTable() {
         categories={categories}
       />
     </Box>
+
   );
 }
 

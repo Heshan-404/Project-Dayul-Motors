@@ -49,8 +49,7 @@ const AdminLogin = () => {
 
       // Save the token and user details as needed
       localStorage.setItem("adminToken", result.data.token);
-      localStorage.setItem("adminLevel", result.data.user.level); // Save the admin level
-
+      localStorage.setItem("adminLevel", result.data.user.level);
       // After successful login, navigate to the desired page
       navigate("/admin");
     } catch (error) {

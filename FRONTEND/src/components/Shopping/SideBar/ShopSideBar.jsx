@@ -1,20 +1,13 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable react/prop-types */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import NavigationBar from "../../Homepage/NavigationBar";
 import Footer from "../../Homepage/Footer";
-import image from "../../../assets/Project Images/Dayul Motors/Categories/Bearing.jpg";
 import all from "../../../assets/Project Images/Dayul Motors/ShopSideBar/select-all.png";
-import brake from "../../../assets/Project Images/Dayul Motors/ShopSideBar/small_BrakeParts-S.jpg";
 import list from "../../../assets/Project Images/Dayul Motors/ShopSideBar/list.webp";
 import search from "../../../assets/Project Images/Dayul Motors/HomePage/searchIcon.png";
-
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import CircularProgress from "@mui/material/CircularProgress";
-import Pagination from "@mui/material/Pagination";
-import Stack from "@mui/material/Stack";
 import Background from "../Background/Background";
 import axiosInstance from "../../../axiosConfig";
-import axios from "axios";
 
 // BrandImagesBar Component
 const BrandImagesBar = ({ onBrandClick, selectedBrand }) => {
@@ -48,12 +41,7 @@ const BrandImagesBar = ({ onBrandClick, selectedBrand }) => {
           fontWeight: "bold",
         }}
       >
-        <img
-          src={list}
-          alt="List Icon"
-          style={{ marginRight: "10px", width: "30px", height: "30px" }}
-        />
-        <span className="fs-5 fw-semibold">LIST OF BRAND</span>
+        <span className="fs-5 fw-semibold"> BRAND</span>
       </div>
       {brands.map((brand) => (
         <div
@@ -109,7 +97,7 @@ const Sidebar = ({
     { title: "All Categories", icon: all, id: undefined },
     ...categories.map((category) => ({
       title: category.categoryname,
-      icon: image,
+      icon: category.imageurl,
       id: category.categoryid,
     })),
   ];
@@ -129,7 +117,7 @@ const Sidebar = ({
   return (
     <div
       className="d-flex flex-column align-items-stretch flex-shrink-0 bg-white"
-      style={{ width: "200px", marginTop: "4px" }}
+      style={{ width: "207px", marginTop: "4px" }}
     >
       <a
         href="/"
@@ -287,6 +275,7 @@ const Content = ({
           }}
         />
       </div>
+
       {/* Loading Indicator (only for search) */}
       {isSearching && (
         <div
@@ -297,7 +286,6 @@ const Content = ({
             height: "200px",
           }}
         >
-          {" "}
           <CircularProgress />
         </div>
       )}
@@ -321,23 +309,21 @@ function ShopSideBar() {
   const [searchInput, setSearchInput] = useState("");
   const [itemSearchInput, setItemSearchInput] = useState("");
   const [showClearButton, setShowClearButton] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Initial isLoading to true
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); // State for opening/closing sidebar on small screens
+
+  const contentRef = useRef(null);
 
   const handleItemClick = (itemId) => {
     setSelectedItem(itemId);
     setShowClearButton(true);
     setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
   };
-
   const handleBrandClick = (brandId) => {
     setSelectedBrand(brandId);
     setShowClearButton(true);
     setIsLoading(true);
-
     setTimeout(() => {
       setIsLoading(false);
     }, 2000);
@@ -351,13 +337,51 @@ function ShopSideBar() {
     setShowClearButton(false);
   };
 
+  const handleScrollToTop = () => {
+    if (contentRef.current) {
+      contentRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setShowScrollToTop(scrollY > 200); // Show button after scrolling 200px
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  // useEffect for initial loading of categories and brands
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await Promise.all([
+          axiosInstance.get(`/shop/categories`),
+          axiosInstance.get(`/shop/brands`),
+        ]);
+        setIsLoading(false); // Set isLoading to false AFTER both fetches
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setIsLoading(false); // Set isLoading to false even if there's an error
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div>
-      <NavigationBar />
+      {/* NavigationBar and other components as needed */}
       <BrandImagesBar
         onBrandClick={handleBrandClick}
         selectedBrand={selectedBrand}
       />
+
       <div
         style={{
           display: "flex",
@@ -366,6 +390,29 @@ function ShopSideBar() {
           marginLeft: "40px",
         }}
       >
+        {/* Responsive handling: show/hide sidebar based on screen size */}
+        {!isOpen && (
+          <div
+            className="sidebar-toggle"
+            onClick={() => setIsOpen(true)}
+            style={{
+              position: "fixed",
+              left: 0,
+              top: 0,
+              height: "100vh",
+              width: "50px", // Adjust width as needed
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              zIndex: 1000,
+              display: "none", // Initially hidden
+              cursor: "pointer",
+            }}
+          >
+            {/* Optionally add an icon or text for the toggle */}
+            <div style={{ padding: "10px" }}>☰</div>
+          </div>
+        )}
+
+        {/* Sidebar Component */}
         <Sidebar
           onItemClick={handleItemClick}
           selectedItem={selectedItem}
@@ -373,42 +420,48 @@ function ShopSideBar() {
           onSearchChange={setSearchInput}
           handleClearFilters={handleClearFilters}
           showClearButton={showClearButton}
+          isOpen={isOpen}
         />
+
         <div
           style={{
             padding: "20px",
             width: "calc(100% - 220px)",
             marginTop: "10px",
           }}
+          ref={contentRef}
         >
-          {/* Loading Indicator */}
-          {isLoading && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "200px",
-              }}
-            >
-              {" "}
-              <CircularProgress />
-            </div>
-          )}
-
-          {/* Background (Product List) */}
-          {!isLoading && (
-            <Content
-              selectedItem={selectedItem}
-              selectedBrand={selectedBrand}
-              searchInput={itemSearchInput}
-              onSearchChange={setItemSearchInput}
-              onLoadingComplete={() => setIsLoading(false)}
-            />
-          )}
+          {/* Content Component */}
+          <Content
+            selectedItem={selectedItem}
+            selectedBrand={selectedBrand}
+            searchInput={itemSearchInput}
+            onSearchChange={setItemSearchInput}
+            onLoadingComplete={() => setIsLoading(false)}
+          />
         </div>
       </div>
-      <Footer />
+
+      {/* Scroll to Top Button (conditionally shown) */}
+      {showScrollToTop && (
+        <button
+          onClick={handleScrollToTop}
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            right: "20px",
+            backgroundColor: "blue",
+            color: "white",
+            padding: "10px",
+            borderRadius: "50%",
+            border: "none",
+            cursor: "pointer",
+            zIndex: 1000,
+          }}
+        >
+          <ArrowUpwardIcon />
+        </button>
+      )}
     </div>
   );
 }

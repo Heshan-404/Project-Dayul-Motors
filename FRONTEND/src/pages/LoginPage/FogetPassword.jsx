@@ -1,27 +1,34 @@
 import React, { useState, useRef } from "react";
-import { Button, TextField } from "@mui/material";
+import {
+  Button,
+  TextField,
+  CircularProgress,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import { Fingerprint } from "@mui/icons-material";
 import { Navigate } from "react-router-dom";
 import axiosInstance from "../../axiosConfig";
-import NavigationBar from "../../components/Homepage/NavigationBar";
-import Footer from "../../components/Homepage/Footer";
 import KeyIcon from "@mui/icons-material/Key";
 
 export default function ForgetPassword() {
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]); // Initialize OTP with 6 empty strings
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [message, setMessage] = useState("");
   const [isOtpConfirmed, setIsOtpConfirmed] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [isGetOtpButtonDisabled, setIsGetOtpButtonDisabled] = useState(true);
   const [isConfirmButtonDisabled, setIsConfirmButtonDisabled] = useState(true);
-  const [isMessageVisible, setIsMessageVisible] = useState(false); // Add state for controlling message visibility
+  const [isMessageVisible, setIsMessageVisible] = useState(false);
   const [OTP, setOTP] = useState("");
+  const [isGetOtpLoading, setIsGetOtpLoading] = useState(false);
+  const [isConfirmOtpLoading, setIsConfirmOtpLoading] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false); // State for Snackbar
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // State for Snackbar message
 
-  const inputRefs = useRef([]); // Ref to store references to input fields
+  const inputRefs = useRef([]);
 
   const validateEmail = (input) => {
-    // Regular expression for email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(input);
   };
@@ -32,27 +39,40 @@ export default function ForgetPassword() {
       return;
     }
 
+    setIsGetOtpLoading(true);
     try {
       const response = await axiosInstance.post("/auth/user/reset", { email });
 
       if (response.status === 200) {
         showMessage("OTP has been sent to your email.");
+        setOpenSnackbar(true); // Open Snackbar
+        setSnackbarMessage("OTP sent successfully!");
       } else {
         showMessage(response.data.message || "Failed to send OTP.");
+        setOpenSnackbar(true); // Open Snackbar
+        setSnackbarMessage(response.data.message || "Failed to send OTP.");
       }
     } catch (error) {
       showMessage(
         error.response?.data?.message ||
           "An error occurred. Please try again later."
       );
+      setOpenSnackbar(true); // Open Snackbar
+      setSnackbarMessage(
+        error.response?.data?.message ||
+          "An error occurred. Please try again later."
+      );
+    } finally {
+      setIsGetOtpLoading(false);
     }
   };
 
   const handleConfirmOTP = async () => {
+    setIsConfirmOtpLoading(true);
     try {
       const response = await axiosInstance.post("/auth/user/checkOTP", {
         email,
-        otp: otp.join(""), // Convert array to string before sending to backend
+        otp: otp.join(""),
       });
 
       if (response.status === 200) {
@@ -61,12 +81,21 @@ export default function ForgetPassword() {
         setOTP(response.data.OTP);
       } else {
         showMessage(response.data.message || "Failed to verify OTP.");
+        setOpenSnackbar(true); // Open Snackbar
+        setSnackbarMessage(response.data.message || "Failed to verify OTP.");
       }
     } catch (error) {
       showMessage(
         error.response?.data?.message ||
           "An error occurred. Please try again later."
       );
+      setOpenSnackbar(true); // Open Snackbar
+      setSnackbarMessage(
+        error.response?.data?.message ||
+          "An error occurred. Please try again later."
+      );
+    } finally {
+      setIsConfirmOtpLoading(false);
     }
   };
 
@@ -87,7 +116,7 @@ export default function ForgetPassword() {
       value = value.toUpperCase();
 
       setOtp((prevOtp) => {
-        const newOtp = [...prevOtp]; // Make a copy of the OTP array
+        const newOtp = [...prevOtp];
         newOtp[index] = value;
         return newOtp;
       });
@@ -124,6 +153,15 @@ export default function ForgetPassword() {
   // Apply fade animation based on message visibility
   const messageClassName = isMessageVisible ? "fade" : "";
 
+  // Handle Snackbar close
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
+
   if (isOtpConfirmed) {
     localStorage.setItem("OTP", OTP);
     return <Navigate to="/change-password" state={{ email }} />;
@@ -135,7 +173,6 @@ export default function ForgetPassword() {
         className="LoginPage"
         style={{ marginTop: "150px", marginBottom: "100px" }}
       >
-        <NavigationBar />
         <style>{` *, *:before, *:after {
           padding: 0;
           margin: 0;
@@ -262,16 +299,24 @@ export default function ForgetPassword() {
             helperText={emailError ? "Please enter a valid email" : ""}
             required
           />
-          <Button
-            startIcon={<KeyIcon style={{ fill: "#ffffff" }} />}
-            size="small"
-            variant="contained"
-            onClick={handleGetOTP}
-            className="mt-3"
-            disabled={isGetOtpButtonDisabled}
-          >
-            Get OTP
-          </Button>
+          {isGetOtpLoading ? (
+            <CircularProgress
+              size={24}
+              color="secondary"
+              style={{ marginTop: "18px" }}
+            />
+          ) : (
+            <Button
+              startIcon={<KeyIcon style={{ fill: "#ffffff" }} />}
+              size="small"
+              variant="contained"
+              onClick={handleGetOTP}
+              className="mt-3"
+              disabled={isGetOtpButtonDisabled}
+            >
+              Get OTP
+            </Button>
+          )}
           <p
             className={messageClassName}
             style={{ color: "red", fontSize: "12px" }}
@@ -297,19 +342,40 @@ export default function ForgetPassword() {
               />
             ))}
           </div>
-          <Button
-            startIcon={<Fingerprint style={{ fill: "white" }} />}
-            size="small"
-            variant="contained"
-            onClick={handleConfirmOTP}
-            className="mt-3"
-            disabled={isConfirmButtonDisabled}
+          {isConfirmOtpLoading ? (
+            <CircularProgress
+              size={24}
+              color="secondary"
+              style={{ marginTop: "18px" }}
+            />
+          ) : (
+            <Button
+              startIcon={<Fingerprint style={{ fill: "white" }} />}
+              size="small"
+              variant="contained"
+              onClick={handleConfirmOTP}
+              className="mt-3"
+              disabled={isConfirmButtonDisabled}
+            >
+              Confirm
+            </Button>
+          )}
+          <Snackbar
+            open={openSnackbar}
+            autoHideDuration={6000}
+            onClose={handleSnackbarClose}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
           >
-            Confirm
-          </Button>
+            <Alert
+              onClose={handleSnackbarClose}
+              severity="info"
+              sx={{ width: "100%" }}
+            >
+              {snackbarMessage}
+            </Alert>
+          </Snackbar>
         </form>
       </div>
-      <Footer />
     </div>
   );
 }

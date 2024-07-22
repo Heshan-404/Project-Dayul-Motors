@@ -1,8 +1,10 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import bgImg from "./BackGround2.jpg";
-import { useState } from "react";
 
 export default function LandingUI() {
   const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate();
 
   const handleMouseEnter = () => {
     setIsHovered(true);
@@ -10,6 +12,10 @@ export default function LandingUI() {
 
   const handleMouseLeave = () => {
     setIsHovered(false);
+  };
+
+  const handleClick = () => {
+    navigate('/shop');
   };
 
   const styles = {
@@ -80,15 +86,16 @@ export default function LandingUI() {
                 </p>
                 <p style={styles.paragraph}>
                   {` We're here to help with all your motorcycle repair and parts
-                needs. Explore our products, from spare parts to accessories.
-                Our easy-to-use website makes shopping a breeze. Let's make your
-                next ride amazing!`}
+                  needs. Explore our products, from spare parts to accessories.
+                  Our easy-to-use website makes shopping a breeze. Let's make your
+                  next ride amazing!`}
                 </p>
                 <button
                   className="custom-btn"
                   style={styles.customButton}
                   onMouseEnter={handleMouseEnter}
                   onMouseLeave={handleMouseLeave}
+                  onClick={handleClick}
                 >
                   Shop Now
                 </button>
