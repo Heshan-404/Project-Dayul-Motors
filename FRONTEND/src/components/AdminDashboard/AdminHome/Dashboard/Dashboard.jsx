@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+
+import DownloadIcon from "@mui/icons-material/Download";
 import {
   Grid,
   Typography,
@@ -24,6 +26,8 @@ import {
   Alert,
   AlertTitle,
   CircularProgress,
+  Box,
+  IconButton,
 } from "@mui/material";
 import Chart from "chart.js/auto";
 import {
@@ -35,6 +39,8 @@ import {
 } from "@mui/icons-material";
 import axiosInstance from "../../../../axiosConfig";
 
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 const Dashboard = () => {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
@@ -62,6 +68,16 @@ const Dashboard = () => {
   const [editedQuantity, setEditedQuantity] = useState("");
   const [editedMinQuantityLevel, setEditedMinQuantityLevel] = useState("");
 
+  const handleDownloadPDF = () => {
+    const input = document.getElementById('chart-container');
+    html2canvas(input)
+      .then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF();
+        pdf.addImage(imgData, 'PNG', 0, 0);
+        pdf.save('chart.pdf');
+      });
+  };
   const handleYearChange = (event) => {
     setCurrentYear(parseInt(event.target.value, 10));
   };
@@ -419,9 +435,13 @@ const Dashboard = () => {
                       </Select>
                     </FormControl>
                   </Grid>
-                </Grid>
+                </Grid>  <Box display="flex" justifyContent="flex-end" marginBottom={2}>
+                  <IconButton onClick={handleDownloadPDF}>
+                    <DownloadIcon />
+                  </IconButton>
+                </Box>
               </div>
-              <div className="chart-container">
+              <div id="chart-container" className="chart-container">
                 <canvas ref={chartCanvasRef} width="400" height="200" />
               </div>
             </CardContent>
