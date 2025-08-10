@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -8,7 +8,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { Button, TextField } from "@mui/material";
+import { Box, Button, IconButton, TextField } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 import ConfirmDialog from "./ConfirmDialog";
@@ -16,7 +16,11 @@ import SnackbarAlert from "./SnackbarAlert";
 import axiosInstance from "../../../../axiosConfig";
 import CircularProgress from "@mui/material/CircularProgress"; // Import CircularProgress
 
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import DownloadIcon from "@mui/icons-material/Download";
 export default function UserDataTable(props) {
+  const tableRef = useRef();
   const [dataSet, setDataSet] = useState([]);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -49,6 +53,20 @@ export default function UserDataTable(props) {
       showSnackbar("Failed to fetch user data.", "error");
       setIsLoading(false); // Set loading to false even on error
     }
+  };
+ 
+  const handleDownloadPDF = async () => {
+    const tableElement = tableRef.current;
+    if (!tableElement) return;
+
+    const canvas = await html2canvas(tableElement);
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF();
+    const imgWidth = 210;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+    pdf.save("users.pdf");
   };
 
   const handleClickOpen = (userId, action) => {
@@ -165,7 +183,13 @@ export default function UserDataTable(props) {
   });
 
   return (
-    <div className="table-container">
+    <div className="table-container">   <Box display="flex" justifyContent="flex-end" marginBottom={2}>
+    <IconButton onClick={handleDownloadPDF}>
+      <DownloadIcon />
+    </IconButton>
+  </Box>
+
+
       {/* Display loading indicator if isLoading is true */}
       {isLoading && (
         <div
@@ -181,7 +205,7 @@ export default function UserDataTable(props) {
 
       {/* Show the table if isLoading is false */}
       {!isLoading && (
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} ref={tableRef}>
           <Table className="table" aria-label="simple table">
             <TableHead>
               <TableRow>

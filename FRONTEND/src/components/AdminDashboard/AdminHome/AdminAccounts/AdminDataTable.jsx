@@ -73,7 +73,7 @@ export default function UserDataTable(props) {
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [selectedAdmin, setSelectedAdmin] = useState(null);
   const [editingRow, setEditingRow] = useState(null);
-  const [adminLevel, setAdminLevel] = useState(1);
+  const [adminLevel, setAdminLevel] = useState(props.adminLevel);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -92,7 +92,7 @@ export default function UserDataTable(props) {
         }
       );
       setDataSet(response.data.adminDetails);
-      setAdminLevel(localStorage.getItem("adminLevel"));
+      setAdminLevel(props.adminLevel); 
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching admin data:", error);
@@ -196,17 +196,17 @@ export default function UserDataTable(props) {
   };
 
   const filteredDataSet = dataSet.filter((row) => {
-    if (props.searchTerm === "") {
-      return true;
-    } else {
-      return (
-        row.adminid.includes(props.searchTerm) ||
-        row.email.toLowerCase().includes(props.searchTerm.toLowerCase()) ||
-        row.fullname.toLowerCase().includes(props.searchTerm.toLowerCase()) ||
-        row.phoneno.includes(props.searchTerm) ||
-        row.level.toLowerCase().includes(props.searchTerm.toLowerCase())
-      );
-    }
+    const matchesSearchTerm =
+      props.searchTerm === "" ||
+      row.adminid.includes(props.searchTerm) ||
+      row.email.toLowerCase().includes(props.searchTerm.toLowerCase()) ||
+      row.fullname.toLowerCase().includes(props.searchTerm.toLowerCase()) ||
+      row.phoneno.includes(props.searchTerm) ||
+      row.level.toLowerCase().includes(props.searchTerm.toLowerCase());
+
+    const matchesLevel = row.level <= adminLevel;
+
+    return matchesSearchTerm && matchesLevel;
   });
 
   const handleSnackbarClose = (event, reason) => {
@@ -266,7 +266,7 @@ export default function UserDataTable(props) {
                 </TableCell>
                 <TableCell style={{ textAlign: "center" }}>Level</TableCell>
                 <TableCell style={{ textAlign: "center" }}>Status</TableCell>
-                {adminLevel == 3 && (
+                {adminLevel >= 3 && (
                   <TableCell style={{ textAlign: "center", width: "240px" }}>
                     Actions
                   </TableCell>
@@ -309,7 +309,7 @@ export default function UserDataTable(props) {
                       >
                         {row.status}
                       </TableCell>
-                      {adminLevel == 3 && (
+                      {adminLevel >= 3 && (
                         <TableCell style={{ textAlign: "center" }}>
                           <div className="d-flex">
                             <Button
